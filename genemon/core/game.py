@@ -218,6 +218,12 @@ class Game:
                 self.state.player_team.heal_all()
                 print("\nYour creatures are fully healed!")
                 input("Press Enter to continue...")
+        elif npc.id == "move_relearner":
+            # Special case for move relearner
+            print("\nWould you like to relearn moves? (y/n)")
+            choice = input("> ").strip().lower()
+            if choice == 'y':
+                self._move_relearner_menu()
         elif npc.is_trainer and not npc.has_been_defeated:
             print("\nThe trainer wants to battle!")
             input("Press Enter to continue...")
@@ -843,6 +849,90 @@ class Game:
                 print()
 
         input("\nPress Enter to continue...")
+
+    def _move_relearner_menu(self):
+        """
+        Special menu for the Move Relearner NPC to reteach forgotten moves.
+        """
+        self.display.clear_screen()
+        self.display.print_header("MOVE RELEARNER")
+
+        if self.state.player_team.size() == 0:
+            print("\nYou don't have any creatures to teach!")
+            return
+
+        # Select creature
+        print("\nWhich creature should relearn moves?")
+        self.display.show_team(self.state.player_team)
+        print(f"{self.state.player_team.size() + 1}. Cancel")
+
+        choice = self.display.get_menu_choice(self.state.player_team.size() + 1)
+
+        if choice >= self.state.player_team.size():
+            return
+
+        creature = self.state.player_team.creatures[choice]
+        species = creature.species
+
+        # Get all learnable moves from learnset
+        if not species.learnset:
+            print(f"\n{creature.get_display_name()} has no moves to relearn!")
+            input("Press Enter to continue...")
+            return
+
+        # Get all moves the creature can currently learn (at or below its level)
+        learnable_moves = []
+        for learn_level, move in sorted(species.learnset.items()):
+            if learn_level <= creature.level:
+                # Check if creature doesn't already know this move
+                if not any(m.name == move.name for m in creature.moves):
+                    learnable_moves.append((learn_level, move))
+
+        if not learnable_moves:
+            print(f"\n{creature.get_display_name()} already knows all available moves!")
+            input("Press Enter to continue...")
+            return
+
+        # Display learnable moves
+        print(f"\n{creature.get_display_name()} can relearn these moves:")
+        for i, (level, move) in enumerate(learnable_moves, 1):
+            print(f"{i}. {move.name} (Learned at Lv.{level}) - {move.type} | Power: {move.power} | PP: {move.max_pp}")
+
+        print(f"{len(learnable_moves) + 1}. Cancel")
+
+        move_choice = self.display.get_menu_choice(len(learnable_moves) + 1)
+
+        if move_choice >= len(learnable_moves):
+            return
+
+        selected_move = learnable_moves[move_choice][1]
+
+        # If creature has 4 moves, ask which to replace
+        if len(creature.moves) >= 4:
+            print(f"\n{creature.get_display_name()} already knows 4 moves!")
+            print("Which move should be forgotten?")
+
+            for i, move in enumerate(creature.moves, 1):
+                print(f"{i}. {move.name} ({move.type}) - Power: {move.power}, PP: {move.pp}/{move.max_pp}")
+            print(f"{len(creature.moves) + 1}. Cancel")
+
+            replace_choice = self.display.get_menu_choice(len(creature.moves) + 1)
+
+            if replace_choice >= len(creature.moves):
+                print(f"\n{creature.get_display_name()} did not learn {selected_move.name}.")
+                input("Press Enter to continue...")
+                return
+
+            # Replace the move
+            old_move = creature.moves[replace_choice]
+            creature.moves[replace_choice] = selected_move.copy()
+            print(f"\n{creature.get_display_name()} forgot {old_move.name} and learned {selected_move.name}!")
+        else:
+            # Add the move
+            creature.moves.append(selected_move.copy())
+            print(f"\n{creature.get_display_name()} learned {selected_move.name}!")
+
+        input("Press Enter to continue...")
 
     def _show_pokedex(self):
         """Show Pokedex."""

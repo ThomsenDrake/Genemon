@@ -329,6 +329,69 @@ class World:
         )
         self.locations[seventh_town.id] = seventh_town
 
+        # Route 7
+        route_7 = LocationBuilder.create_route(
+            "route_7",
+            "Route 7",
+            length=42
+        )
+        self.locations[route_7.id] = route_7
+
+        # Eighth town (sixth gym - Terra)
+        eighth_town = LocationBuilder.create_town(
+            "town_eighth",
+            "Boulder Ridge City"
+        )
+        self.locations[eighth_town.id] = eighth_town
+
+        # Route 8
+        route_8 = LocationBuilder.create_route(
+            "route_8",
+            "Route 8",
+            length=45
+        )
+        self.locations[route_8.id] = route_8
+
+        # Ninth town (seventh gym - Mind)
+        ninth_town = LocationBuilder.create_town(
+            "town_ninth",
+            "Mindspire Heights"
+        )
+        self.locations[ninth_town.id] = ninth_town
+
+        # Route 9
+        route_9 = LocationBuilder.create_route(
+            "route_9",
+            "Route 9",
+            length=48
+        )
+        self.locations[route_9.id] = route_9
+
+        # Tenth town (eighth gym - Brawl)
+        tenth_town = LocationBuilder.create_town(
+            "town_tenth",
+            "Victory Valley"
+        )
+        self.locations[tenth_town.id] = tenth_town
+
+        # Victory Road - challenging path to Elite Four
+        victory_road = LocationBuilder.create_cave(
+            "victory_road",
+            "Victory Road",
+            width=30,
+            height=35
+        )
+        self.locations[victory_road.id] = victory_road
+
+        # Elite Four Hall - final challenge
+        elite_hall = LocationBuilder.create_town(
+            "elite_hall",
+            "Champion's Hall"
+        )
+        elite_hall.has_healing = True
+        elite_hall.has_shop = False
+        self.locations[elite_hall.id] = elite_hall
+
         # Set up connections
         starter_town.connections["route_1"] = (starter_town.width // 2, starter_town.height - 1)
         route_1.connections["town_starter"] = (route_1.width // 2, route_1.height - 1)
@@ -356,6 +419,22 @@ class World:
         route_6.connections["town_sixth"] = (route_6.width // 2, route_6.height - 1)
         route_6.connections["town_seventh"] = (route_6.width // 2, 0)
         seventh_town.connections["route_6"] = (seventh_town.width // 2, seventh_town.height - 1)
+        seventh_town.connections["route_7"] = (seventh_town.width // 2, 0)
+        route_7.connections["town_seventh"] = (route_7.width // 2, route_7.height - 1)
+        route_7.connections["town_eighth"] = (route_7.width // 2, 0)
+        eighth_town.connections["route_7"] = (eighth_town.width // 2, eighth_town.height - 1)
+        eighth_town.connections["route_8"] = (eighth_town.width // 2, 0)
+        route_8.connections["town_eighth"] = (route_8.width // 2, route_8.height - 1)
+        route_8.connections["town_ninth"] = (route_8.width // 2, 0)
+        ninth_town.connections["route_8"] = (ninth_town.width // 2, ninth_town.height - 1)
+        ninth_town.connections["route_9"] = (ninth_town.width // 2, 0)
+        route_9.connections["town_ninth"] = (route_9.width // 2, route_9.height - 1)
+        route_9.connections["town_tenth"] = (route_9.width // 2, 0)
+        tenth_town.connections["route_9"] = (tenth_town.width // 2, tenth_town.height - 1)
+        tenth_town.connections["victory_road"] = (tenth_town.width // 2, 0)
+        victory_road.connections["town_tenth"] = (victory_road.width // 2, victory_road.height - 1)
+        victory_road.connections["elite_hall"] = (victory_road.width // 2, 0)
+        elite_hall.connections["victory_road"] = (elite_hall.width // 2, elite_hall.height - 1)
 
     def get_location(self, location_id: str) -> Optional[Location]:
         """Get location by ID."""

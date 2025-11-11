@@ -405,6 +405,411 @@ class NPCRegistry:
         )
         self.npcs[healer_fourth.id] = healer_fourth
 
+        # Gym Leader in eighth town - Terra type specialist
+        gym_leader_6 = NPC(
+            id="gym_leader_6",
+            name="Leader Boulder",
+            location_id="town_eighth",
+            x=10,
+            y=7,
+            sprite="G",
+            is_trainer=True,
+            is_gym_leader=True,
+            specialty_type="Terra",
+            badge_id="badge_terra",
+            badge_name="Boulder Badge",
+            badge_description="Proof of victory over Leader Boulder and mastery of Terra-type battles.",
+            dialogues=[
+                Dialogue("My rock-solid defense is unbreakable!"),
+                Dialogue("Your strength has shattered my resolve!")
+            ]
+        )
+        self.npcs[gym_leader_6.id] = gym_leader_6
+
+        # Gym Leader in ninth town - Mind type specialist
+        gym_leader_7 = NPC(
+            id="gym_leader_7",
+            name="Leader Sage",
+            location_id="town_ninth",
+            x=10,
+            y=7,
+            sprite="G",
+            is_trainer=True,
+            is_gym_leader=True,
+            specialty_type="Mind",
+            badge_id="badge_mind",
+            badge_name="Wisdom Badge",
+            badge_description="Proof of victory over Leader Sage and mastery of Mind-type battles.",
+            dialogues=[
+                Dialogue("The mind is the ultimate battleground..."),
+                Dialogue("Your mental fortitude has exceeded my expectations!")
+            ]
+        )
+        self.npcs[gym_leader_7.id] = gym_leader_7
+
+        # Gym Leader in tenth town - Brawl type specialist
+        gym_leader_8 = NPC(
+            id="gym_leader_8",
+            name="Leader Champion",
+            location_id="town_tenth",
+            x=10,
+            y=7,
+            sprite="G",
+            is_trainer=True,
+            is_gym_leader=True,
+            specialty_type="Brawl",
+            badge_id="badge_brawl",
+            badge_name="Victory Badge",
+            badge_description="Proof of victory over Leader Champion and mastery of Brawl-type battles.",
+            dialogues=[
+                Dialogue("Show me your fighting spirit!"),
+                Dialogue("You have the heart of a true champion!")
+            ]
+        )
+        self.npcs[gym_leader_8.id] = gym_leader_8
+
+        # Nurse Joy in Boulder Ridge City
+        nurse_boulder = NPC(
+            id="nurse_boulder",
+            name="Nurse Joy",
+            location_id="town_eighth",
+            x=5,
+            y=5,
+            sprite="N",
+            is_healer=True,
+            dialogues=[
+                Dialogue("Welcome to Boulder Ridge! Rest up for the gym challenge!")
+            ]
+        )
+        self.npcs[nurse_boulder.id] = nurse_boulder
+
+        # Nurse Joy in Mindspire Heights
+        nurse_mindspire = NPC(
+            id="nurse_mindspire",
+            name="Nurse Joy",
+            location_id="town_ninth",
+            x=5,
+            y=5,
+            sprite="N",
+            is_healer=True,
+            dialogues=[
+                Dialogue("Clear your mind and let me heal your team!")
+            ]
+        )
+        self.npcs[nurse_mindspire.id] = nurse_mindspire
+
+        # Nurse Joy in Victory Valley
+        nurse_victory = NPC(
+            id="nurse_victory",
+            name="Nurse Joy",
+            location_id="town_tenth",
+            x=5,
+            y=5,
+            sprite="N",
+            is_healer=True,
+            dialogues=[
+                Dialogue("You're close to Victory Road! Prepare well!")
+            ]
+        )
+        self.npcs[nurse_victory.id] = nurse_victory
+
+        # Nurse Joy in Champion's Hall
+        nurse_elite = NPC(
+            id="nurse_elite",
+            name="Nurse Joy",
+            location_id="elite_hall",
+            x=5,
+            y=5,
+            sprite="N",
+            is_healer=True,
+            dialogues=[
+                Dialogue("Only the strongest trainers make it here. Let me heal you!")
+            ]
+        )
+        self.npcs[nurse_elite.id] = nurse_elite
+
+        # Elite Four Member 1 - Mystic specialist
+        elite_1 = NPC(
+            id="elite_1",
+            name="Elite Mystica",
+            location_id="elite_hall",
+            x=8,
+            y=10,
+            sprite="E",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("I am the first of the Elite Four. Prove your worth!"),
+                Dialogue("Impressive... but there are three more ahead!")
+            ]
+        )
+        self.npcs[elite_1.id] = elite_1
+
+        # Elite Four Member 2 - Gale specialist
+        elite_2 = NPC(
+            id="elite_2",
+            name="Elite Tempest",
+            location_id="elite_hall",
+            x=12,
+            y=10,
+            sprite="E",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("Feel the fury of the storm!"),
+                Dialogue("Your resolve is stronger than any gale!")
+            ]
+        )
+        self.npcs[elite_2.id] = elite_2
+
+        # Elite Four Member 3 - Metal specialist
+        elite_3 = NPC(
+            id="elite_3",
+            name="Elite Steel",
+            location_id="elite_hall",
+            x=8,
+            y=14,
+            sprite="E",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("My iron defense cannot be breached!"),
+                Dialogue("You've forged an incredible team!")
+            ]
+        )
+        self.npcs[elite_3.id] = elite_3
+
+        # Elite Four Member 4 - Spirit specialist
+        elite_4 = NPC(
+            id="elite_4",
+            name="Elite Phantom",
+            location_id="elite_hall",
+            x=12,
+            y=14,
+            sprite="E",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("The spirits will decide your fate!"),
+                Dialogue("Your spirit burns brighter than mine!")
+            ]
+        )
+        self.npcs[elite_4.id] = elite_4
+
+        # Champion - the final challenge
+        champion = NPC(
+            id="champion",
+            name="Champion Aurora",
+            location_id="elite_hall",
+            x=10,
+            y=3,
+            sprite="C",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("You've made it this far. I am the Champion! Show me everything!"),
+                Dialogue("Congratulations! You are the new Champion!")
+            ]
+        )
+        self.npcs[champion.id] = champion
+
+        # Move Relearner - Special NPC to teach forgotten moves
+        move_relearner = NPC(
+            id="move_relearner",
+            name="Move Tutor Ray",
+            location_id="town_tenth",
+            x=15,
+            y=5,
+            sprite="M",
+            dialogues=[
+                Dialogue("I can help your creatures remember forgotten moves!"),
+                Dialogue("Come back anytime you need to relearn moves!")
+            ]
+        )
+        self.npcs[move_relearner.id] = move_relearner
+
+        # TM Shop in eighth town
+        tm_shop = NPC(
+            id="tm_shop_boulder",
+            name="TM Merchant Terra",
+            location_id="town_eighth",
+            x=15,
+            y=10,
+            sprite="S",
+            is_shopkeeper=True,
+            shop_inventory=[
+                'tm01', 'tm02', 'tm03', 'tm04', 'tm05', 'tm06',
+                'tm07', 'tm08', 'tm09', 'tm10', 'tm11', 'tm12',
+                'tm13', 'tm14', 'tm15', 'tm16', 'tm17'
+            ],
+            dialogues=[
+                Dialogue("Welcome to the TM Shop!"),
+                Dialogue("These Technical Machines contain powerful moves!")
+            ]
+        )
+        self.npcs[tm_shop.id] = tm_shop
+
+        # TM Shop in ninth town
+        tm_shop_2 = NPC(
+            id="tm_shop_mindspire",
+            name="TM Merchant Mind",
+            location_id="town_ninth",
+            x=15,
+            y=10,
+            sprite="S",
+            is_shopkeeper=True,
+            shop_inventory=[
+                'tm18', 'tm19', 'tm20', 'tm21', 'tm22', 'tm23',
+                'tm24', 'tm25', 'tm26', 'tm27', 'tm28', 'tm29',
+                'tm30', 'tm31', 'tm32', 'tm33', 'tm34'
+            ],
+            dialogues=[
+                Dialogue("More TMs for your collection!"),
+                Dialogue("Master these moves and nothing can stop you!")
+            ]
+        )
+        self.npcs[tm_shop_2.id] = tm_shop_2
+
+        # TM Shop in tenth town
+        tm_shop_3 = NPC(
+            id="tm_shop_victory",
+            name="TM Merchant Victory",
+            location_id="town_tenth",
+            x=14,
+            y=10,
+            sprite="S",
+            is_shopkeeper=True,
+            shop_inventory=[
+                'tm35', 'tm36', 'tm37', 'tm38', 'tm39', 'tm40',
+                'tm41', 'tm42', 'tm43', 'tm44', 'tm45', 'tm46',
+                'tm47', 'tm48', 'tm49', 'tm50', 'tm51'
+            ],
+            dialogues=[
+                Dialogue("The finest TMs for the final challenges!"),
+                Dialogue("With these moves, you can conquer the Elite Four!")
+            ]
+        )
+        self.npcs[tm_shop_3.id] = tm_shop_3
+
+        # Additional trainers on Route 4
+        route4_trainer1 = NPC(
+            id="trainer_route4_1",
+            name="Swimmer Maya",
+            location_id="route_4",
+            x=10,
+            y=15,
+            sprite="T",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("The ocean calls to me!"),
+                Dialogue("You surf right over me!")
+            ]
+        )
+        self.npcs[route4_trainer1.id] = route4_trainer1
+
+        route4_trainer2 = NPC(
+            id="trainer_route4_2",
+            name="Fisherman Ron",
+            location_id="route_4",
+            x=10,
+            y=25,
+            sprite="T",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("I caught these creatures fishing!"),
+                Dialogue("You reeled me in!")
+            ]
+        )
+        self.npcs[route4_trainer2.id] = route4_trainer2
+
+        # Additional trainers on Route 7
+        route7_trainer1 = NPC(
+            id="trainer_route7_1",
+            name="Blackbelt Ken",
+            location_id="route_7",
+            x=10,
+            y=20,
+            sprite="T",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("My martial arts are unmatched!"),
+                Dialogue("Your fighting spirit wins!")
+            ]
+        )
+        self.npcs[route7_trainer1.id] = route7_trainer1
+
+        route7_trainer2 = NPC(
+            id="trainer_route7_2",
+            name="Psychic Luna",
+            location_id="route_7",
+            x=10,
+            y=35,
+            sprite="T",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("I foresaw this battle..."),
+                Dialogue("My vision was clouded!")
+            ]
+        )
+        self.npcs[route7_trainer2.id] = route7_trainer2
+
+        # Additional trainers on Route 9
+        route9_trainer1 = NPC(
+            id="trainer_route9_1",
+            name="Ace Trainer Sarah",
+            location_id="route_9",
+            x=10,
+            y=20,
+            sprite="T",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("I'm an elite trainer!"),
+                Dialogue("You're even stronger than me!")
+            ]
+        )
+        self.npcs[route9_trainer1.id] = route9_trainer1
+
+        route9_trainer2 = NPC(
+            id="trainer_route9_2",
+            name="Dragon Tamer Drake",
+            location_id="route_9",
+            x=10,
+            y=40,
+            sprite="T",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("My creatures have the power of legends!"),
+                Dialogue("You've tamed the untamable!")
+            ]
+        )
+        self.npcs[route9_trainer2.id] = route9_trainer2
+
+        # Victory Road trainers
+        victory_trainer1 = NPC(
+            id="trainer_victory_1",
+            name="Veteran Marcus",
+            location_id="victory_road",
+            x=15,
+            y=15,
+            sprite="T",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("Only the best make it through Victory Road!"),
+                Dialogue("You're ready for the Elite Four!")
+            ]
+        )
+        self.npcs[victory_trainer1.id] = victory_trainer1
+
+        victory_trainer2 = NPC(
+            id="trainer_victory_2",
+            name="Veteran Diana",
+            location_id="victory_road",
+            x=15,
+            y=25,
+            sprite="T",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("Turn back if you're not ready!"),
+                Dialogue("You have what it takes!")
+            ]
+        )
+        self.npcs[victory_trainer2.id] = victory_trainer2
+
     def get_npc(self, npc_id: str) -> Optional[NPC]:
         """Get NPC by ID."""
         return self.npcs.get(npc_id)
