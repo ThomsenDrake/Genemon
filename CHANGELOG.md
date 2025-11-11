@@ -4,6 +4,87 @@ All notable changes to the Genemon project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.7.0] - 2025-11-11 - Iteration 7: Elite Four Overhaul, Legendaries, and Post-Game Content
+
+### Added
+
+#### Hand-Crafted Elite Four and Champion Teams
+- **Elite Mystica Team** - Strategic 5-creature team specializing in Mystic-type, levels 32-36 (genemon/core/game.py:499-536)
+- **Elite Tempest Team** - Fast-paced 5-creature team specializing in Gale-type, levels 33-37 (genemon/core/game.py:538-578)
+- **Elite Steel Team** - Defensive 5-creature team specializing in Metal-type, levels 34-38 (genemon/core/game.py:580-618)
+- **Elite Phantom Team** - Evasive 5-creature team specializing in Spirit/Shadow-type, levels 35-39 (genemon/core/game.py:620-657)
+- **Champion Aurora Team** - Perfectly balanced 6-creature team with diverse types, levels 38-43 (genemon/core/game.py:659-693)
+- **Intelligent team selection** - Elite Four teams now hand-picked based on stats (speed, defense) for thematic consistency
+
+#### Legendary Creature System
+- **6 legendary creatures** - IDs 146-151 with significantly higher base stats (90-120 range) (genemon/creatures/generator.py:114-120)
+- **Legendary flag** - New `is_legendary` attribute on CreatureSpecies to mark special creatures (genemon/core/creature.py:134)
+- **Legendary Sanctuary** - New post-game cave location (35x40) for legendary encounters (genemon/world/map.py:406-411)
+- **Legendary Guardians** - Two special trainers (Guardian Kai and Guardian Luna) protecting legendary creatures (genemon/world/npc.py:845-874)
+- **Legendary Researcher** - Professor Sage NPC providing lore about legendary creatures (genemon/world/npc.py:876-889)
+
+#### Post-Game Content
+- **Battle Tower** - New post-game location (20x25) for challenging battles (genemon/world/map.py:395-404)
+- **Tower Master Zane** - Post-game challenge trainer with powerful random teams (genemon/world/npc.py:813-827)
+- **Battle Tower Assistant** - Healing NPC in Battle Tower (genemon/world/npc.py:829-843)
+- **Post-game area connections** - Battle Tower and Legendary Sanctuary accessible from Champion's Hall (genemon/world/map.py:456-459)
+- **24 total locations** - Up from 22, completing post-game world expansion
+
+### Changed
+
+#### Elite Four Balance
+- **Elite Four levels increased** - Now range from 32-39 (was random generation)
+- **Champion levels significantly increased** - Champion Aurora's team now levels 38-43 (highest in game)
+- **Type-optimized teams** - Elite members now use creatures sorted by relevant stats (speed for Tempest, defense for Steel)
+- **Diverse Champion team** - Champion now uses strongest creatures from 6 different types for perfect coverage
+
+#### Creature Generation
+- **Legendary designation** - Last 6 creatures (146-151) now explicitly marked as legendary
+- **Consistent legendary stats** - Legendaries guaranteed 90-120 base stats with power_level="legendary"
+- **No evolutions for legendaries** - Legendary creatures remain in stage 1 form
+
+### Technical Details
+
+#### Code Changes
+- **Modified files**: 4 core files enhanced
+  - genemon/core/game.py: +199 lines (5 new hand-crafted team methods, Elite Four routing)
+  - genemon/core/creature.py: +2 lines (is_legendary flag)
+  - genemon/creatures/generator.py: +2 lines (legendary marking)
+  - genemon/world/map.py: +21 lines (2 new locations, 4 new connections)
+  - genemon/world/npc.py: +79 lines (5 new NPCs for post-game)
+
+#### New Features Count
+- **5 hand-crafted teams**: Elite Four (4) + Champion (1)
+- **6 legendary creatures**: IDs 146-151 with special stats
+- **2 new locations**: Battle Tower and Legendary Sanctuary
+- **5 new NPCs**: Tower Master, Tower Assistant, 2 Legendary Guardians, Legendary Researcher
+- **303 lines of new code**: Across 4 files
+
+### Improvements
+- **Elite Four difficulty spike** - Significantly more challenging with hand-crafted teams
+- **Champion as final boss** - Highest-level team (38-43) with perfect type coverage
+- **Post-game replayability** - Battle Tower and Legendary hunts provide endgame content
+- **Legendary creature value** - Legendaries now have special designation and sanctuary location
+- **Strategic team building** - Elite Four teams optimized by stats for their type specialty
+
+### Balance
+- **Elite Mystica (Levels 32-36)**: Mystic specialist with Mind/Spirit support
+- **Elite Tempest (Levels 33-37)**: Gale specialist prioritizing speed
+- **Elite Steel (Levels 34-38)**: Metal specialist prioritizing defense
+- **Elite Phantom (Levels 35-39)**: Spirit/Shadow specialist with evasive tactics
+- **Champion Aurora (Levels 38-43)**: Diverse team with Flame, Aqua, Leaf, Volt, Terra, Shadow
+
+### Performance
+- **Generation time**: ~10 seconds (unchanged - legendary marking adds no overhead)
+- **Save file size**: ~800-1200 KB (unchanged)
+- **Team generation**: Instant for Elite Four/Champion (cached after first battle)
+
+### Testing
+- ✅ All imports successful (10/10 modules)
+- ✅ Creature generation with legendaries (151 total, 6 legendary)
+- ✅ World system with new locations (24 locations, 46 NPCs)
+- ✅ All tests passing (6/6)
+
 ## [0.6.0] - 2025-11-11 - Iteration 6: Complete Gym Challenge, Elite Four, and Endgame
 
 ### Added

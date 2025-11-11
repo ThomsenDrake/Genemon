@@ -111,12 +111,13 @@ class CreatureGenerator:
 
         # Generate late-game and legendary creatures (IDs 101-151)
         for i in range(101, 152):
-            if i >= 146:  # Last 5 are legendary
+            if i >= 146:  # Last 6 are legendary (IDs 146-151)
                 creature = self._generate_creature(
                     creature_id=i,
                     power_level="legendary",
                     stage=1
                 )
+                creature.is_legendary = True  # Mark as legendary
             else:
                 stage = self.rng.choice([1, 2, 3])
                 creature = self._generate_creature(

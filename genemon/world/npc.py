@@ -810,6 +810,84 @@ class NPCRegistry:
         )
         self.npcs[victory_trainer2.id] = victory_trainer2
 
+        # Battle Tower Master - post-game challenge trainer
+        battle_tower_master = NPC(
+            id="battle_tower_master",
+            name="Tower Master Zane",
+            location_id="battle_tower",
+            x=10,
+            y=5,
+            sprite="B",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("Welcome to the Battle Tower! I'll test your skills with random powerful creatures!"),
+                Dialogue("You're truly a master trainer! Come back anytime for another challenge!")
+            ]
+        )
+        self.npcs[battle_tower_master.id] = battle_tower_master
+
+        # Battle Tower Assistant - provides healing
+        battle_tower_healer = NPC(
+            id="battle_tower_healer",
+            name="Tower Assistant",
+            location_id="battle_tower",
+            x=5,
+            y=10,
+            sprite="N",
+            is_healer=True,
+            dialogues=[
+                Dialogue("Welcome to the Battle Tower! Let me heal your team!"),
+                Dialogue("Good luck in your battles!")
+            ]
+        )
+        self.npcs[battle_tower_healer.id] = battle_tower_healer
+
+        # Legendary Guardians - special trainers protecting legendaries
+        legendary_guardian_1 = NPC(
+            id="legendary_guardian_1",
+            name="Guardian Kai",
+            location_id="legendary_sanctuary",
+            x=17,
+            y=10,
+            sprite="G",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("Only those who have defeated the Champion may enter this sacred place!"),
+                Dialogue("You have proven yourself worthy!")
+            ]
+        )
+        self.npcs[legendary_guardian_1.id] = legendary_guardian_1
+
+        legendary_guardian_2 = NPC(
+            id="legendary_guardian_2",
+            name="Guardian Luna",
+            location_id="legendary_sanctuary",
+            x=17,
+            y=30,
+            sprite="G",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("The legendary creatures ahead are not to be taken lightly!"),
+                Dialogue("You've earned the right to proceed!")
+            ]
+        )
+        self.npcs[legendary_guardian_2.id] = legendary_guardian_2
+
+        # Legendary Researcher - provides lore about legendaries
+        legendary_researcher = NPC(
+            id="legendary_researcher",
+            name="Professor Sage",
+            location_id="legendary_sanctuary",
+            x=17,
+            y=20,
+            sprite="P",
+            dialogues=[
+                Dialogue("I study the legendary creatures of this region. They are the strongest of all!"),
+                Dialogue("Six legendary creatures dwell in this sanctuary. Tread carefully!")
+            ]
+        )
+        self.npcs[legendary_researcher.id] = legendary_researcher
+
     def get_npc(self, npc_id: str) -> Optional[NPC]:
         """Get NPC by ID."""
         return self.npcs.get(npc_id)

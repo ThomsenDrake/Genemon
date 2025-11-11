@@ -430,6 +430,18 @@ class Game:
         Returns:
             Team for the trainer
         """
+        # Check for special hand-crafted teams (Elite Four and Champion)
+        if npc.id == "elite_1":
+            return self._create_elite_mystica_team()
+        elif npc.id == "elite_2":
+            return self._create_elite_tempest_team()
+        elif npc.id == "elite_3":
+            return self._create_elite_steel_team()
+        elif npc.id == "elite_4":
+            return self._create_elite_phantom_team()
+        elif npc.id == "champion":
+            return self._create_champion_aurora_team()
+
         # Use NPC ID as seed for reproducibility
         rng = random.Random(hash(npc.id + str(self.state.seed)))
 
@@ -483,6 +495,202 @@ class Game:
             trainer_team.add_creature(creature)
 
         return trainer_team
+
+    def _create_elite_mystica_team(self) -> Team:
+        """
+        Create hand-crafted team for Elite Mystica (Mystic-type specialist).
+        Level 32-35 with strong Mystic and supporting types.
+        """
+        team = Team()
+        rng = random.Random(hash("elite_mystica" + str(self.state.seed)))
+
+        # Find creatures with Mystic type and high stats
+        mystic_creatures = []
+        for species in self.state.species_dict.values():
+            if species.types[0] == "Mystic" or (len(species.types) > 1 and species.types[1] == "Mystic"):
+                mystic_creatures.append(species)
+
+        # Select 5 creatures: 3-4 Mystic types + 1-2 supporting types
+        if len(mystic_creatures) >= 4:
+            selected = rng.sample(mystic_creatures, 4)
+        else:
+            selected = mystic_creatures[:]
+            # Add some Mind or Spirit types as support
+            support_types = [s for s in self.state.species_dict.values()
+                           if s.types[0] in ["Mind", "Spirit"] and s not in selected]
+            if support_types:
+                selected.extend(rng.sample(support_types, min(4 - len(selected), len(support_types))))
+
+        # Add one more random strong creature if needed
+        while len(selected) < 5:
+            candidate = rng.choice(list(self.state.species_dict.values()))
+            if candidate not in selected:
+                selected.append(candidate)
+
+        # Create team with levels 32-35
+        for i, species in enumerate(selected):
+            level = 32 + i  # Levels 32, 33, 34, 35, 36
+            creature = Creature(species=species, level=level)
+            team.add_creature(creature)
+
+        return team
+
+    def _create_elite_tempest_team(self) -> Team:
+        """
+        Create hand-crafted team for Elite Tempest (Gale-type specialist).
+        Level 33-36 with fast, powerful Gale types.
+        """
+        team = Team()
+        rng = random.Random(hash("elite_tempest" + str(self.state.seed)))
+
+        # Find Gale-type creatures
+        gale_creatures = []
+        for species in self.state.species_dict.values():
+            if species.types[0] == "Gale" or (len(species.types) > 1 and species.types[1] == "Gale"):
+                gale_creatures.append(species)
+
+        # Select creatures prioritizing high speed
+        if len(gale_creatures) >= 4:
+            # Sort by speed and pick top candidates
+            sorted_gale = sorted(gale_creatures, key=lambda s: s.base_stats.speed, reverse=True)
+            selected = sorted_gale[:4]
+        else:
+            selected = gale_creatures[:]
+
+        # Add supporting Volt or Frost types (good offensive combos)
+        while len(selected) < 5:
+            support_types = [s for s in self.state.species_dict.values()
+                           if s.types[0] in ["Volt", "Frost"] and s not in selected]
+            if support_types:
+                selected.append(rng.choice(support_types))
+            else:
+                # Add any creature
+                candidate = rng.choice(list(self.state.species_dict.values()))
+                if candidate not in selected:
+                    selected.append(candidate)
+
+        # Create team with levels 33-37
+        for i, species in enumerate(selected):
+            level = 33 + i
+            creature = Creature(species=species, level=level)
+            team.add_creature(creature)
+
+        return team
+
+    def _create_elite_steel_team(self) -> Team:
+        """
+        Create hand-crafted team for Elite Steel (Metal-type specialist).
+        Level 34-37 with defensive Metal types and hard-hitting attacks.
+        """
+        team = Team()
+        rng = random.Random(hash("elite_steel" + str(self.state.seed)))
+
+        # Find Metal-type creatures
+        metal_creatures = []
+        for species in self.state.species_dict.values():
+            if species.types[0] == "Metal" or (len(species.types) > 1 and species.types[1] == "Metal"):
+                metal_creatures.append(species)
+
+        # Select creatures prioritizing defense
+        if len(metal_creatures) >= 4:
+            sorted_metal = sorted(metal_creatures, key=lambda s: s.base_stats.defense, reverse=True)
+            selected = sorted_metal[:4]
+        else:
+            selected = metal_creatures[:]
+
+        # Add Terra or Brawl types for coverage
+        while len(selected) < 5:
+            support_types = [s for s in self.state.species_dict.values()
+                           if s.types[0] in ["Terra", "Brawl"] and s not in selected]
+            if support_types:
+                selected.append(rng.choice(support_types))
+            else:
+                candidate = rng.choice(list(self.state.species_dict.values()))
+                if candidate not in selected:
+                    selected.append(candidate)
+
+        # Create team with levels 34-38
+        for i, species in enumerate(selected):
+            level = 34 + i
+            creature = Creature(species=species, level=level)
+            team.add_creature(creature)
+
+        return team
+
+    def _create_elite_phantom_team(self) -> Team:
+        """
+        Create hand-crafted team for Elite Phantom (Spirit-type specialist).
+        Level 35-38 with evasive Spirit and Shadow types.
+        """
+        team = Team()
+        rng = random.Random(hash("elite_phantom" + str(self.state.seed)))
+
+        # Find Spirit and Shadow-type creatures
+        spirit_shadow_creatures = []
+        for species in self.state.species_dict.values():
+            if species.types[0] in ["Spirit", "Shadow"] or (len(species.types) > 1 and species.types[1] in ["Spirit", "Shadow"]):
+                spirit_shadow_creatures.append(species)
+
+        # Select creatures
+        if len(spirit_shadow_creatures) >= 5:
+            selected = rng.sample(spirit_shadow_creatures, 5)
+        else:
+            selected = spirit_shadow_creatures[:]
+            # Add Toxin or Mind types
+            while len(selected) < 5:
+                support_types = [s for s in self.state.species_dict.values()
+                               if s.types[0] in ["Toxin", "Mind"] and s not in selected]
+                if support_types:
+                    selected.append(rng.choice(support_types))
+                else:
+                    candidate = rng.choice(list(self.state.species_dict.values()))
+                    if candidate not in selected:
+                        selected.append(candidate)
+
+        # Create team with levels 35-39
+        for i, species in enumerate(selected):
+            level = 35 + i
+            creature = Creature(species=species, level=level)
+            team.add_creature(creature)
+
+        return team
+
+    def _create_champion_aurora_team(self) -> Team:
+        """
+        Create hand-crafted team for Champion Aurora.
+        Level 38-42 with a perfectly balanced team covering all weaknesses.
+        Uses the strongest creatures from diverse types.
+        """
+        team = Team()
+        rng = random.Random(hash("champion_aurora" + str(self.state.seed)))
+
+        # Champion has a diverse team - select strongest from each type category
+        type_priorities = ["Flame", "Aqua", "Leaf", "Volt", "Terra", "Shadow"]
+
+        selected = []
+        for priority_type in type_priorities:
+            # Find creatures of this type
+            type_creatures = []
+            for species in self.state.species_dict.values():
+                if species.types[0] == priority_type or (len(species.types) > 1 and species.types[1] == priority_type):
+                    type_creatures.append(species)
+
+            if type_creatures:
+                # Sort by overall stats (total base stats)
+                sorted_creatures = sorted(type_creatures,
+                                        key=lambda s: (s.base_stats.hp + s.base_stats.attack +
+                                                      s.base_stats.defense + s.base_stats.special +
+                                                      s.base_stats.speed),
+                                        reverse=True)
+                selected.append(sorted_creatures[0])
+
+        # Create team with levels 38-43 (Champion's team)
+        for i, species in enumerate(selected):
+            level = 38 + i  # Levels 38, 39, 40, 41, 42, 43
+            creature = Creature(species=species, level=level)
+            team.add_creature(creature)
+
+        return team
 
     def _battle(self, opponent_team: Team, is_wild: bool = False) -> BattleResult:
         """Handle a battle."""

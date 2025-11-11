@@ -392,6 +392,26 @@ class World:
         elite_hall.has_shop = False
         self.locations[elite_hall.id] = elite_hall
 
+        # Battle Tower - post-game challenge facility
+        battle_tower = LocationBuilder.create_town(
+            "battle_tower",
+            "Battle Tower",
+            width=20,
+            height=25
+        )
+        battle_tower.has_healing = True
+        battle_tower.has_shop = False
+        self.locations[battle_tower.id] = battle_tower
+
+        # Legendary Sanctuary - post-game legendary encounter area
+        legendary_sanctuary = LocationBuilder.create_cave(
+            "legendary_sanctuary",
+            "Legendary Sanctuary",
+            width=35,
+            height=40
+        )
+        self.locations[legendary_sanctuary.id] = legendary_sanctuary
+
         # Set up connections
         starter_town.connections["route_1"] = (starter_town.width // 2, starter_town.height - 1)
         route_1.connections["town_starter"] = (route_1.width // 2, route_1.height - 1)
@@ -435,6 +455,10 @@ class World:
         victory_road.connections["town_tenth"] = (victory_road.width // 2, victory_road.height - 1)
         victory_road.connections["elite_hall"] = (victory_road.width // 2, 0)
         elite_hall.connections["victory_road"] = (elite_hall.width // 2, elite_hall.height - 1)
+        elite_hall.connections["battle_tower"] = (elite_hall.width - 5, elite_hall.height // 2)
+        battle_tower.connections["elite_hall"] = (5, battle_tower.height // 2)
+        elite_hall.connections["legendary_sanctuary"] = (5, elite_hall.height // 2)
+        legendary_sanctuary.connections["elite_hall"] = (legendary_sanctuary.width - 5, legendary_sanctuary.height // 2)
 
     def get_location(self, location_id: str) -> Optional[Location]:
         """Get location by ID."""

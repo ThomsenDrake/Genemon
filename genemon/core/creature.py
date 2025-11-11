@@ -131,6 +131,7 @@ class CreatureSpecies:
     sprite_data: Optional[Dict[str, any]] = None  # Contains front, back, mini sprites
     learnset: Optional[Dict[int, Move]] = None  # Level -> Move mapping for level-up moves
     tm_compatible: Optional[List[str]] = None  # List of TM move names this species can learn
+    is_legendary: bool = False  # Marks rare, powerful creatures (IDs 146-151)
 
     def to_dict(self) -> dict:
         """Convert species to dictionary for serialization."""
@@ -143,7 +144,8 @@ class CreatureSpecies:
             'flavor_text': self.flavor_text,
             'evolution_level': self.evolution_level,
             'evolves_into': self.evolves_into,
-            'sprite_data': self.sprite_data
+            'sprite_data': self.sprite_data,
+            'is_legendary': self.is_legendary
         }
         # Add learnset if present
         if self.learnset:
