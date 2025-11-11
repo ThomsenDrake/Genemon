@@ -364,6 +364,12 @@ def _create_tm_moves() -> Dict[str, Move]:
         "Dark Blast": Move("Dark Blast", "Shadow", 75, 95, 15, 15, "A blast of darkness."),
         "Shadow Storm": Move("Shadow Storm", "Shadow", 90, 85, 10, 10, "A storm of shadows."),
         "Void Strike": Move("Void Strike", "Shadow", 85, 90, 12, 12, "Strikes from the void."),
+
+        # Weather-changing moves (NEW in v0.10.0)
+        "Rain Dance": Move("Rain Dance", "Aqua", 0, 100, 5, 5, "Summons rain for 5 turns."),
+        "Sunny Day": Move("Sunny Day", "Flame", 0, 100, 5, 5, "Summons harsh sunlight for 5 turns."),
+        "Sandstorm": Move("Sandstorm", "Terra", 0, 100, 5, 5, "Summons a sandstorm for 5 turns."),
+        "Hail": Move("Hail", "Frost", 0, 100, 5, 5, "Summons hail for 5 turns."),
     }
 
 
@@ -395,6 +401,7 @@ def _create_tms() -> Dict[str, Item]:
         "metal": ["Steel Slash", "Metal Storm", "Iron Impact"],
         "mystic": ["Mystic Blast", "Fairy Storm", "Magic Strike"],
         "shadow": ["Dark Blast", "Shadow Storm", "Void Strike"],
+        "weather": ["Rain Dance", "Sunny Day", "Sandstorm", "Hail"],  # NEW in v0.10.0
     }
 
     for category, move_names in tm_groups.items():

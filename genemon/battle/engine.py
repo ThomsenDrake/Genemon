@@ -26,6 +26,15 @@ class BattleResult(Enum):
     CAPTURED = "captured"
 
 
+class Weather(Enum):
+    """Weather conditions that affect battles."""
+    NONE = "none"
+    RAIN = "rain"          # Boosts Aqua moves, weakens Flame moves
+    SUN = "sun"            # Boosts Flame moves, weakens Aqua moves
+    SANDSTORM = "sandstorm"  # Damages non-Terra/Metal/Rock creatures each turn
+    HAIL = "hail"          # Damages non-Frost creatures each turn
+
+
 class BattleLog:
     """Stores messages from battle events."""
 
@@ -78,6 +87,10 @@ class Battle:
         self.log = BattleLog()
         self.result = BattleResult.ONGOING
         self.turn_count = 0
+
+        # Weather system
+        self.weather = Weather.NONE
+        self.weather_turns = 0  # Number of turns weather lasts (0 = infinite until changed)
 
         # Battle start message
         if is_wild:
@@ -143,6 +156,9 @@ class Battle:
         # Check for fainted creatures
         self._check_fainted()
 
+        # Process weather effects at end of turn
+        self._process_weather()
+
         # Check win conditions
         self._check_battle_end()
 
@@ -196,6 +212,18 @@ class Battle:
         move.pp -= 1
 
         self.log.add(f"{attacker_name} used {move.name}!")
+
+        # Check for weather-changing moves (power 0 indicates status/weather move)
+        if move.power == 0:
+            weather_moves = {
+                "Rain Dance": Weather.RAIN,
+                "Sunny Day": Weather.SUN,
+                "Sandstorm": Weather.SANDSTORM,
+                "Hail": Weather.HAIL
+            }
+            if move.name in weather_moves:
+                self.set_weather(weather_moves[move.name], turns=5)
+                return  # Weather moves don't deal damage
 
         # Check accuracy
         if random.randint(1, 100) > move.accuracy:
@@ -301,6 +329,18 @@ class Battle:
         # STAB (Same Type Attack Bonus)
         if move.type in attacker.species.types:
             damage *= 1.5
+
+        # Weather effects
+        if self.weather == Weather.RAIN:
+            if move.type == "Aqua":
+                damage *= 1.5  # Rain boosts Aqua moves
+            elif move.type == "Flame":
+                damage *= 0.5  # Rain weakens Flame moves
+        elif self.weather == Weather.SUN:
+            if move.type == "Flame":
+                damage *= 1.5  # Sun boosts Flame moves
+            elif move.type == "Aqua":
+                damage *= 0.5  # Sun weakens Aqua moves
 
         # Random factor (85-100%)
         damage *= random.uniform(0.85, 1.0)
@@ -481,3 +521,78 @@ class Battle:
             self._check_fainted()
             self._check_battle_end()
             return False
+
+    def _process_weather(self):
+        """Process weather effects at end of turn."""
+        if self.weather == Weather.NONE:
+            return
+
+        # Sandstorm damages non-Terra/Metal/Beast creatures
+        if self.weather == Weather.SANDSTORM:
+            self._process_sandstorm_damage(self.player_active, "player")
+            self._process_sandstorm_damage(self.opponent_active, "opponent")
+
+        # Hail damages non-Frost creatures
+        elif self.weather == Weather.HAIL:
+            self._process_hail_damage(self.player_active, "player")
+            self._process_hail_damage(self.opponent_active, "opponent")
+
+        # Decrement weather duration if it has a limit
+        if self.weather_turns > 0:
+            self.weather_turns -= 1
+            if self.weather_turns == 0:
+                weather_name = self.weather.value.capitalize()
+                self.log.add(f"The {weather_name} subsided.")
+                self.weather = Weather.NONE
+
+    def _process_sandstorm_damage(self, creature: Creature, side: str):
+        """Process sandstorm damage for a creature."""
+        if creature.is_fainted():
+            return
+
+        # Sandstorm doesn't damage Terra, Metal, or Beast types
+        immune_types = ["Terra", "Metal", "Beast"]
+        if any(t in immune_types for t in creature.species.types):
+            return
+
+        damage = max(1, int(creature.max_hp / 16))  # 1/16 max HP
+        creature.take_damage(damage)
+        self.log.add(f"{creature.get_display_name()} is buffeted by the sandstorm! ({damage} damage)")
+
+        if creature.is_fainted():
+            self.log.add(f"{creature.get_display_name()} fainted from the sandstorm!")
+
+    def _process_hail_damage(self, creature: Creature, side: str):
+        """Process hail damage for a creature."""
+        if creature.is_fainted():
+            return
+
+        # Hail doesn't damage Frost types
+        if "Frost" in creature.species.types:
+            return
+
+        damage = max(1, int(creature.max_hp / 16))  # 1/16 max HP
+        creature.take_damage(damage)
+        self.log.add(f"{creature.get_display_name()} is pelted by hail! ({damage} damage)")
+
+        if creature.is_fainted():
+            self.log.add(f"{creature.get_display_name()} fainted from the hail!")
+
+    def set_weather(self, weather: Weather, turns: int = 5):
+        """
+        Set the current weather condition.
+
+        Args:
+            weather: Weather condition to set
+            turns: Number of turns weather lasts (0 = infinite)
+        """
+        old_weather = self.weather
+        self.weather = weather
+        self.weather_turns = turns
+
+        if weather != Weather.NONE:
+            weather_name = weather.value.capitalize()
+            if old_weather == Weather.NONE:
+                self.log.add(f"{weather_name} started!")
+            else:
+                self.log.add(f"The weather changed to {weather_name}!")

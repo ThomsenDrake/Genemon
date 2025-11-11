@@ -5,7 +5,7 @@ Generates 151 unique creatures with stats, moves, types, and names.
 
 import random
 from typing import List, Dict, Tuple
-from ..core.creature import CreatureSpecies, CreatureStats, Move
+from ..core.creature import CreatureSpecies, CreatureStats, Move, Ability
 from .types import TYPES
 
 
@@ -183,6 +183,9 @@ class CreatureGenerator:
         # Generate TM compatibility
         tm_compatible = self._generate_tm_compatibility(types)
 
+        # Generate ability
+        ability = self._generate_ability(types, power_level, base_stats)
+
         # Create species
         species = CreatureSpecies(
             id=creature_id,
@@ -195,7 +198,8 @@ class CreatureGenerator:
             evolves_into=None,
             sprite_data=None,  # Will be generated separately
             learnset=learnset,
-            tm_compatible=tm_compatible
+            tm_compatible=tm_compatible,
+            ability=ability
         )
 
         return species
@@ -507,6 +511,143 @@ class CreatureGenerator:
                         compatible.append(move_name)
 
         return list(set(compatible))  # Remove duplicates
+
+    def _generate_ability(self, types: List[str], power_level: str, stats: CreatureStats) -> Ability:
+        """Generate a passive ability for the creature based on its types and stats."""
+
+        # Type-based abilities (50% of creatures get type-based abilities)
+        type_abilities = {
+            "Flame": [
+                ("Blaze", "Boosts Flame-type moves when HP is low", "type_boost_low_hp"),
+                ("Flash Fire", "Powers up Flame moves when hit by fire", "absorb_type"),
+                ("Drought", "Changes weather to sunny when sent out", "weather_sun"),
+            ],
+            "Aqua": [
+                ("Torrent", "Boosts Aqua-type moves when HP is low", "type_boost_low_hp"),
+                ("Swift Swim", "Boosts Speed in rain", "speed_rain"),
+                ("Drizzle", "Changes weather to rain when sent out", "weather_rain"),
+            ],
+            "Leaf": [
+                ("Overgrow", "Boosts Leaf-type moves when HP is low", "type_boost_low_hp"),
+                ("Chlorophyll", "Boosts Speed in sunny weather", "speed_sun"),
+                ("Leaf Guard", "Prevents status conditions in sunny weather", "status_immune_sun"),
+            ],
+            "Volt": [
+                ("Static", "May paralyze on contact", "paralyze_contact"),
+                ("Volt Absorb", "Restores HP when hit by Volt moves", "absorb_type"),
+                ("Lightning Rod", "Draws Volt moves to itself", "draw_type"),
+            ],
+            "Frost": [
+                ("Snow Cloak", "Boosts Evasion in hail", "evasion_hail"),
+                ("Ice Body", "Restores HP in hail", "heal_hail"),
+                ("Slush Rush", "Boosts Speed in hail", "speed_hail"),
+            ],
+            "Terra": [
+                ("Sand Veil", "Boosts Evasion in sandstorm", "evasion_sandstorm"),
+                ("Sand Rush", "Boosts Speed in sandstorm", "speed_sandstorm"),
+                ("Sand Stream", "Changes weather to sandstorm", "weather_sandstorm"),
+            ],
+            "Metal": [
+                ("Sturdy", "Cannot be knocked out with one hit", "survive_ohko"),
+                ("Heavy Metal", "Doubles creature weight", "stat_weight"),
+                ("Light Metal", "Halves creature weight", "stat_weight"),
+            ],
+            "Toxin": [
+                ("Poison Point", "May poison on contact", "poison_contact"),
+                ("Poison Touch", "May poison targets on contact", "poison_contact"),
+                ("Immunity", "Cannot be poisoned", "status_immune_poison"),
+            ],
+            "Shadow": [
+                ("Cursed Body", "May disable moves on contact", "disable_contact"),
+                ("Shadow Tag", "Prevents fleeing", "prevent_flee"),
+                ("Infiltrator", "Ignores barriers and substitutes", "ignore_barriers"),
+            ],
+            "Mind": [
+                ("Synchronize", "Passes status problems to the foe", "reflect_status"),
+                ("Inner Focus", "Protects from flinching", "no_flinch"),
+                ("Telepathy", "Anticipates ally moves", "anticipate"),
+            ],
+        }
+
+        # Stat-based abilities (choose based on highest stat)
+        stat_abilities = []
+
+        # High HP abilities
+        if stats.hp >= 80:
+            stat_abilities.extend([
+                ("Thick Fat", "Reduces damage from Flame and Frost moves", "resist_flame_frost"),
+                ("Filter", "Reduces super effective damage", "reduce_super"),
+            ])
+
+        # High Attack abilities
+        if stats.attack >= 80:
+            stat_abilities.extend([
+                ("Huge Power", "Doubles Attack stat", "double_attack"),
+                ("Guts", "Boosts Attack when statused", "attack_boost_status"),
+                ("Sheer Force", "Removes added effects to boost power", "power_no_effects"),
+            ])
+
+        # High Defense abilities
+        if stats.defense >= 80:
+            stat_abilities.extend([
+                ("Iron Barbs", "Inflicts damage on contact", "damage_contact"),
+                ("Solid Rock", "Reduces super effective damage", "reduce_super"),
+                ("Battle Armor", "Blocks critical hits", "no_crits"),
+            ])
+
+        # High Speed abilities
+        if stats.speed >= 80:
+            stat_abilities.extend([
+                ("Speed Boost", "Gradually boosts Speed", "speed_gradual"),
+                ("Quick Feet", "Boosts Speed when statused", "speed_boost_status"),
+                ("Unburden", "Boosts Speed when item is used", "speed_after_item"),
+            ])
+
+        # High Special abilities
+        if stats.special >= 80:
+            stat_abilities.extend([
+                ("Magic Guard", "Only damaged by attacks", "no_indirect_damage"),
+                ("Adaptability", "Boosts STAB effectiveness", "boost_stab"),
+                ("Rivalry", "Boosts against same type", "boost_same_type"),
+            ])
+
+        # Universal abilities (any creature can have these)
+        universal_abilities = [
+            ("Keen Eye", "Prevents accuracy reduction", "no_accuracy_loss"),
+            ("Intimidate", "Lowers opposing Attack on switch-in", "lower_attack_entry"),
+            ("Pressure", "Makes foe use more PP", "increase_pp_use"),
+            ("Trace", "Copies foe's ability", "copy_ability"),
+            ("Natural Cure", "Heals status on switching out", "heal_status_switch"),
+            ("Shed Skin", "May heal status each turn", "heal_status_chance"),
+            ("Regenerator", "Restores HP when switching out", "heal_switch"),
+            ("Moxie", "Boosts Attack after knocking out opponent", "attack_ko_boost"),
+        ]
+
+        # Choose ability based on type and stats
+        ability_pool = []
+
+        # Add type-specific abilities for creature's types
+        for creature_type in types:
+            if creature_type in type_abilities:
+                ability_pool.extend(type_abilities[creature_type])
+
+        # Add stat-based abilities
+        ability_pool.extend(stat_abilities)
+
+        # Always include some universal abilities
+        ability_pool.extend(universal_abilities)
+
+        # Remove duplicates
+        ability_pool = list(set(ability_pool))
+
+        # Choose one ability
+        if ability_pool:
+            name, description, effect_type = self.rng.choice(ability_pool)
+        else:
+            # Fallback to a universal ability
+            name, description, effect_type = self.rng.choice(universal_abilities)
+
+        return Ability(name=name, description=description, effect_type=effect_type)
 
     def _create_evolution_chains(self):
         """Set up evolution relationships between creatures."""

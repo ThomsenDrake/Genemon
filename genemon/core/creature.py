@@ -88,6 +88,28 @@ class Move:
 
 
 @dataclass
+class Ability:
+    """Represents a creature's passive ability."""
+
+    name: str
+    description: str
+    effect_type: str  # e.g., "stat_boost", "weather", "status_immune", "type_boost"
+
+    def to_dict(self) -> dict:
+        """Convert ability to dictionary for serialization."""
+        return {
+            'name': self.name,
+            'description': self.description,
+            'effect_type': self.effect_type
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'Ability':
+        """Create ability from dictionary."""
+        return cls(**data)
+
+
+@dataclass
 class CreatureStats:
     """Base stats for a creature species."""
 
@@ -132,6 +154,7 @@ class CreatureSpecies:
     learnset: Optional[Dict[int, Move]] = None  # Level -> Move mapping for level-up moves
     tm_compatible: Optional[List[str]] = None  # List of TM move names this species can learn
     is_legendary: bool = False  # Marks rare, powerful creatures (IDs 146-151)
+    ability: Optional[Ability] = None  # Passive ability for this species
 
     def to_dict(self) -> dict:
         """Convert species to dictionary for serialization."""
@@ -153,6 +176,9 @@ class CreatureSpecies:
         # Add TM compatibility if present
         if self.tm_compatible:
             result['tm_compatible'] = self.tm_compatible
+        # Add ability if present
+        if self.ability:
+            result['ability'] = self.ability.to_dict()
         return result
 
     @classmethod
@@ -163,6 +189,9 @@ class CreatureSpecies:
         # Deserialize learnset if present
         if 'learnset' in data and data['learnset']:
             data['learnset'] = {int(level): Move.from_dict(move) for level, move in data['learnset'].items()}
+        # Deserialize ability if present
+        if 'ability' in data and data['ability']:
+            data['ability'] = Ability.from_dict(data['ability'])
         # TM compatibility is already a list, no conversion needed
         return cls(**data)
 
