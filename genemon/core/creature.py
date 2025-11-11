@@ -63,6 +63,7 @@ class Move:
     description: str
     status_effect: Optional[StatusEffect] = None  # Status effect inflicted
     status_chance: int = 0  # Chance (0-100) to inflict status
+    crit_rate: int = 0  # Critical hit stage (0 = normal, 1 = high, 2 = always)
 
     def to_dict(self) -> dict:
         """Convert move to dictionary for serialization."""
@@ -75,7 +76,8 @@ class Move:
             'max_pp': self.max_pp,
             'description': self.description,
             'status_effect': self.status_effect.value if self.status_effect else None,
-            'status_chance': self.status_chance
+            'status_chance': self.status_chance,
+            'crit_rate': self.crit_rate
         }
 
     @classmethod
@@ -84,6 +86,9 @@ class Move:
         status_effect_val = data.get('status_effect')
         if status_effect_val:
             data['status_effect'] = StatusEffect(status_effect_val)
+        # Default crit_rate to 0 for backward compatibility
+        if 'crit_rate' not in data:
+            data['crit_rate'] = 0
         return cls(**data)
 
 

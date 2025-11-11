@@ -238,8 +238,11 @@ class Battle:
             self.log.add("The attack missed!")
             return
 
-        # Calculate damage
-        damage = self._calculate_damage(attacker, defender, move)
+        # Check for critical hit
+        is_critical = self._check_critical_hit(attacker, defender, move, is_player)
+
+        # Calculate damage (with critical hit flag)
+        damage = self._calculate_damage(attacker, defender, move, is_critical)
 
         # Apply damage
         actual_damage = defender.take_damage(damage)
@@ -247,6 +250,10 @@ class Battle:
         # Check for effectiveness and create enhanced damage message
         effectiveness = get_effectiveness(move.type, defender.species.types)
         damage_message = f"{defender_name} took {actual_damage} damage!"
+
+        # Add critical hit indicator first
+        if is_critical:
+            damage_message += " (Critical hit!)"
 
         # Add effectiveness indicator to damage message
         if effectiveness > 1.5:
@@ -304,7 +311,8 @@ class Battle:
         self,
         attacker: Creature,
         defender: Creature,
-        move: Move
+        move: Move,
+        is_critical: bool = False
     ) -> int:
         """
         Calculate damage for an attack (simplified Gen 1 formula).
@@ -313,6 +321,7 @@ class Battle:
             attacker: Attacking creature
             defender: Defending creature
             move: Move being used
+            is_critical: Whether this is a critical hit
 
         Returns:
             Damage amount
@@ -349,6 +358,13 @@ class Battle:
         if move.type in attacker.species.types:
             damage *= 1.5
 
+        # Critical hit (2x damage multiplier, 3x with Sniper ability)
+        if is_critical:
+            if attacker.species.ability and attacker.species.ability.name == "Sniper":
+                damage *= 3.0  # Sniper boosts crit damage to 3x
+            else:
+                damage *= 2.0  # Normal crit is 2x
+
         # Weather effects
         if self.weather == Weather.RAIN:
             if move.type == "Aqua":
@@ -368,6 +384,58 @@ class Battle:
         damage = self._apply_ability_damage_modifiers(attacker, defender, move, int(damage))
 
         return max(1, int(damage))
+
+    def _check_critical_hit(
+        self,
+        attacker: Creature,
+        defender: Creature,
+        move: Move,
+        is_player: bool
+    ) -> bool:
+        """
+        Check if an attack is a critical hit.
+
+        Critical hit rates:
+        - Base: 6.25% (1/16 chance)
+        - High crit moves (crit_rate=1): 12.5% (1/8 chance)
+        - Always crit moves (crit_rate=2): 100%
+
+        Abilities that affect crits:
+        - Super Luck: Increases crit chance by 1 stage (base -> high)
+        - Sniper: Boosts critical hit damage (increases multiplier from 2.0x to 3.0x)
+        - Battle Armor / Shell Armor: Prevents critical hits entirely
+
+        Args:
+            attacker: Attacking creature
+            defender: Defending creature
+            move: Move being used
+            is_player: True if attacker is player
+
+        Returns:
+            True if critical hit
+        """
+        # Check if defender has crit-blocking abilities
+        if defender.species.ability:
+            if defender.species.ability.name in ["Battle Armor", "Shell Armor"]:
+                return False
+
+        # Base critical hit rate by stage
+        crit_stage = move.crit_rate if hasattr(move, 'crit_rate') else 0
+
+        # Super Luck increases crit stage by 1
+        if attacker.species.ability and attacker.species.ability.name == "Super Luck":
+            crit_stage += 1
+
+        # Critical hit chances by stage
+        if crit_stage >= 2:
+            # Always crit
+            return True
+        elif crit_stage == 1:
+            # High crit rate: 12.5% (1/8)
+            return random.randint(1, 8) == 1
+        else:
+            # Base crit rate: 6.25% (1/16)
+            return random.randint(1, 16) == 1
 
     def _determine_order(self) -> bool:
         """

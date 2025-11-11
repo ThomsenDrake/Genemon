@@ -375,6 +375,14 @@ class CreatureGenerator:
                 status_name = status_effect.value.capitalize()
                 description = f"A {move_type}-type attack that may inflict {status_name}."
 
+        # Determine critical hit rate
+        # Some moves have high crit rate (roughly 10-15% of moves)
+        crit_rate = 0
+        if "Slash" in name or "Claw" in name or "Strike" in name or "Razor" in name:
+            crit_rate = 1  # High crit rate moves
+            if "Critical" not in description and status_effect is None:
+                description = f"A {move_type}-type attack with a high critical hit ratio."
+
         return Move(
             name=name,
             type=move_type,
@@ -384,7 +392,8 @@ class CreatureGenerator:
             max_pp=max_pp,
             description=description,
             status_effect=status_effect,
-            status_chance=status_chance
+            status_chance=status_chance,
+            crit_rate=crit_rate
         )
 
     def _generate_flavor_text(self, name: str, types: List[str]) -> str:
@@ -585,6 +594,8 @@ class CreatureGenerator:
                 ("Huge Power", "Doubles Attack stat", "double_attack"),
                 ("Guts", "Boosts Attack when statused", "attack_boost_status"),
                 ("Sheer Force", "Removes added effects to boost power", "power_no_effects"),
+                ("Super Luck", "Heightens critical hit ratio", "boost_crit"),
+                ("Sniper", "Boosts critical hit power", "crit_power_boost"),
             ])
 
         # High Defense abilities
@@ -593,6 +604,7 @@ class CreatureGenerator:
                 ("Iron Barbs", "Inflicts damage on contact", "damage_contact"),
                 ("Solid Rock", "Reduces super effective damage", "reduce_super"),
                 ("Battle Armor", "Blocks critical hits", "no_crits"),
+                ("Shell Armor", "Blocks critical hits", "no_crits"),
             ])
 
         # High Speed abilities

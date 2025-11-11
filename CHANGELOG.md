@@ -4,6 +4,85 @@ All notable changes to the Genemon project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.12.0] - 2025-11-11 - Iteration 12: Critical Hit System
+
+### Added
+
+#### Critical Hit System (Complete Battle Mechanic)
+- **Base critical hit chance** - 6.25% (1/16) chance for normal moves (genemon/battle/engine.py:388-438)
+- **High crit rate moves** - 12.5% (1/8) chance with crit_rate=1 (moves with "Slash", "Claw", "Strike", "Razor" in name)
+- **Critical hit damage** - 2x damage multiplier for critical hits
+- **Critical hit display** - Battle log shows "(Critical hit!)" message when crits occur
+
+#### Critical-Hit Abilities (New)
+- **Super Luck** - Increases critical hit chance by 1 stage (6.25% → 12.5%)
+- **Sniper** - Boosts critical hit damage from 2x to 3x
+- **Battle Armor** - Completely prevents critical hits (already existed, now functional)
+- **Shell Armor** - Completely prevents critical hits (new addition)
+
+#### Move System Enhancement
+- **crit_rate field** - Added to Move dataclass for high-crit moves (genemon/core/creature.py:66)
+- **Backward compatibility** - Old save files without crit_rate work seamlessly
+- **High-crit move generation** - Moves with "Slash", "Claw", "Strike", "Razor" get crit_rate=1
+
+#### Comprehensive Test Suite
+- **test_critical_hits.py** - New 250-line test suite for critical hit system
+- **7 critical hit tests** - Base rate, high rate, Super Luck, Battle Armor, damage multiplier, Sniper, Shell Armor
+- **All tests passing** - 7/7 crit tests + 6/6 core tests + 6/6 ability tests = 19/19 total
+
+### Changed
+
+#### Battle System Enhancements
+- **Damage calculation** - Now accepts is_critical parameter and applies 2x/3x multiplier
+- **Critical hit integration** - Checks for crits before damage calculation
+- **Ability integration** - Super Luck boosts crit chance, Sniper boosts crit damage, Battle Armor/Shell Armor block crits
+- **Battle feedback** - Enhanced damage messages with critical hit indicators
+
+#### Strategic Depth
+- **Team building** - Critical-hit focused teams now viable strategy
+- **High-risk/high-reward** - Crit-based creatures offer burst damage potential
+- **Defensive options** - Battle Armor/Shell Armor counter crit-heavy teams
+- **Move selection** - High-crit moves valuable for offensive strategies
+
+### Technical Details
+
+#### Code Changes
+- **Modified files**: 3 core files enhanced, 1 test file created
+  - genemon/core/creature.py: +12 lines (Move dataclass + serialization)
+  - genemon/battle/engine.py: +66 lines (Critical hit checking + damage integration)
+  - genemon/creatures/generator.py: +14 lines (High-crit moves + crit abilities)
+  - test_critical_hits.py: +250 lines (NEW - Comprehensive crit tests)
+- **Total code added**: +342 lines (92 production + 250 test)
+- **No breaking changes**: All v0.11.0 features maintained
+- **Backward compatible**: Old saves work without migration
+
+#### New Features Count
+- **1 new Battle method**: _check_critical_hit (50+ lines)
+- **4 new/enhanced abilities**: Super Luck, Sniper, Battle Armor (functional), Shell Armor
+- **High-crit move type**: crit_rate=1 moves generated automatically
+- **2x/3x damage system**: Normal crits 2x, Sniper crits 3x
+
+### Improvements
+
+- **RPG completeness** - Critical hits are fundamental RPG mechanic, now implemented
+- **Strategic variety** - Crit-based strategies create new playstyles
+- **Risk/reward balance** - Crits add excitement and unpredictability
+- **Ability synergy** - Super Luck + high-crit moves = powerful combo
+- **Defensive counterplay** - Battle Armor provides anti-crit option
+
+### Balance
+
+#### Critical Hit Rates
+- **Base**: 6.25% (1/16 chance)
+- **High crit moves**: 12.5% (1/8 chance)
+- **Super Luck**: Increases stage by 1 (base → high, high → always)
+- **Battle Armor/Shell Armor**: 0% (complete immunity)
+
+#### Damage Multipliers
+- **Normal critical hit**: 2.0x damage
+- **Sniper critical hit**: 3.0x damage
+- **Stacks with**: STAB, type effectiveness, weather, abilities
+
 ## [0.11.0] - 2025-11-11 - Iteration 11: Ability System Activation
 
 ### Added
