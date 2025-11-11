@@ -19,6 +19,38 @@ class StatusEffect(Enum):
 
 
 @dataclass
+class Badge:
+    """Represents a gym badge earned by the player."""
+
+    badge_id: str
+    name: str
+    type: str  # Type specialty of the gym
+    gym_leader: str
+    description: str
+
+    def to_dict(self) -> dict:
+        """Convert badge to dictionary for serialization."""
+        return {
+            'badge_id': self.badge_id,
+            'name': self.name,
+            'type': self.type,
+            'gym_leader': self.gym_leader,
+            'description': self.description
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'Badge':
+        """Deserialize badge from dictionary."""
+        return cls(
+            badge_id=data['badge_id'],
+            name=data['name'],
+            type=data['type'],
+            gym_leader=data['gym_leader'],
+            description=data['description']
+        )
+
+
+@dataclass
 class Move:
     """Represents a move/ability that a creature can use."""
 

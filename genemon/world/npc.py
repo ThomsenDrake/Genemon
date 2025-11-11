@@ -32,6 +32,11 @@ class NPC:
     is_shopkeeper: bool = False
     shop_inventory: List[str] = field(default_factory=list)  # List of item IDs sold
     is_healer: bool = False
+    specialty_type: Optional[str] = None  # For gym leaders with type specialization
+    is_gym_leader: bool = False  # Flag for gym leader status
+    badge_id: Optional[str] = None  # Badge ID awarded by this gym leader
+    badge_name: Optional[str] = None  # Name of the badge
+    badge_description: Optional[str] = None  # Description of the badge
 
     def get_dialogue(self, game_state: Dict = None) -> str:
         """
@@ -156,7 +161,7 @@ class NPCRegistry:
         )
         self.npcs[shopkeeper.id] = shopkeeper
 
-        # Gym Leader in third town
+        # Gym Leader in third town - Flame type specialist
         gym_leader = NPC(
             id="gym_leader_1",
             name="Leader Flint",
@@ -165,12 +170,100 @@ class NPCRegistry:
             y=7,
             sprite="G",
             is_trainer=True,
+            is_gym_leader=True,
+            specialty_type="Flame",
+            badge_id="badge_flame",
+            badge_name="Ember Badge",
+            badge_description="Proof of victory over Leader Flint and mastery of Flame-type battles.",
             dialogues=[
                 Dialogue("I'm the Flame-type Gym Leader!"),
                 Dialogue("Prove your strength in battle!")
             ]
         )
         self.npcs[gym_leader.id] = gym_leader
+
+        # Gym Leader in fourth town - Aqua type specialist
+        gym_leader_2 = NPC(
+            id="gym_leader_2",
+            name="Leader Marina",
+            location_id="town_fourth",
+            x=10,
+            y=7,
+            sprite="G",
+            is_trainer=True,
+            is_gym_leader=True,
+            specialty_type="Aqua",
+            badge_id="badge_aqua",
+            badge_name="Cascade Badge",
+            badge_description="Proof of victory over Leader Marina and mastery of Aqua-type battles.",
+            dialogues=[
+                Dialogue("Welcome to Aquamarine Harbor!"),
+                Dialogue("Face the power of the ocean!")
+            ]
+        )
+        self.npcs[gym_leader_2.id] = gym_leader_2
+
+        # Trainers on Route 1
+        route1_trainer1 = NPC(
+            id="trainer_route1_1",
+            name="Bug Catcher Tim",
+            location_id="route_1",
+            x=10,
+            y=12,
+            sprite="T",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("Let's battle!"),
+                Dialogue("You're strong!")
+            ]
+        )
+        self.npcs[route1_trainer1.id] = route1_trainer1
+
+        route1_trainer2 = NPC(
+            id="trainer_route1_2",
+            name="Lass Anna",
+            location_id="route_1",
+            x=10,
+            y=18,
+            sprite="T",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("Hi! Want to battle?"),
+                Dialogue("Good match!")
+            ]
+        )
+        self.npcs[route1_trainer2.id] = route1_trainer2
+
+        # Trainers on Route 3
+        route3_trainer1 = NPC(
+            id="trainer_route3_1",
+            name="Ace Trainer Jake",
+            location_id="route_3",
+            x=10,
+            y=15,
+            sprite="T",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("I'm an expert trainer!"),
+                Dialogue("Impressive skills!")
+            ]
+        )
+        self.npcs[route3_trainer1.id] = route3_trainer1
+
+        route3_trainer2 = NPC(
+            id="trainer_route3_2",
+            name="Hiker Bob",
+            location_id="route_3",
+            x=10,
+            y=25,
+            sprite="T",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("I love the mountains!"),
+                Dialogue("You got me!")
+            ]
+        )
+        self.npcs[route3_trainer2.id] = route3_trainer2
 
         # Healer in each town
         healer_newbark = NPC(
@@ -187,6 +280,22 @@ class NPCRegistry:
             ]
         )
         self.npcs[healer_newbark.id] = healer_newbark
+
+        # Healer in fourth town
+        healer_fourth = NPC(
+            id="healer_fourth",
+            name="Nurse Joy",
+            location_id="town_fourth",
+            x=5,
+            y=5,
+            sprite="H",
+            is_healer=True,
+            dialogues=[
+                Dialogue("Welcome to Aquamarine Harbor!"),
+                Dialogue("Let me heal your team!")
+            ]
+        )
+        self.npcs[healer_fourth.id] = healer_fourth
 
     def get_npc(self, npc_id: str) -> Optional[NPC]:
         """Get NPC by ID."""

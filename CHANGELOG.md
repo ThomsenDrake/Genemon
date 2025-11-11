@@ -4,6 +4,94 @@ All notable changes to the Genemon project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.4.0] - 2025-11-11 - Iteration 4: Badges, Type-Themed Gyms, Evolution, and World Expansion
+
+### Added
+
+#### Badge System
+- **Badge class** - Complete Badge dataclass with id, name, type, gym_leader, description (genemon/core/creature.py:21-50)
+- **Badge collection** - GameState.badges now stores Badge objects
+- **Badge awarding** - Automatic badge award when defeating gym leaders (genemon/core/game.py:268-297)
+- **Badge display** - New "Badges" menu option to view collected badges (genemon/core/game.py:701-719)
+- **Badge celebration** - Special screen when earning a badge with badge details
+- **Badge persistence** - Proper serialization/deserialization in save system
+
+#### Type-Themed Gym Leaders
+- **Gym leader flags** - Added is_gym_leader, specialty_type fields to NPC (genemon/world/npc.py:36-37)
+- **Type filtering** - Gym leaders get teams of their specialty type (genemon/core/game.py:294-326)
+- **Badge fields** - NPCs can have badge_id, badge_name, badge_description (genemon/world/npc.py:37-39)
+- **Leader Flint** - First gym leader with Flame-type specialty and Ember Badge
+- **Leader Marina** - Second gym leader with Aqua-type specialty and Cascade Badge
+- **Stronger teams** - Gym leaders have 4-6 creatures at levels 14-20
+
+#### Evolution System
+- **Evolution notifications** - Battle log shows "can evolve!" after level-up (genemon/battle/engine.py:379-381)
+- **Post-battle evolution** - All team creatures checked for evolution after winning (genemon/core/game.py:450-453)
+- **Evolution choice** - Player can choose to evolve or cancel (genemon/core/game.py:302-360)
+- **Evolution screen** - Dedicated UI showing stats before and after
+- **HP preservation** - HP percentage maintained through evolution
+- **Pokedex integration** - Evolved forms automatically marked as seen
+
+#### World Expansion
+- **Route 3** - New 35-tile route connecting Steelforge to Aquamarine Harbor
+- **Aquamarine Harbor** - New town with gym, healer (genemon/world/map.py:272-285)
+- **Bug Catcher Tim** - Trainer on Route 1 (genemon/world/npc.py:206-220)
+- **Lass Anna** - Trainer on Route 1 (genemon/world/npc.py:222-235)
+- **Ace Trainer Jake** - Trainer on Route 3 (genemon/world/npc.py:237-251)
+- **Hiker Bob** - Trainer on Route 3 (genemon/world/npc.py:253-266)
+- **Nurse Joy (Harbor)** - Healer in Aquamarine Harbor (genemon/world/npc.py:284-298)
+
+### Changed
+
+#### NPC System
+- **Gym leader identification** - is_gym_leader flag for proper team generation
+- **Type specialization** - specialty_type determines team composition
+- **Badge rewards** - Gym leaders have badge information
+
+#### Battle System
+- **Evolution checking** - After level-up, checks if creature can evolve
+- **Post-battle processing** - Evolution handled after battle victory
+
+#### Game Loop
+- **Badges menu** - New menu option between Items and Pokedex
+- **Menu order** - Move, Team, Items, Badges, Pokedex, Save, Quit
+
+#### Save System
+- **Badge serialization** - Badges stored as full objects with to_dict/from_dict
+- **Backwards compatibility** - Old saves default to empty badge list
+
+### Technical Details
+
+#### Code Changes
+- **Modified files**: 6 core files enhanced
+  - genemon/core/game.py: +125 lines (badge awarding, evolution, badge display)
+  - genemon/world/npc.py: +120 lines (6 new NPCs, gym leader fields)
+  - genemon/core/creature.py: +47 lines (Badge class)
+  - genemon/world/map.py: +31 lines (Route 3, Aquamarine Harbor)
+  - genemon/core/save_system.py: +10 lines (badge serialization)
+  - genemon/battle/engine.py: +4 lines (evolution check)
+
+#### New Features Count
+- **4 major systems**: Type-themed gyms, Badge system, Evolution improvements, World expansion
+- **3 new methods**: _award_badge, _show_badges, _handle_evolution
+- **1 new class**: Badge
+- **8 new fields**: 5 NPC fields (is_gym_leader, specialty_type, badge_id, badge_name, badge_description), 3 Badge fields
+- **6 new NPCs**: 4 trainers, 1 gym leader, 1 healer
+- **2 new locations**: Route 3, Aquamarine Harbor
+
+### Improvements
+- **Type-focused battles** - Gym leaders provide thematic challenges
+- **Clear progression** - Badge collection shows player advancement
+- **Player agency** - Can choose when to evolve creatures
+- **More content** - Expanded world with more battles and exploration
+
+### Compatibility
+- **Fully compatible** with v0.3.0 saves
+- Badges will be empty list for old saves
+- New NPCs and locations work with existing saves
+
+---
+
 ## [0.3.0] - 2025-11-11 - Iteration 3: Items UI, Shop System, Status Moves, and Trainer Teams
 
 ### Added

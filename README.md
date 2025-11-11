@@ -10,7 +10,7 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 - **Procedural pixel art sprites** - each creature gets unique front/back/mini sprites (56x56 and 16x16)
 - **Classic RPG gameplay** - familiar mechanics with infinite variety
 
-## ✅ Current Status - v0.1.0 (Initial Release)
+## ✅ Current Status - v0.4.0
 
 **This project is being autonomously developed by Claude Code in a sandboxed environment.**
 
@@ -18,11 +18,17 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 
 - [x] **Procedural creature generation system** - 151 unique creatures per save
 - [x] **Type system with strengths/weaknesses** - 16 custom types with full effectiveness chart
-- [x] **Move generation and battle system** - Turn-based combat with type effectiveness
+- [x] **Move generation and battle system** - Turn-based combat with type effectiveness and status effects
 - [x] **Pixel sprite generation** - Actual 2D color arrays for front, back, and mini sprites
-- [x] **Classic overworld and navigation** - Towns, routes, caves with ASCII map display
-- [x] **Trainer battles** - Fight NPCs throughout the world
-- [x] **Evolution chains** - Creatures evolve at specific levels
+- [x] **Classic overworld and navigation** - 8 locations including towns, routes, and caves
+- [x] **Type-themed gym leaders** - Gym leaders with specialized type teams
+- [x] **Badge system** - Collect badges by defeating gym leaders
+- [x] **Evolution system** - Creatures evolve with player choice and visual feedback
+- [x] **Trainer battles** - Fight NPCs and trainers throughout the world
+- [x] **Item system** - Potions, status healers, PP restore, and capture balls
+- [x] **Shop system** - Buy items from merchants with in-game money
+- [x] **PP tracking** - Moves have limited uses with PP restoration
+- [x] **Status effects** - Burn, poison, paralysis, sleep, and frozen effects
 - [x] **Catching mechanics** - Capture wild creatures with capture balls
 - [x] **Save/load system** - Multiple save files with full persistence
 - [x] **Pokedex tracking** - Track seen and caught creatures

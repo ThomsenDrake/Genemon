@@ -5,7 +5,7 @@ Main game engine and game loop.
 import random
 from typing import Optional
 from .save_system import GameState, SaveManager
-from .creature import Creature, Team
+from .creature import Creature, Team, Badge
 from ..world.map import World, Location
 from ..world.npc import NPCRegistry, NPC
 from ..battle.engine import Battle, BattleAction, BattleResult
@@ -137,6 +137,7 @@ class Game:
                 "Move",
                 "Team",
                 "Items",
+                "Badges",
                 "Pokedex",
                 "Save",
                 "Quit to Menu"
@@ -152,12 +153,14 @@ class Game:
             elif choice == 2:
                 self._show_items_menu()
             elif choice == 3:
-                self._show_pokedex()
+                self._show_badges()
             elif choice == 4:
+                self._show_pokedex()
+            elif choice == 5:
                 self.save_manager.save_game(self.state)
                 print("\nGame saved!")
                 input("Press Enter to continue...")
-            elif choice == 5:
+            elif choice == 6:
                 self.state = None  # Exit to main menu
 
     def _handle_movement(self, location: Location, npcs: list):
@@ -261,6 +264,101 @@ class Game:
             npc.has_been_defeated = True
             self.state.defeated_trainers.append(npc.id)
 
+            # Award badge if this is a gym leader
+            if npc.is_gym_leader and npc.badge_id:
+                self._award_badge(npc)
+
+    def _award_badge(self, npc: NPC):
+        """
+        Award a badge to the player after defeating a gym leader.
+
+        Args:
+            npc: The gym leader NPC
+        """
+        # Check if player already has this badge
+        if any(badge.badge_id == npc.badge_id for badge in self.state.badges):
+            return
+
+        # Create and add the badge
+        badge = Badge(
+            badge_id=npc.badge_id,
+            name=npc.badge_name,
+            type=npc.specialty_type,
+            gym_leader=npc.name,
+            description=npc.badge_description
+        )
+        self.state.badges.append(badge)
+
+        # Celebratory message
+        self.display.clear_screen()
+        self.display.print_header("BADGE EARNED!")
+        print(f"\nCongratulations! You earned the {badge.name}!")
+        print(f"Type: {badge.type}")
+        print(f"Gym Leader: {badge.gym_leader}")
+        print(f"\n{badge.description}")
+        print(f"\nTotal Badges: {len(self.state.badges)}")
+        input("\nPress Enter to continue...")
+
+    def _handle_evolution(self, creature: Creature):
+        """
+        Handle the evolution of a creature.
+
+        Args:
+            creature: The creature that can evolve
+        """
+        if not creature.can_evolve():
+            return
+
+        # Get the evolved form
+        evolved_species_id = creature.species.evolves_into
+        evolved_species = self.state.species_dict.get(evolved_species_id)
+
+        if not evolved_species:
+            return
+
+        # Ask player if they want to evolve
+        self.display.clear_screen()
+        self.display.print_header("EVOLUTION!")
+        print(f"\nYour {creature.species.name} is evolving!")
+        print(f"\n{creature.species.name} → {evolved_species.name}")
+        print(f"\nAllow evolution?")
+        print("1. Yes")
+        print("2. No")
+
+        choice = self.display.get_menu_choice(2)
+
+        if choice == 0:  # Yes, evolve
+            old_name = creature.species.name
+            old_hp = creature.current_hp
+            old_max_hp = creature.max_hp
+
+            # Evolve the creature
+            creature.species = evolved_species
+            creature._calculate_stats()
+
+            # Maintain HP percentage
+            hp_percentage = old_hp / old_max_hp if old_max_hp > 0 else 1.0
+            creature.current_hp = int(creature.max_hp * hp_percentage)
+
+            # Success message
+            self.display.clear_screen()
+            self.display.print_header("EVOLUTION COMPLETE!")
+            print(f"\n{old_name} evolved into {evolved_species.name}!")
+            print(f"\nNew stats:")
+            print(f"  HP: {creature.max_hp}")
+            print(f"  Attack: {creature.attack}")
+            print(f"  Defense: {creature.defense}")
+            print(f"  Special: {creature.special}")
+            print(f"  Speed: {creature.speed}")
+            input("\nPress Enter to continue...")
+
+            # Mark as seen in pokedex
+            self.state.pokedex_seen.add(evolved_species.id)
+
+        else:
+            print(f"\n{creature.species.name} did not evolve.")
+            input("Press Enter to continue...")
+
     def _generate_trainer_team(self, npc: NPC) -> Team:
         """
         Generate a fixed team for a trainer NPC.
@@ -277,10 +375,10 @@ class Game:
         trainer_team = Team()
 
         # Determine team size and level based on NPC type
-        if "gym_leader" in npc.id:
-            team_size = rng.randint(3, 6)
-            min_level = 12
-            max_level = 18
+        if npc.is_gym_leader:
+            team_size = rng.randint(4, 6)  # Gym leaders have larger teams
+            min_level = 14
+            max_level = 20
         elif "rival" in npc.id:
             team_size = rng.randint(2, 4)
             min_level = 8
@@ -291,14 +389,35 @@ class Game:
             min_level = 5
             max_level = 12
 
-        # Generate team
-        for i in range(team_size):
-            # Pick a random creature from the roster
-            creature_id = rng.randint(1, len(self.state.species_dict))
-            species = self.state.species_dict[creature_id]
-            level = rng.randint(min_level, max_level)
+        # Filter creatures by type for gym leaders with specialty
+        if npc.is_gym_leader and npc.specialty_type:
+            # Get all creatures that match the gym leader's specialty type
+            matching_species = []
+            for species_id, species in self.state.species_dict.items():
+                if (species.type1 == npc.specialty_type or
+                    species.type2 == npc.specialty_type):
+                    matching_species.append(species)
 
-            # Create creature
+            # If we have enough matching creatures, use them
+            if len(matching_species) >= team_size:
+                selected_species = rng.sample(matching_species, team_size)
+            else:
+                # Not enough matching creatures, use what we have plus random ones
+                selected_species = matching_species[:]
+                remaining = team_size - len(selected_species)
+                all_species = list(self.state.species_dict.values())
+                selected_species.extend(rng.sample(all_species, remaining))
+        else:
+            # No type specialization, pick randomly
+            selected_species = []
+            for i in range(team_size):
+                creature_id = rng.randint(1, len(self.state.species_dict))
+                species = self.state.species_dict[creature_id]
+                selected_species.append(species)
+
+        # Generate team with selected species
+        for species in selected_species:
+            level = rng.randint(min_level, max_level)
             creature = Creature(species=species, level=level, current_hp=0)
             trainer_team.add_creature(creature)
 
@@ -387,6 +506,12 @@ class Game:
 
         if battle.result == BattleResult.PLAYER_WIN:
             print("\n*** YOU WON! ***")
+
+            # Check for evolution after battle
+            for creature in self.state.player_team.creatures:
+                if creature.can_evolve():
+                    self._handle_evolution(creature)
+
         elif battle.result == BattleResult.OPPONENT_WIN:
             print("\n*** YOU LOST! ***")
             # Heal team and return to town
@@ -638,6 +763,26 @@ class Game:
 
                 print(f"\nPurchased {quantity}x {item.name}!")
                 input("Press Enter to continue...")
+
+    def _show_badges(self):
+        """Show collected badges."""
+        self.display.clear_screen()
+        self.display.print_header("BADGE COLLECTION")
+
+        if not self.state.badges:
+            print("\nYou haven't earned any badges yet!")
+            print("Defeat Gym Leaders to earn badges!")
+        else:
+            print(f"\nBadges Earned: {len(self.state.badges)}/8\n")
+
+            for i, badge in enumerate(self.state.badges, 1):
+                print(f"{i}. {badge.name}")
+                print(f"   Type: {badge.type}")
+                print(f"   Gym Leader: {badge.gym_leader}")
+                print(f"   {badge.description}")
+                print()
+
+        input("\nPress Enter to continue...")
 
     def _show_pokedex(self):
         """Show Pokedex."""

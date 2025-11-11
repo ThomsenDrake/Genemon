@@ -269,6 +269,21 @@ class World:
         )
         self.locations[third_town.id] = third_town
 
+        # Route 3
+        route_3 = LocationBuilder.create_route(
+            "route_3",
+            "Route 3",
+            length=35
+        )
+        self.locations[route_3.id] = route_3
+
+        # Fourth town (second gym)
+        fourth_town = LocationBuilder.create_town(
+            "town_fourth",
+            "Aquamarine Harbor"
+        )
+        self.locations[fourth_town.id] = fourth_town
+
         # Set up connections
         starter_town.connections["route_1"] = (starter_town.width // 2, starter_town.height - 1)
         route_1.connections["town_starter"] = (route_1.width // 2, route_1.height - 1)
@@ -280,6 +295,10 @@ class World:
         cave_1.connections["route_2"] = (cave_1.width // 2, cave_1.height - 1)
         cave_1.connections["town_third"] = (cave_1.width // 2, 0)
         third_town.connections["cave_1"] = (third_town.width // 2, third_town.height - 1)
+        third_town.connections["route_3"] = (third_town.width // 2, 0)
+        route_3.connections["town_third"] = (route_3.width // 2, route_3.height - 1)
+        route_3.connections["town_fourth"] = (route_3.width // 2, 0)
+        fourth_town.connections["route_3"] = (fourth_town.width // 2, fourth_town.height - 1)
 
     def get_location(self, location_id: str) -> Optional[Location]:
         """Get location by ID."""

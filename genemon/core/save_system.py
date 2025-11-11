@@ -4,9 +4,9 @@ Save and load game state system.
 
 import json
 import os
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from datetime import datetime
-from .creature import Team, CreatureSpecies, Creature
+from .creature import Team, CreatureSpecies, Creature, Badge
 from ..creatures.generator import CreatureGenerator
 from ..sprites.generator import SpriteGenerator
 
@@ -34,7 +34,7 @@ class GameState:
         self.storage: list = []  # Stored creatures
 
         # Game progress flags
-        self.badges: list = []
+        self.badges: List[Badge] = []  # List of Badge objects
         self.flags: Dict[str, bool] = {}
         self.defeated_trainers: list = []
         self.pokedex_seen: set = set()
@@ -68,7 +68,7 @@ class GameState:
             },
             'player_team': self.player_team.to_dict(),
             'storage': [c.to_dict() for c in self.storage],
-            'badges': self.badges,
+            'badges': [b.to_dict() for b in self.badges],
             'flags': self.flags,
             'defeated_trainers': self.defeated_trainers,
             'pokedex_seen': list(self.pokedex_seen),
@@ -113,7 +113,9 @@ class GameState:
             state.storage.append(creature)
 
         # Game progress
-        state.badges = data.get('badges', [])
+        badge_data = data.get('badges', [])
+        state.badges = [Badge.from_dict(b) if isinstance(b, dict) else b
+                       for b in badge_data]
         state.flags = data.get('flags', {})
         state.defeated_trainers = data.get('defeated_trainers', [])
         state.pokedex_seen = set(data.get('pokedex_seen', []))
