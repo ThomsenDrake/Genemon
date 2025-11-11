@@ -1,0 +1,8 @@
+# Ignore log files
+loop.log
+
+# Ignore any temporary or generated files
+*.tmp
+*.swp
+*.swo
+*~
