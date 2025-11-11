@@ -4,6 +4,116 @@ All notable changes to the Genemon project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.13.0] - 2025-11-11 - Iteration 13: Advanced Move Mechanics
+
+### Added
+
+#### Multi-Hit Move System (Battle Mechanics Enhancement)
+- **Multi-hit moves** - Moves that hit 2-5 times in succession (genemon/battle/engine.py:270-292)
+- **Individual hit messages** - Shows "Hit 1!", "Hit 2!", etc. for each hit
+- **Total damage summary** - "Hit {X} time(s)! Total damage: {Y}!" message
+- **Early termination** - Stops hitting if target faints mid-multi-hit
+- **5% of moves** are multi-hit with reduced power per hit (genemon/creatures/generator.py:386-392)
+
+#### Recoil Move System (High-Risk/High-Reward)
+- **Recoil damage** - Attacker takes percentage of damage dealt as self-damage (genemon/battle/engine.py:327-342)
+- **25% recoil** - Default recoil is 25% of total damage dealt
+- **Recoil messages** - "{Attacker} took {X} recoil damage!" displayed in battle log
+- **Can self-KO** - Attacker can faint from recoil damage
+- **5% of moves** are recoil moves with +20% power bonus (genemon/creatures/generator.py:394-400)
+
+#### Priority Move System (Speed Override)
+- **Priority levels** - Moves have priority from -7 to +7 (currently using 0, 1, 2)
+- **Turn order override** - Higher priority always goes first, regardless of speed
+- **Speed tiebreaker** - If same priority, speed determines order (genemon/battle/engine.py:525-550)
+- **Priority 1 moves** - "Quick" moves that usually strike first (70% of priority moves)
+- **Priority 2 moves** - "Extremely fast" moves that always strike first (30% of priority moves)
+- **8% of moves** have priority with reduced power (genemon/creatures/generator.py:402-415)
+
+#### Skill Link Ability (Multi-Hit Enhancement)
+- **Always max hits** - Multi-hit moves always hit maximum times (5 hits)
+- **Consistency boost** - Removes randomness for reliable damage output
+- **Added to high-Attack creatures** (genemon/creatures/generator.py:633)
+- **Integration** - Checked before multi-hit RNG (genemon/battle/engine.py:276-283)
+
+#### Rock Head Ability (Recoil Immunity)
+- **No recoil damage** - Completely prevents recoil from recoil moves
+- **High-power enabler** - Use powerful recoil moves without penalty
+- **Added to high-Attack creatures** (genemon/creatures/generator.py:634)
+- **Integration** - Checked before applying recoil (genemon/battle/engine.py:332-342)
+
+#### Move Dataclass Enhancements
+- **multi_hit field** - Tuple[int, int] for hit range, e.g., (2, 5) (genemon/core/creature.py:67)
+- **recoil_percent field** - int for recoil percentage, e.g., 25 for 25% (genemon/core/creature.py:68)
+- **priority field** - int for priority level, -7 to +7 (genemon/core/creature.py:69)
+- **Backward compatibility** - All fields have default values for old saves
+
+#### Comprehensive Test Suite
+- **test_advanced_moves.py** - New 337-line test suite for advanced move mechanics
+- **5 advanced move tests** - Multi-hit, Skill Link, recoil, Rock Head, priority
+- **All tests passing** - 5/5 advanced + 7/7 crit + 6/6 ability + 6/6 core = 24/24 total
+
+### Changed
+
+#### Battle System Enhancements
+- **Turn ordering** - Now considers move priority before speed (genemon/battle/engine.py:148-152)
+- **Opponent AI** - Pre-selects move for priority comparison (genemon/battle/engine.py:142-146)
+- **Damage application** - Loops for multi-hit moves, applies recoil after damage (genemon/battle/engine.py:288-342)
+- **Battle log** - Enhanced messages for multi-hit, recoil, and priority moves
+
+#### Strategic Depth
+- **Speed strategies** - Priority moves enable slow creatures to strike first
+- **Consistency strategies** - Skill Link provides reliable multi-hit damage
+- **Risk/reward strategies** - Recoil moves offer high damage at HP cost
+- **Ability synergies** - Rock Head + recoil, Skill Link + multi-hit
+
+### Technical Details
+
+#### Code Changes
+- **Modified files**: 3 core files enhanced, 1 test file created
+  - genemon/core/creature.py: +27 lines (Move dataclass + serialization)
+  - genemon/battle/engine.py: +107 lines (Multi-hit, recoil, priority systems)
+  - genemon/creatures/generator.py: +98 lines (Advanced move generation + abilities)
+  - test_advanced_moves.py: +337 lines (NEW - Comprehensive advanced move tests)
+- **Total code added**: +569 lines (232 production + 337 test)
+- **No breaking changes**: All v0.12.0 features maintained
+- **Backward compatible**: Old saves work without migration
+
+#### New Features Count
+- **2 new Battle methods**: _determine_order_with_priority, _opponent_turn_with_move
+- **3 new move mechanics**: Multi-hit, recoil, priority
+- **2 new abilities**: Skill Link, Rock Head
+- **3 new Move fields**: multi_hit, recoil_percent, priority
+- **~18% of moves** have advanced mechanics (5% + 5% + 8%)
+
+### Improvements
+
+- **Battle variety** - Three new move types create diverse battle experiences
+- **Strategic options** - Priority enables speed control, Skill Link enables consistency
+- **Risk/reward balance** - Recoil moves high damage at HP cost
+- **Ability synergies** - Skill Link + multi-hit, Rock Head + recoil combos
+- **Move diversity** - ~60% of moves now have special properties
+
+### Balance
+
+#### Multi-Hit Moves
+- **Hits**: 2-5 times randomly (always 5 with Skill Link)
+- **Power per hit**: Reduced to 50% of base (minimum 15)
+- **Total damage**: 2× to 5× base damage (varies)
+- **With Skill Link**: Consistent 5× damage
+
+#### Recoil Moves
+- **Recoil**: 25% of damage dealt
+- **Power boost**: +20% power (max 120)
+- **Self-KO**: Can faint from recoil
+- **With Rock Head**: No recoil, full power
+
+#### Priority Moves
+- **Priority 1**: -20% power, usually strikes first
+- **Priority 2**: -30% power, always strikes first
+- **Tiebreaker**: Speed used if same priority
+- **Tradeoff**: Lower damage for speed advantage
+
 ## [0.12.0] - 2025-11-11 - Iteration 12: Critical Hit System
 
 ### Added

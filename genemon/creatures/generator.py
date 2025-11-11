@@ -383,6 +383,37 @@ class CreatureGenerator:
             if "Critical" not in description and status_effect is None:
                 description = f"A {move_type}-type attack with a high critical hit ratio."
 
+        # Determine if multi-hit move (roughly 5% of moves)
+        multi_hit = (1, 1)
+        if self.rng.random() < 0.05 and power < 60:  # Multi-hit moves are weaker per hit
+            multi_hit = (2, 5)
+            power = max(15, power // 2)  # Reduce power per hit
+            if status_effect is None:
+                description = f"A {move_type}-type attack that hits 2-5 times."
+
+        # Determine if recoil move (roughly 5% of moves, high power)
+        recoil_percent = 0
+        if self.rng.random() < 0.05 and power > 60 and multi_hit == (1, 1):
+            recoil_percent = 25  # 25% recoil damage
+            power = min(120, int(power * 1.2))  # Boost power by 20%
+            if status_effect is None:
+                description = f"A powerful {move_type}-type attack with recoil damage."
+
+        # Determine priority (roughly 8% of moves)
+        priority = 0
+        if self.rng.random() < 0.08 and power < 70:
+            # Priority moves are typically weaker
+            if self.rng.random() < 0.7:
+                priority = 1  # Standard priority (Quick Attack style)
+                power = max(30, int(power * 0.8))  # Reduce power by 20%
+                if status_effect is None and multi_hit == (1, 1) and recoil_percent == 0:
+                    description = f"A quick {move_type}-type attack that strikes first."
+            else:
+                priority = 2  # High priority (Extreme Speed style)
+                power = max(40, int(power * 0.7))  # Reduce power by 30%
+                if status_effect is None and multi_hit == (1, 1) and recoil_percent == 0:
+                    description = f"An extremely fast {move_type}-type attack that always strikes first."
+
         return Move(
             name=name,
             type=move_type,
@@ -393,7 +424,10 @@ class CreatureGenerator:
             description=description,
             status_effect=status_effect,
             status_chance=status_chance,
-            crit_rate=crit_rate
+            crit_rate=crit_rate,
+            multi_hit=multi_hit,
+            recoil_percent=recoil_percent,
+            priority=priority
         )
 
     def _generate_flavor_text(self, name: str, types: List[str]) -> str:
@@ -596,6 +630,8 @@ class CreatureGenerator:
                 ("Sheer Force", "Removes added effects to boost power", "power_no_effects"),
                 ("Super Luck", "Heightens critical hit ratio", "boost_crit"),
                 ("Sniper", "Boosts critical hit power", "crit_power_boost"),
+                ("Skill Link", "Multi-hit moves always hit maximum times", "multi_hit_max"),
+                ("Rock Head", "Protects from recoil damage", "no_recoil"),
             ])
 
         # High Defense abilities

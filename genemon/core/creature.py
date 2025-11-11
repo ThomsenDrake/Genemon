@@ -64,6 +64,9 @@ class Move:
     status_effect: Optional[StatusEffect] = None  # Status effect inflicted
     status_chance: int = 0  # Chance (0-100) to inflict status
     crit_rate: int = 0  # Critical hit stage (0 = normal, 1 = high, 2 = always)
+    multi_hit: Tuple[int, int] = (1, 1)  # Multi-hit range (min, max) - (2, 5) for multi-hit moves
+    recoil_percent: int = 0  # Recoil damage as % of damage dealt (e.g., 25 = 25% recoil)
+    priority: int = 0  # Priority level (-7 to +7, higher goes first)
 
     def to_dict(self) -> dict:
         """Convert move to dictionary for serialization."""
@@ -77,7 +80,10 @@ class Move:
             'description': self.description,
             'status_effect': self.status_effect.value if self.status_effect else None,
             'status_chance': self.status_chance,
-            'crit_rate': self.crit_rate
+            'crit_rate': self.crit_rate,
+            'multi_hit': list(self.multi_hit),
+            'recoil_percent': self.recoil_percent,
+            'priority': self.priority
         }
 
     @classmethod
@@ -86,9 +92,18 @@ class Move:
         status_effect_val = data.get('status_effect')
         if status_effect_val:
             data['status_effect'] = StatusEffect(status_effect_val)
-        # Default crit_rate to 0 for backward compatibility
+        # Default values for backward compatibility
         if 'crit_rate' not in data:
             data['crit_rate'] = 0
+        if 'multi_hit' not in data:
+            data['multi_hit'] = [1, 1]
+        if 'recoil_percent' not in data:
+            data['recoil_percent'] = 0
+        if 'priority' not in data:
+            data['priority'] = 0
+        # Convert list back to tuple for multi_hit
+        if isinstance(data.get('multi_hit'), list):
+            data['multi_hit'] = tuple(data['multi_hit'])
         return cls(**data)
 
 

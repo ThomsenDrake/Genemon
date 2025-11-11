@@ -14,6 +14,10 @@ A Python-based monster-collecting RPG where **each new save file generates 151 c
 
 ### Gameplay Systems
 - **Turn-based battles** - Classic RPG combat with type effectiveness
+- **Advanced move mechanics** - Multi-hit, recoil, and priority moves
+- **Critical hits** - Chance-based critical strikes for extra damage
+- **Ability system** - 70+ unique passive abilities that affect battles
+- **Weather system** - Rain, sun, sandstorm, and hail with strategic effects
 - **Wild encounters** - Random battles in grass areas
 - **Trainer battles** - Fight NPCs throughout the world
 - **Capture system** - Catch wild creatures with capture balls

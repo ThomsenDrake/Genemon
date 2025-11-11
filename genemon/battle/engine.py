@@ -139,8 +139,17 @@ class Battle:
                 player_target
             )
             if player_move:
-                # Determine order based on speed
-                player_first = self._determine_order()
+                # Get opponent's move (for priority checking)
+                opponent_move = None
+                usable_moves = [m for m in self.opponent_active.moves if m.pp > 0]
+                if usable_moves:
+                    opponent_move = random.choice(usable_moves)
+
+                # Determine order based on priority first, then speed
+                player_first = self._determine_order_with_priority(
+                    player_move,
+                    opponent_move
+                )
 
                 if player_first:
                     self._execute_attack(
@@ -150,9 +159,9 @@ class Battle:
                         is_player=True
                     )
                     if not self.opponent_active.is_fainted():
-                        self._opponent_turn()
+                        self._opponent_turn_with_move(opponent_move)
                 else:
-                    self._opponent_turn()
+                    self._opponent_turn_with_move(opponent_move)
                     if not self.player_active.is_fainted():
                         self._execute_attack(
                             self.player_active,
@@ -189,6 +198,23 @@ class Battle:
             )
         else:
             # No PP left - use Struggle (a special move)
+            self.log.add(f"{self.opponent_active.get_display_name()} has no PP left!")
+            self._execute_struggle(self.opponent_active, self.player_active, is_player=False)
+
+    def _opponent_turn_with_move(self, move: Optional[Move]):
+        """Execute opponent's turn with a pre-selected move (for priority ordering)."""
+        if self.opponent_active.is_fainted():
+            return
+
+        if move and move.pp > 0:
+            self._execute_attack(
+                self.opponent_active,
+                self.player_active,
+                move,
+                is_player=False
+            )
+        else:
+            # No PP left or no move - use Struggle
             self.log.add(f"{self.opponent_active.get_display_name()} has no PP left!")
             self._execute_struggle(self.opponent_active, self.player_active, is_player=False)
 
@@ -241,27 +267,79 @@ class Battle:
         # Check for critical hit
         is_critical = self._check_critical_hit(attacker, defender, move, is_player)
 
-        # Calculate damage (with critical hit flag)
-        damage = self._calculate_damage(attacker, defender, move, is_critical)
+        # Handle multi-hit moves
+        min_hits, max_hits = move.multi_hit
+        num_hits = 1
+        if max_hits > 1:
+            # Check for Skill Link ability (always hit max times)
+            has_skill_link = False
+            if attacker.species.ability and attacker.species.ability.name == "Skill Link":
+                has_skill_link = True
 
-        # Apply damage
-        actual_damage = defender.take_damage(damage)
+            if has_skill_link:
+                num_hits = max_hits  # Always hit maximum times
+            else:
+                # Multi-hit moves hit 2-5 times randomly
+                num_hits = random.randint(min_hits, max_hits)
 
-        # Check for effectiveness and create enhanced damage message
+        total_damage = 0
         effectiveness = get_effectiveness(move.type, defender.species.types)
-        damage_message = f"{defender_name} took {actual_damage} damage!"
 
-        # Add critical hit indicator first
-        if is_critical:
-            damage_message += " (Critical hit!)"
+        # Execute hits
+        for hit_num in range(num_hits):
+            if defender.is_fainted():
+                break  # Stop if defender faints mid-multi-hit
 
-        # Add effectiveness indicator to damage message
-        if effectiveness > 1.5:
-            damage_message += " (Super effective!)"
-        elif effectiveness < 0.75:
-            damage_message += " (Not very effective...)"
+            # Calculate damage (with critical hit flag)
+            damage = self._calculate_damage(attacker, defender, move, is_critical)
 
-        self.log.add(damage_message)
+            # Apply damage
+            actual_damage = defender.take_damage(damage)
+            total_damage += actual_damage
+
+            # Show individual hit messages for multi-hit moves
+            if num_hits > 1:
+                self.log.add(f"Hit {hit_num + 1}! {defender_name} took {actual_damage} damage!")
+
+        # Create final damage message for single-hit or multi-hit summary
+        if num_hits == 1:
+            damage_message = f"{defender_name} took {total_damage} damage!"
+
+            # Add critical hit indicator first
+            if is_critical:
+                damage_message += " (Critical hit!)"
+
+            # Add effectiveness indicator to damage message
+            if effectiveness > 1.5:
+                damage_message += " (Super effective!)"
+            elif effectiveness < 0.75:
+                damage_message += " (Not very effective...)"
+
+            self.log.add(damage_message)
+        else:
+            # Multi-hit summary message
+            summary_msg = f"Hit {num_hits} time(s)! Total damage: {total_damage}!"
+            if effectiveness > 1.5:
+                summary_msg += " (Super effective!)"
+            elif effectiveness < 0.75:
+                summary_msg += " (Not very effective...)"
+            self.log.add(summary_msg)
+
+        # Handle recoil damage
+        if move.recoil_percent > 0 and total_damage > 0:
+            recoil_damage = max(1, (total_damage * move.recoil_percent) // 100)
+
+            # Check for Rock Head ability (prevents recoil damage)
+            has_rock_head = False
+            if attacker.species.ability and attacker.species.ability.name == "Rock Head":
+                has_rock_head = True
+
+            if not has_rock_head:
+                attacker.take_damage(recoil_damage)
+                self.log.add(f"{attacker_name} took {recoil_damage} recoil damage!")
+
+                if attacker.is_fainted():
+                    self.log.add(f"{attacker_name} fainted from recoil!")
 
         # Try to apply status effect from move (only if defender not fainted)
         if move.status_effect and move.status_chance > 0 and not defender.is_fainted():
@@ -468,6 +546,33 @@ class Battle:
             return False
         else:
             return random.choice([True, False])
+
+    def _determine_order_with_priority(
+        self,
+        player_move: Optional[Move],
+        opponent_move: Optional[Move]
+    ) -> bool:
+        """
+        Determine if player goes first based on move priority, then speed.
+
+        Args:
+            player_move: The move the player is using
+            opponent_move: The move the opponent is using
+
+        Returns:
+            True if player goes first
+        """
+        player_priority = player_move.priority if player_move else 0
+        opponent_priority = opponent_move.priority if opponent_move else 0
+
+        # Higher priority always goes first
+        if player_priority > opponent_priority:
+            return True
+        elif player_priority < opponent_priority:
+            return False
+        else:
+            # Same priority - use speed to determine order
+            return self._determine_order()
 
     def _try_run(self) -> bool:
         """
