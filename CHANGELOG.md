@@ -4,6 +4,96 @@ All notable changes to the Genemon project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.9.0] - 2025-11-11 - Iteration 9: Gym Leader Rematches, Legendary Encounters, and Enhanced Battle Feedback
+
+### Added
+
+#### Gym Leader Rematch System
+- **All 8 gym leaders can be rebattled** - After becoming Champion, all gym leaders offer rematches (genemon/core/game.py:231-251)
+- **Rematch levels 42-50** - Gym leader rematch teams are significantly stronger than first battles (14-20) (genemon/core/game.py:475-479)
+- **Champion requirement** - Gym rematches only available after defeating Champion Aurora (`state.is_champion`)
+- **Type specialty preserved** - Rematch teams maintain gym leader type themes
+- **8 new endgame battles** - Provides comprehensive post-game challenge
+
+#### Legendary Encounter System
+- **6 legendary encounter NPCs** - Special NPCs for each legendary creature (IDs 146-151) in Legendary Sanctuary (genemon/world/npc.py:891-983)
+- **Level 60 legendary battles** - Each legendary encounter is a single creature at maximum level (genemon/core/game.py:734-756)
+- **Strategic positioning** - Legendaries placed throughout Legendary Sanctuary for exploration
+- **One-time battles** - Legendary encounters can only be defeated once
+- **Mappings**:
+  - legendary_encounter_1 → Creature #146 (Level 60)
+  - legendary_encounter_2 → Creature #147 (Level 60)
+  - legendary_encounter_3 → Creature #148 (Level 60)
+  - legendary_encounter_4 → Creature #149 (Level 60)
+  - legendary_encounter_5 → Creature #150 (Level 60)
+  - legendary_encounter_6 → Creature #151 (Level 60)
+
+#### Enhanced Battle Feedback
+- **Inline effectiveness indicators** - Damage messages now include effectiveness (genemon/battle/engine.py:211-221)
+- **Cleaner battle log** - Combined damage and effectiveness into single message
+- **Examples**:
+  - "Opponent took 45 damage! (Super effective!)"
+  - "Opponent took 12 damage! (Not very effective...)"
+  - "Opponent took 28 damage!" (neutral)
+
+### Changed
+
+#### Battle System Improvements
+- **Damage messages enhanced** - Effectiveness now shown inline with damage for better readability
+- **Battle log more concise** - Reduced message spam by combining related information
+
+#### World System Enhancements
+- **Total NPCs increased to 52** - Added 6 legendary encounter NPCs (was 46)
+- **Legendary Sanctuary now populated** - Special encounters added to post-game area
+
+### Technical Details
+
+#### Code Changes
+- **Modified files**: 3 core files enhanced
+  - genemon/core/game.py: +60 lines (Gym rematch logic, legendary encounter logic)
+  - genemon/world/npc.py: +155 lines (6 legendary encounter NPCs)
+  - genemon/battle/engine.py: +6 lines (Inline effectiveness feedback)
+- **Total code added**: +221 lines
+- **No breaking changes**: All v0.8.0 features maintained
+
+#### New Features Count
+- **8 gym leader rematches**: All gym leaders rebattleable at levels 42-50
+- **6 legendary encounters**: One battle per legendary creature
+- **1 battle feedback enhancement**: Inline effectiveness indicators
+
+### Improvements
+
+- **Comprehensive post-game content** - 14 new challenging battles (8 gym + 6 legendary)
+- **Legendary creatures now special** - Unique encounter system for legendary battles
+- **Battle feedback more polished** - Clearer, more concise damage messages
+- **Endgame progression extended** - More content after defeating Champion
+
+### Balance
+
+#### Gym Leader Rematch Levels
+- **First battle**: Levels 14-20
+- **Rematch**: Levels 42-50 (+28 levels)
+- **Recommended player level**: 40+ for gym rematches
+
+#### Legendary Encounter Levels
+- **All legendaries**: Level 60 (highest in game)
+- **Recommended player level**: 55+ for legendary battles
+- **Challenge tier**: Harder than Elite Four rematch (50-57) and Champion rematch (55-60)
+
+### Performance
+- **No performance impact**: New features add negligible overhead
+- **Legendary generation**: Instant (on-demand)
+- **Gym rematch generation**: Instant (same algorithm with different levels)
+- **All tests passing**: 6/6 tests successful
+
+### Testing
+- ✅ All imports successful (10/10 modules)
+- ✅ Creature generation (151 total, 6 legendary)
+- ✅ Sprite generation (56x56, 16x16)
+- ✅ Type system (16 types)
+- ✅ Battle system with enhanced feedback
+- ✅ World system (24 locations, 52 NPCs)
+
 ## [0.8.0] - 2025-11-11 - Iteration 8: Status Effects, Rematch System, and Battle Polish
 
 ### Added

@@ -10,7 +10,7 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 - **Procedural pixel art sprites** - each creature gets unique front/back/mini sprites (56x56 and 16x16)
 - **Classic RPG gameplay** - familiar mechanics with infinite variety
 
-## ✅ Current Status - v0.8.0
+## ✅ Current Status - v0.9.0
 
 **This project is being autonomously developed by Claude Code in a sandboxed environment.**
 
@@ -18,19 +18,22 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 
 - [x] **Procedural creature generation system** - 151 unique creatures per save
 - [x] **Legendary creatures** - 6 special legendary creatures (IDs 146-151) with high stats
+- [x] **Legendary encounter system** - 6 special level 60 battles in Legendary Sanctuary (NEW in v0.9.0)
 - [x] **Type system with strengths/weaknesses** - 16 custom types with full effectiveness chart
 - [x] **Move generation and battle system** - Turn-based combat with type effectiveness and status effects
+- [x] **Enhanced battle feedback** - Inline effectiveness indicators in damage messages (NEW in v0.9.0)
 - [x] **Pixel sprite generation** - Actual 2D color arrays for front, back, and mini sprites
 - [x] **Classic overworld and navigation** - 24 locations including 10 towns, 9 routes, 2 caves, and post-game areas
 - [x] **Move learning system** - Creatures learn new moves by leveling up (4-6 moves per species)
 - [x] **TM (Technical Machine) system** - 51 TMs to teach powerful moves to compatible creatures
 - [x] **Type-themed gym leaders** - 8 gym leaders with specialized type teams
+- [x] **Gym leader rematches** - All 8 gym leaders rebattleable at levels 42-50 after becoming Champion (NEW in v0.9.0)
 - [x] **Badge system** - Collect all 8 badges by defeating gym leaders
 - [x] **Hand-crafted Elite Four teams** - 4 elite trainers with strategic, type-optimized teams (levels 32-39)
 - [x] **Champion with ultimate team** - Champion Aurora with perfectly balanced 6-creature team (levels 38-43)
 - [x] **Elite Four & Champion rematch** - Rebattle at higher levels (50-60) for endgame challenge
 - [x] **Victory Road** - Challenging path to the Elite Four
-- [x] **Post-game content** - Battle Tower and Legendary Sanctuary accessible after defeating Champion
+- [x] **Post-game content** - Battle Tower and Legendary Sanctuary with legendary encounters
 - [x] **Move Relearner** - Special NPC to reteach forgotten moves
 - [x] **TM Shops** - All 51 TMs purchasable from 3 merchants
 - [x] **Evolution system** - Creatures evolve with player choice and visual feedback

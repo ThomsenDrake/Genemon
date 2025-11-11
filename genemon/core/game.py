@@ -228,13 +228,23 @@ class Game:
             # Check if Elite Four/Champion (can rematch)
             is_rematchable = npc.id in ["elite_1", "elite_2", "elite_3", "elite_4", "champion"]
 
+            # Gym leaders can also rematch after player becomes Champion
+            is_gym_rematchable = (
+                npc.is_gym_leader and
+                npc.has_been_defeated and
+                self.state.is_champion  # Only after defeating Champion
+            )
+
             if not npc.has_been_defeated:
                 print("\nThe trainer wants to battle!")
                 input("Press Enter to continue...")
                 self._trainer_battle(npc)
-            elif is_rematchable:
+            elif is_rematchable or is_gym_rematchable:
                 print(f"\n{npc.name} wants a rematch!")
-                print("(Rematch team will be higher level)")
+                if is_gym_rematchable:
+                    print("(Rematch team will be much stronger!)")
+                else:
+                    print("(Rematch team will be higher level)")
                 print("\nAccept the challenge? (y/n)")
                 choice = input("> ").strip().lower()
                 if choice == 'y':
@@ -454,6 +464,10 @@ class Game:
         elif npc.id == "champion":
             return self._create_champion_aurora_team(is_rematch)
 
+        # Check for legendary encounter NPCs
+        if npc.id.startswith("legendary_encounter_"):
+            return self._create_legendary_encounter_team(npc)
+
         # Use NPC ID as seed for reproducibility
         rng = random.Random(hash(npc.id + str(self.state.seed)))
 
@@ -462,8 +476,14 @@ class Game:
         # Determine team size and level based on NPC type
         if npc.is_gym_leader:
             team_size = rng.randint(4, 6)  # Gym leaders have larger teams
-            min_level = 14
-            max_level = 20
+            if is_rematch:
+                # Rematch levels: 42-50 (much stronger, post-Champion challenge)
+                min_level = 42
+                max_level = 50
+            else:
+                # Normal levels
+                min_level = 14
+                max_level = 20
         elif "rival" in npc.id:
             team_size = rng.randint(2, 4)
             min_level = 8
@@ -708,6 +728,30 @@ class Game:
             level = base_level + i  # 38-43 normal, 55-60 rematch
             creature = Creature(species=species, level=level)
             team.add_creature(creature)
+
+        return team
+
+    def _create_legendary_encounter_team(self, npc: NPC) -> Team:
+        """
+        Create team with a single legendary creature for legendary encounters.
+        Maps legendary_encounter_1 through legendary_encounter_6 to creature IDs 146-151.
+        Legendary creatures are at level 60 (the highest level in the game).
+        """
+        team = Team()
+
+        # Extract encounter number from NPC ID (e.g., "legendary_encounter_1" -> 1)
+        encounter_num = int(npc.id.split("_")[-1])
+
+        # Map to legendary creature ID (146-151)
+        legendary_id = 145 + encounter_num  # encounter_1 -> 146, encounter_6 -> 151
+
+        # Get the legendary creature species
+        if legendary_id in self.state.species_dict:
+            species = self.state.species_dict[legendary_id]
+
+            # Legendary creatures are always at level 60 (maximum challenge)
+            legendary_creature = Creature(species=species, level=60)
+            team.add_creature(legendary_creature)
 
         return team
 

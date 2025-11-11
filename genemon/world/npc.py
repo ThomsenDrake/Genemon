@@ -888,6 +888,100 @@ class NPCRegistry:
         )
         self.npcs[legendary_researcher.id] = legendary_researcher
 
+        # Legendary Encounter NPCs - These are one-time battles with legendary creatures
+        # Positioned at various spots in the Legendary Sanctuary
+        # Each represents a specific legendary creature (IDs 146-151)
+
+        legendary_encounter_1 = NPC(
+            id="legendary_encounter_1",
+            name="Legendary Creature",
+            location_id="legendary_sanctuary",
+            x=5,
+            y=10,
+            sprite="L",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("A powerful legendary creature blocks your path!"),
+                Dialogue("The legendary creature watches you intently...")
+            ]
+        )
+        self.npcs[legendary_encounter_1.id] = legendary_encounter_1
+
+        legendary_encounter_2 = NPC(
+            id="legendary_encounter_2",
+            name="Legendary Creature",
+            location_id="legendary_sanctuary",
+            x=29,
+            y=10,
+            sprite="L",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("A majestic legendary creature appears!"),
+                Dialogue("The legendary aura is overwhelming...")
+            ]
+        )
+        self.npcs[legendary_encounter_2.id] = legendary_encounter_2
+
+        legendary_encounter_3 = NPC(
+            id="legendary_encounter_3",
+            name="Legendary Creature",
+            location_id="legendary_sanctuary",
+            x=5,
+            y=30,
+            sprite="L",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("An ancient legendary creature emerges!"),
+                Dialogue("The legendary creature radiates power...")
+            ]
+        )
+        self.npcs[legendary_encounter_3.id] = legendary_encounter_3
+
+        legendary_encounter_4 = NPC(
+            id="legendary_encounter_4",
+            name="Legendary Creature",
+            location_id="legendary_sanctuary",
+            x=29,
+            y=30,
+            sprite="L",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("A rare legendary creature stands before you!"),
+                Dialogue("The legendary presence is unmistakable...")
+            ]
+        )
+        self.npcs[legendary_encounter_4.id] = legendary_encounter_4
+
+        legendary_encounter_5 = NPC(
+            id="legendary_encounter_5",
+            name="Legendary Creature",
+            location_id="legendary_sanctuary",
+            x=10,
+            y=20,
+            sprite="L",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("A mythical legendary creature awaits!"),
+                Dialogue("The legendary creature's eyes glow with power...")
+            ]
+        )
+        self.npcs[legendary_encounter_5.id] = legendary_encounter_5
+
+        legendary_encounter_6 = NPC(
+            id="legendary_encounter_6",
+            name="Legendary Creature",
+            location_id="legendary_sanctuary",
+            x=24,
+            y=20,
+            sprite="L",
+            is_trainer=True,
+            dialogues=[
+                Dialogue("The most powerful legendary creature appears!"),
+                Dialogue("The ultimate legendary challenge stands before you...")
+            ]
+        )
+        self.npcs[legendary_encounter_6.id] = legendary_encounter_6
+
     def get_npc(self, npc_id: str) -> Optional[NPC]:
         """Get NPC by ID."""
         return self.npcs.get(npc_id)

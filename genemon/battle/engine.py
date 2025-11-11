@@ -208,14 +208,17 @@ class Battle:
         # Apply damage
         actual_damage = defender.take_damage(damage)
 
-        self.log.add(f"{defender_name} took {actual_damage} damage!")
-
-        # Check for effectiveness message
+        # Check for effectiveness and create enhanced damage message
         effectiveness = get_effectiveness(move.type, defender.species.types)
+        damage_message = f"{defender_name} took {actual_damage} damage!"
+
+        # Add effectiveness indicator to damage message
         if effectiveness > 1.5:
-            self.log.add("It's super effective!")
+            damage_message += " (Super effective!)"
         elif effectiveness < 0.75:
-            self.log.add("It's not very effective...")
+            damage_message += " (Not very effective...)"
+
+        self.log.add(damage_message)
 
         # Try to apply status effect from move (only if defender not fainted)
         if move.status_effect and move.status_chance > 0 and not defender.is_fainted():
