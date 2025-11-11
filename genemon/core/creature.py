@@ -142,6 +142,32 @@ class Ability:
 
 
 @dataclass
+class HeldItem:
+    """Represents an item that a creature can hold for passive bonuses."""
+
+    name: str
+    description: str
+    effect_type: str  # Type of held item effect
+    effect_value: float = 1.0  # Multiplier or value (e.g., 1.2 for 20% boost)
+    effect_data: Optional[Dict] = None  # Additional data (e.g., {"type": "Flame"} for type boosters)
+
+    def to_dict(self) -> dict:
+        """Convert held item to dictionary for serialization."""
+        return {
+            'name': self.name,
+            'description': self.description,
+            'effect_type': self.effect_type,
+            'effect_value': self.effect_value,
+            'effect_data': self.effect_data
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'HeldItem':
+        """Create held item from dictionary."""
+        return cls(**data)
+
+
+@dataclass
 class CreatureStats:
     """Base stats for a creature species."""
 
@@ -248,6 +274,9 @@ class Creature:
     # Status effect
     status: StatusEffect = StatusEffect.NONE
     status_turns: int = 0  # Number of turns status has been active (for sleep, etc.)
+
+    # Held item (provides passive bonuses)
+    held_item: Optional['HeldItem'] = None
 
     # Current battle stats (can be modified by stat changes)
     attack: int = field(init=False)
@@ -456,7 +485,7 @@ class Creature:
 
     def to_dict(self) -> dict:
         """Convert creature to dictionary for serialization."""
-        return {
+        result = {
             'species_id': self.species.id,
             'level': self.level,
             'current_hp': self.current_hp,
@@ -467,6 +496,10 @@ class Creature:
             'status': self.status.value,
             'status_turns': self.status_turns
         }
+        # Add held_item if present
+        if self.held_item:
+            result['held_item'] = self.held_item.to_dict()
+        return result
 
     @classmethod
     def from_dict(cls, data: dict, species: CreatureSpecies) -> 'Creature':
@@ -490,6 +523,10 @@ class Creature:
         if 'status' in data:
             creature.status = StatusEffect(data['status'])
             creature.status_turns = data.get('status_turns', 0)
+
+        # Restore held item if saved
+        if 'held_item' in data and data['held_item']:
+            creature.held_item = HeldItem.from_dict(data['held_item'])
 
         return creature
 

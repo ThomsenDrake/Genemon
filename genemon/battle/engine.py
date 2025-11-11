@@ -7,6 +7,11 @@ from typing import Optional, List, Tuple
 from enum import Enum
 from ..core.creature import Creature, Move, Team, StatusEffect
 from ..creatures.types import get_effectiveness
+from ..core.held_items import (
+    EFFECT_POWER_BOOST, EFFECT_TYPE_BOOST, EFFECT_DEFENSE_BOOST,
+    EFFECT_SPEED_BOOST, EFFECT_CRIT_BOOST, EFFECT_STAT_HEAL,
+    EFFECT_FOCUS_BAND, EFFECT_CHOICE_BOOST, EFFECT_LIFE_ORB
+)
 
 
 class BattleAction(Enum):
@@ -343,7 +348,7 @@ class Battle:
                 summary_msg += " (Not very effective...)"
             self.log.add(summary_msg)
 
-        # Handle recoil damage
+        # Handle recoil damage from move
         if move.recoil_percent > 0 and total_damage > 0:
             recoil_damage = max(1, (total_damage * move.recoil_percent) // 100)
 
@@ -358,6 +363,26 @@ class Battle:
 
                 if attacker.is_fainted():
                     self.log.add(f"{attacker_name} fainted from recoil!")
+
+        # Handle Life Orb recoil (if attacker is still alive and dealt damage)
+        if (total_damage > 0 and not attacker.is_fainted() and
+            attacker.held_item and attacker.held_item.effect_type == EFFECT_LIFE_ORB):
+            life_orb_recoil = max(1, int(attacker.max_hp * 0.10))  # 10% of max HP
+            attacker.take_damage(life_orb_recoil)
+            self.log.add(f"{attacker_name} was hurt by its Life Orb!")
+
+            if attacker.is_fainted():
+                self.log.add(f"{attacker_name} fainted from Life Orb recoil!")
+
+        # Shell Bell healing (if attacker still alive and dealt damage)
+        if (total_damage > 0 and not attacker.is_fainted() and
+            attacker.held_item and attacker.held_item.effect_type == EFFECT_STAT_HEAL):
+            if attacker.held_item.effect_data.get("heal_on_damage"):
+                # Shell Bell heals 1/8 of damage dealt
+                heal_amount = max(1, int(total_damage * 0.125))
+                if attacker.current_hp < attacker.max_hp:
+                    attacker.heal(heal_amount)
+                    self.log.add(f"{attacker_name} restored HP using Shell Bell!")
 
         # Try to apply status effect from move (only if defender not fainted)
         if move.status_effect and move.status_chance > 0 and not defender.is_fainted():
@@ -504,6 +529,9 @@ class Battle:
             elif move.type == "Aqua":
                 damage *= 0.5  # Sun weakens Aqua moves
 
+        # Held item effects (before random factor for consistency)
+        damage = self._apply_held_item_damage_modifiers(attacker, defender, move, damage, effectiveness)
+
         # Random factor (85-100%)
         damage *= random.uniform(0.85, 1.0)
 
@@ -552,6 +580,11 @@ class Battle:
         # Super Luck increases crit stage by 1
         if attacker.species.ability and attacker.species.ability.name == "Super Luck":
             crit_stage += 1
+
+        # Held items (Scope Lens, Razor Claw) increase crit stage
+        if attacker.held_item and attacker.held_item.effect_type == EFFECT_CRIT_BOOST:
+            crit_boost = attacker.held_item.effect_data.get("crit_stage", 1)
+            crit_stage += crit_boost
 
         # Critical hit chances by stage
         if crit_stage >= 2:
@@ -778,27 +811,30 @@ class Battle:
             return False
 
     def _process_weather(self):
-        """Process weather effects at end of turn."""
-        if self.weather == Weather.NONE:
-            return
+        """Process weather effects and end-of-turn held item effects."""
+        # Process weather damage
+        if self.weather != Weather.NONE:
+            # Sandstorm damages non-Terra/Metal/Beast creatures
+            if self.weather == Weather.SANDSTORM:
+                self._process_sandstorm_damage(self.player_active, "player")
+                self._process_sandstorm_damage(self.opponent_active, "opponent")
 
-        # Sandstorm damages non-Terra/Metal/Beast creatures
-        if self.weather == Weather.SANDSTORM:
-            self._process_sandstorm_damage(self.player_active, "player")
-            self._process_sandstorm_damage(self.opponent_active, "opponent")
+            # Hail damages non-Frost creatures
+            elif self.weather == Weather.HAIL:
+                self._process_hail_damage(self.player_active, "player")
+                self._process_hail_damage(self.opponent_active, "opponent")
 
-        # Hail damages non-Frost creatures
-        elif self.weather == Weather.HAIL:
-            self._process_hail_damage(self.player_active, "player")
-            self._process_hail_damage(self.opponent_active, "opponent")
+            # Decrement weather duration if it has a limit
+            if self.weather_turns > 0:
+                self.weather_turns -= 1
+                if self.weather_turns == 0:
+                    weather_name = self.weather.value.capitalize()
+                    self.log.add(f"The {weather_name} subsided.")
+                    self.weather = Weather.NONE
 
-        # Decrement weather duration if it has a limit
-        if self.weather_turns > 0:
-            self.weather_turns -= 1
-            if self.weather_turns == 0:
-                weather_name = self.weather.value.capitalize()
-                self.log.add(f"The {weather_name} subsided.")
-                self.weather = Weather.NONE
+        # Process end-of-turn held item effects (Leftovers, etc.)
+        self._process_held_item_effects(self.player_active)
+        self._process_held_item_effects(self.opponent_active)
 
     def _process_sandstorm_damage(self, creature: Creature, side: str):
         """Process sandstorm damage for a creature."""
@@ -832,6 +868,25 @@ class Battle:
 
         if creature.is_fainted():
             self.log.add(f"{creature.get_display_name()} fainted from the hail!")
+
+    def _process_held_item_effects(self, creature: Creature):
+        """Process end-of-turn held item effects (Leftovers, Flame Orb, etc.)."""
+        if creature.is_fainted() or not creature.held_item:
+            return
+
+        item = creature.held_item
+        name = creature.get_display_name()
+
+        # Leftovers - restores 1/16 max HP each turn
+        if item.effect_type == EFFECT_STAT_HEAL and not item.effect_data.get("heal_on_damage"):
+            if creature.current_hp < creature.max_hp:
+                heal_amount = max(1, int(creature.max_hp * item.effect_value))
+                creature.heal(heal_amount)
+                self.log.add(f"{name} restored some HP using {item.name}!")
+
+        # Flame Orb / Toxic Orb - inflict status at end of turn
+        # (This is a simplified implementation - these would normally inflict on turn 1)
+        # For now, we'll skip auto-inflict as status is already handled elsewhere
 
     def set_weather(self, weather: Weather, turns: int = 5):
         """
@@ -939,6 +994,63 @@ class Battle:
                 modifier *= 2.0  # Slush Rush
 
         return modifier
+
+    def _apply_held_item_damage_modifiers(
+        self,
+        attacker: Creature,
+        defender: Creature,
+        move,
+        damage: float,
+        effectiveness: float
+    ) -> float:
+        """
+        Apply held item damage modifiers.
+
+        Args:
+            attacker: The attacking creature
+            defender: The defending creature
+            move: The move being used
+            damage: Base damage before held item modifications
+            effectiveness: Type effectiveness multiplier
+
+        Returns:
+            Modified damage value
+        """
+        # Check attacker's held item
+        if attacker.held_item:
+            item = attacker.held_item
+
+            # Type boost items (e.g., Charcoal boosts Flame moves)
+            if item.effect_type == EFFECT_TYPE_BOOST:
+                boosted_type = item.effect_data.get("type")
+                if move.type == boosted_type:
+                    damage *= item.effect_value
+
+            # Power boost items (e.g., Muscle Band, Wise Glasses)
+            elif item.effect_type == EFFECT_POWER_BOOST:
+                # Check if there are conditions
+                if item.effect_data:
+                    # Expert Belt - only boosts super-effective moves
+                    if item.effect_data.get("only_super_effective"):
+                        if effectiveness > 1.0:
+                            damage *= item.effect_value
+                    # Muscle Band/Wise Glasses - stat-specific boosts
+                    else:
+                        damage *= item.effect_value
+                else:
+                    damage *= item.effect_value
+
+            # Choice items (Choice Band, Choice Specs, Choice Scarf)
+            elif item.effect_type == EFFECT_CHOICE_BOOST:
+                stat_boosted = item.effect_data.get("stat")
+                # Choice Band boosts attack-based moves, Choice Specs boosts special
+                damage *= item.effect_value
+
+            # Life Orb - boosts all moves but deals recoil
+            elif item.effect_type == EFFECT_LIFE_ORB:
+                damage *= item.effect_value
+
+        return damage
 
     def _apply_ability_damage_modifiers(
         self,

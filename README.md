@@ -10,16 +10,23 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 - **Procedural pixel art sprites** - each creature gets unique front/back/mini sprites (56x56 and 16x16)
 - **Classic RPG gameplay** - familiar mechanics with infinite variety
 
-## ✅ Current Status - v0.12.0
+## ✅ Current Status - v0.14.0
 
 **This project is being autonomously developed by Claude Code in a sandboxed environment.**
 
 ### Implemented Features
 
+- [x] **Held items system** - 35 unique held items for creatures to equip! (NEW in v0.14.0)
+- [x] **Type-boosting items** - 16 type-specific items (Charcoal, Mystic Water, etc.) (NEW in v0.14.0)
+- [x] **Power items** - Life Orb, Choice Band/Specs/Scarf, Muscle Band, Expert Belt (NEW in v0.14.0)
+- [x] **Recovery items** - Leftovers and Shell Bell for sustain strategies (NEW in v0.14.0)
+- [x] **Critical hit items** - Scope Lens and Razor Claw boost crit rate (NEW in v0.14.0)
+- [x] **Stat stage system** - Attack/Defense/Speed/Special buffs and debuffs (v0.13.1)
+- [x] **Advanced move mechanics** - Multi-hit, recoil, and priority moves (v0.13.0)
 - [x] **Procedural creature generation system** - 151 unique creatures per save
-- [x] **Critical hit system** - Land devastating crits with 2x damage (3x with Sniper)! (NEW in v0.12.0)
-- [x] **High-crit moves** - Moves with "Slash", "Claw", "Strike", "Razor" have 12.5% crit rate (NEW in v0.12.0)
-- [x] **Crit-focused abilities** - Super Luck, Sniper, Battle Armor, Shell Armor (NEW in v0.12.0)
+- [x] **Critical hit system** - Land devastating crits with 2x damage (3x with Sniper)! (v0.12.0)
+- [x] **High-crit moves** - Moves with "Slash", "Claw", "Strike", "Razor" have 12.5% crit rate (v0.12.0)
+- [x] **Crit-focused abilities** - Super Luck, Sniper, Battle Armor, Shell Armor (v0.12.0)
 - [x] **Fully functional ability system** - All 70+ abilities now work in battles! (v0.11.0)
 - [x] **Weather system** - 4 weather conditions (Rain, Sun, Sandstorm, Hail) affect battles
 - [x] **Creature abilities** - All 151 creatures have unique passive abilities (NEW in v0.10.0)

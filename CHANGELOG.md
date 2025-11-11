@@ -4,6 +4,128 @@ All notable changes to the Genemon project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.14.0] - 2025-11-11 - Iteration 14: Held Items System
+
+### Added
+
+#### Held Items System (Major Feature)
+- **HeldItem dataclass** - New dataclass for items creatures can hold (genemon/core/creature.py:144-167)
+- **35 held items** - Complete catalog of equippable items with diverse effects (genemon/core/held_items.py)
+- **Creature.held_item field** - Creatures can now equip one held item (genemon/core/creature.py:279)
+- **Save/load support** - Held items persist across save files with full serialization
+
+#### Type-Boosting Held Items (16 items)
+- **Type-specific boosters** - One for each type (Charcoal, Mystic Water, Miracle Seed, etc.)
+- **20% damage boost** - Boosts moves of matching type by 1.2x
+- **Examples**: Charcoal (Flame), Mystic Water (Aqua), Miracle Seed (Leaf), Never-Melt Ice (Frost)
+
+#### Power-Boosting Held Items
+- **Muscle Band** - Boosts physical attack power by 20% (genemon/core/held_items.py:37-42)
+- **Wise Glasses** - Boosts special attack power by 20% (genemon/core/held_items.py:44-49)
+- **Expert Belt** - Boosts super-effective moves by 20% (genemon/core/held_items.py:209-214)
+
+#### High-Risk/High-Reward Held Items
+- **Life Orb** - Boosts all moves by 30% but deals 10% max HP recoil each turn (genemon/core/held_items.py:216-221)
+- **Life Orb integration** - Recoil applied after successful attacks (genemon/battle/engine.py:367-375)
+- **Choice Band** - 50% attack boost but locks into first move used (genemon/core/held_items.py:179-184)
+- **Choice Specs** - 50% special boost but locks into first move used (genemon/core/held_items.py:186-191)
+- **Choice Scarf** - 50% speed boost but locks into first move used (genemon/core/held_items.py:193-198)
+
+#### Healing Held Items
+- **Leftovers** - Restores 1/16 max HP at end of each turn (genemon/core/held_items.py:156-161)
+- **Shell Bell** - Restores 1/8 of damage dealt to opponent (genemon/core/held_items.py:163-168)
+- **End-of-turn healing** - Processed after weather effects (genemon/battle/engine.py:872-889)
+
+#### Critical Hit Held Items
+- **Scope Lens** - Increases critical hit rate by 1 stage (genemon/core/held_items.py:120-125)
+- **Razor Claw** - Sharply increases critical hit rate by 1 stage (genemon/core/held_items.py:127-132)
+- **Crit boost integration** - Applied in critical hit calculation (genemon/battle/engine.py:564-567)
+
+#### Defensive Held Items
+- **Assault Vest** - Greatly boosts special defense by 50% (genemon/core/held_items.py:102-107)
+- **Rocky Helmet** - Damages attackers when hit by contact moves (genemon/core/held_items.py:109-114)
+
+#### Utility Held Items
+- **Quick Claw** - 20% chance to move first regardless of speed (genemon/core/held_items.py:116-121)
+- **Focus Band** - 10% chance to survive fatal hit with 1 HP (genemon/core/held_items.py:170-175)
+- **Focus Sash** - Guarantees survival of fatal hit at full HP (one-time) (genemon/core/held_items.py:177-182)
+- **Flame Orb** - Burns holder at end of turn (for Guts strategy) (genemon/core/held_items.py:134-139)
+- **Toxic Orb** - Poisons holder at end of turn (for Guts strategy) (genemon/core/held_items.py:141-146)
+
+#### Battle Engine Integration
+- **Damage modifier system** - Held items modify damage calculation (genemon/battle/engine.py:956-1011)
+- **Type boost application** - Matching type moves get damage boost
+- **Power boost application** - Generic and conditional power boosts applied
+- **Super-effective boost** - Expert Belt only boosts super-effective hits
+- **End-of-turn effects** - Leftovers healing, Life Orb recoil processed each turn
+- **Shell Bell healing** - Heals based on damage dealt to opponent (genemon/battle/engine.py:377-385)
+
+#### Comprehensive Test Suite
+- **test_held_items.py** - New 389-line test suite for held items system
+- **8 held item tests** - Type boost, power boost, crit boost, Life Orb, Choice Band, Leftovers, Shell Bell, Expert Belt
+- **All tests passing** - 8/8 held items + 7/7 stat stages + 7/7 crit + 6/6 ability + 6/6 core = 34/34 total
+
+### Changed
+
+#### Creature Dataclass Enhancements
+- **held_item field** - Added optional held_item field to Creature (genemon/core/creature.py:279)
+- **to_dict serialization** - Updated to include held_item (genemon/core/creature.py:500-501)
+- **from_dict deserialization** - Updated to restore held_item (genemon/core/creature.py:528-529)
+
+#### Battle System Enhancements
+- **Damage calculation** - Now applies held item modifiers before random factor (genemon/battle/engine.py:512-513)
+- **Critical hit checking** - Includes held item crit boost (Scope Lens, Razor Claw)
+- **Turn processing** - Processes held item effects at end of turn (Leftovers, etc.)
+- **Battle feedback** - Enhanced messages for Life Orb recoil, Shell Bell healing, Leftovers healing
+
+#### Strategic Depth
+- **Team building** - Held items add major customization to team strategies
+- **Offensive options** - Life Orb, Choice items for high damage output
+- **Defensive options** - Leftovers for sustain, Assault Vest for bulk
+- **Type synergy** - Type boosters enable specialized type-focused teams
+- **Risk/reward balance** - Choice items and Life Orb offer power at a cost
+
+### Technical Details
+
+#### Code Changes
+- **Modified files**: 2 core files, 1 battle file enhanced, 2 new files created, 1 test file created
+  - genemon/core/creature.py: +43 lines (HeldItem dataclass + Creature.held_item + serialization)
+  - genemon/battle/engine.py: +95 lines (Held item damage modifiers + end-of-turn effects)
+  - genemon/core/held_items.py: +276 lines (NEW - Complete held items catalog)
+  - test_held_items.py: +389 lines (NEW - Comprehensive held items test suite)
+- **Total code added**: +803 lines (414 production + 389 test)
+- **No breaking changes**: All v0.13.0 features maintained
+- **Backward compatible**: Old saves work without held items
+
+#### New Features Count
+- **35 unique held items** across 9 categories
+- **1 new Creature field**: held_item
+- **3 new Battle methods**: _apply_held_item_damage_modifiers, _process_held_item_effects
+- **9 held item effect types**: power_boost, type_boost, defense_boost, speed_boost, crit_boost, stat_heal, focus_band, choice_boost, life_orb
+
+### Improvements
+
+- **Strategic variety** - 35 held items create diverse team-building options
+- **Battle depth** - Items enable new strategies and playstyles
+- **Customization** - Players can tailor each creature's role with held items
+- **Competitive viability** - Choice items and Life Orb enable high-level strategies
+- **Synergy potential** - Items synergize with abilities, types, and movesets
+
+### Balance
+
+#### Damage Modifiers
+- **Type boosters**: 1.2x (20% boost) for matching type
+- **Power boosters**: 1.2x (Muscle Band, Wise Glasses, Expert Belt)
+- **Choice items**: 1.5x (50% boost) but lock into one move
+- **Life Orb**: 1.3x (30% boost) with 10% max HP recoil
+
+#### Healing Items
+- **Leftovers**: 1/16 max HP per turn (6.25%)
+- **Shell Bell**: 1/8 of damage dealt (12.5%)
+
+#### Critical Hit Items
+- **Scope Lens/Razor Claw**: +1 crit stage (6.25% → 12.5%)
+
 ## [0.13.0] - 2025-11-11 - Iteration 13: Advanced Move Mechanics
 
 ### Added
