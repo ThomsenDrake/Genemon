@@ -4,6 +4,122 @@ All notable changes to the Genemon project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.5.0] - 2025-11-11 - Iteration 5: Move Learning, TMs, and Gym Expansion
+
+### Added
+
+#### Move Learning System
+- **Learnset field** - CreatureSpecies now has learnset Dict[int, Move] mapping level to learnable moves (genemon/core/creature.py:132)
+- **TM compatibility field** - CreatureSpecies has tm_compatible List[str] for TM move names (genemon/core/creature.py:133)
+- **get_learnable_move()** - New Creature method to check for moves at current level (genemon/core/creature.py:268-281)
+- **learn_move()** - New Creature method to learn moves with optional replacement (genemon/core/creature.py:283-306)
+- **can_learn_tm()** - New Creature method to check TM compatibility (genemon/core/creature.py:308-321)
+- **Learnset generation** - All 151 creatures get 4-6 learnable moves at appropriate levels (genemon/creatures/generator.py:402-455)
+- **TM compatibility generation** - Creatures get type-appropriate TM compatibility lists (genemon/creatures/generator.py:457-508)
+- **Move learning notifications** - Battle log shows "can learn [move]!" after level-up (genemon/battle/engine.py:379-382)
+- **Move learning UI** - Complete UI for learning moves with replacement choice (genemon/core/game.py:362-415)
+- **Post-battle move learning** - After winning battles, creatures are checked for new moves (genemon/core/game.py:567-569)
+
+#### TM (Technical Machine) System
+- **TM item type** - New ItemType.TM for teachable move items (genemon/core/items.py:18)
+- **TEACH_MOVE effect** - New ItemEffect for TM usage (genemon/core/items.py:30)
+- **tm_move field** - Item class now supports TM move data (genemon/core/items.py:46)
+- **51 TM moves** - Complete set of TM moves across all 16 types (genemon/core/items.py:287-359)
+- **51 TM items** - TM01-TM51 available as teachable items (genemon/core/items.py:366-410)
+- **TM usage validation** - Items check creature TM compatibility before use (genemon/core/items.py:83-95)
+- **TM categorization** - 3 universal TMs + 3 per type = balanced distribution
+- **High quality moves** - TM moves are powerful (60-110 power) and reliable
+
+#### Gym Expansion
+- **3 new gym leaders** - Leader Zapper (Volt), Leader Glacia (Frost), Leader Umbra (Shadow)
+- **Leader Zapper** - Third gym in Thunderpeak City with Volt-type specialty and Thunder Badge
+- **Leader Glacia** - Fourth gym in Frostfield Village with Frost-type specialty and Glacier Badge
+- **Leader Umbra** - Fifth gym in Shadowmere Town with Shadow-type specialty and Eclipse Badge
+- **3 new badges** - Thunder Badge, Glacier Badge, Eclipse Badge
+- **3 new healers** - Nurse Joy in each of the three new towns
+
+#### World Expansion
+- **Route 4** - 32-tile route connecting Aquamarine Harbor to Thunderpeak (genemon/world/map.py:287-293)
+- **Route 5** - 38-tile route connecting Thunderpeak to Frostfield (genemon/world/map.py:302-308)
+- **Route 6** - 40-tile route connecting Frostfield to Shadowmere (genemon/world/map.py:317-323)
+- **Thunderpeak City** - New town with Volt gym and healer (genemon/world/map.py:295-300)
+- **Frostfield Village** - New town with Frost gym and healer (genemon/world/map.py:310-315)
+- **Shadowmere Town** - New town with Shadow gym and healer (genemon/world/map.py:325-330)
+- **14 total locations** - Complete world with 7 towns, 6 routes, 1 cave
+- **Linear progression** - Clear path from starter town to fifth gym
+
+### Changed
+
+#### Creature System
+- **Learnset serialization** - to_dict/from_dict support for learnsets (genemon/core/creature.py:148-153, 162-163)
+- **TM compatibility serialization** - Proper handling in save system
+- **Move learning on level-up** - Creatures can now expand their moveset
+
+#### Battle System
+- **Move learning check** - After level-up, battle log shows learnable moves (genemon/battle/engine.py:379-382)
+- **Post-battle flow** - Move learning handled before evolution (genemon/core/game.py:567-573)
+
+#### Item System
+- **TM support** - Items can now teach moves to compatible creatures
+- **63 total items** - 12 consumables + 51 TMs
+- **Item type expansion** - 6 item types including TMs
+
+#### World
+- **7 gyms total** - 5 gym leaders implemented (Flame, Aqua, Volt, Frost, Shadow)
+- **6 routes** - More exploration and trainer battles available
+- **17 NPCs** - 5 gym leaders, 3 healers, 4 trainers, 5 utility NPCs
+
+### Technical Details
+
+#### Code Changes
+- **Modified files**: 6 core files enhanced
+  - genemon/core/creature.py: +75 lines (move learning methods, learnset fields)
+  - genemon/core/items.py: +145 lines (51 TMs, TM moves, TM validation)
+  - genemon/creatures/generator.py: +110 lines (learnset & TM generation)
+  - genemon/core/game.py: +60 lines (move learning UI and flow)
+  - genemon/world/map.py: +60 lines (3 towns, 3 routes, connections)
+  - genemon/world/npc.py: +115 lines (3 gym leaders, 3 healers)
+  - genemon/battle/engine.py: +3 lines (move learning notification)
+
+#### New Features Count
+- **3 major systems**: Move learning, TM system, Gym expansion
+- **4 new methods**: get_learnable_move, learn_move, can_learn_tm, _handle_move_learning
+- **3 new fields**: learnset, tm_compatible, tm_move
+- **51 new items**: TM01-TM51
+- **51 new moves**: TM moves across all types
+- **6 new NPCs**: 3 gym leaders, 3 healers
+- **6 new locations**: 3 towns, 3 routes
+
+### Improvements
+- **Strategic depth** - Players can customize movesets via level-up and TMs
+- **Type variety** - TMs allow creatures to learn moves outside their type
+- **Clear progression** - 5 gyms with diverse type challenges
+- **Expanded world** - More locations to explore and battles to fight
+- **Procedural learnsets** - Each of 151 creatures has unique level-up moves
+- **Balanced TM distribution** - Every type has 3 TMs, plus 3 universal
+
+### Balance
+- **Move learning levels** - Scaled by creature power level (basic: 7-35, legendary: 15-65)
+- **TM prices** - Expensive at 3000 each (vs 100-1500 for consumables)
+- **TM power** - Stronger than most level-up moves (60-110 vs 20-100)
+- **TM rarity** - 51 TMs available but expensive to acquire
+- **Gym progression** - Gyms 3-5 have stronger teams than gyms 1-2
+
+### Compatibility
+- **Fully compatible** with v0.4.0 saves
+- Old creature data will have null learnsets (no moves learnable until new save)
+- New NPCs and locations work with existing saves
+- TMs available in shops and as future rewards
+
+### Known Limitations
+- **No TM shops yet** - TMs created but not yet available for purchase (future iteration)
+- **Move relearning** - Cannot relearn forgotten moves yet
+- **Move tutors** - No special move tutors yet
+- **HMs** - No field-use moves yet (Surf, Fly, etc.)
+- **3 gyms remaining** - Gyms 6-8 not yet implemented
+
+---
+
 ## [0.4.0] - 2025-11-11 - Iteration 4: Badges, Type-Themed Gyms, Evolution, and World Expansion
 
 ### Added

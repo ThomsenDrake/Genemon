@@ -129,10 +129,12 @@ class CreatureSpecies:
     evolution_level: Optional[int] = None
     evolves_into: Optional[int] = None  # ID of evolved form
     sprite_data: Optional[Dict[str, any]] = None  # Contains front, back, mini sprites
+    learnset: Optional[Dict[int, Move]] = None  # Level -> Move mapping for level-up moves
+    tm_compatible: Optional[List[str]] = None  # List of TM move names this species can learn
 
     def to_dict(self) -> dict:
         """Convert species to dictionary for serialization."""
-        return {
+        result = {
             'id': self.id,
             'name': self.name,
             'types': self.types,
@@ -143,12 +145,23 @@ class CreatureSpecies:
             'evolves_into': self.evolves_into,
             'sprite_data': self.sprite_data
         }
+        # Add learnset if present
+        if self.learnset:
+            result['learnset'] = {str(level): move.to_dict() for level, move in self.learnset.items()}
+        # Add TM compatibility if present
+        if self.tm_compatible:
+            result['tm_compatible'] = self.tm_compatible
+        return result
 
     @classmethod
     def from_dict(cls, data: dict) -> 'CreatureSpecies':
         """Create species from dictionary."""
         data['base_stats'] = CreatureStats.from_dict(data['base_stats'])
         data['moves'] = [Move.from_dict(m) for m in data['moves']]
+        # Deserialize learnset if present
+        if 'learnset' in data and data['learnset']:
+            data['learnset'] = {int(level): Move.from_dict(move) for level, move in data['learnset'].items()}
+        # TM compatibility is already a list, no conversion needed
         return cls(**data)
 
 
@@ -251,6 +264,61 @@ class Creature:
         return (self.species.evolution_level is not None and
                 self.level >= self.species.evolution_level and
                 self.species.evolves_into is not None)
+
+    def get_learnable_move(self) -> Optional[Move]:
+        """
+        Check if creature can learn a new move at current level.
+
+        Returns:
+            Move object if a move can be learned, None otherwise
+        """
+        if not self.species.learnset:
+            return None
+
+        if self.level in self.species.learnset:
+            return self.species.learnset[self.level]
+
+        return None
+
+    def learn_move(self, move: Move, replace_index: Optional[int] = None) -> bool:
+        """
+        Learn a new move. If creature already has 4 moves, must specify which to replace.
+
+        Args:
+            move: The move to learn
+            replace_index: Index (0-3) of move to replace, or None to add to empty slot
+
+        Returns:
+            True if move was learned successfully, False otherwise
+        """
+        import copy
+
+        # If creature has fewer than 4 moves, just add it
+        if len(self.moves) < 4:
+            self.moves.append(copy.deepcopy(move))
+            return True
+
+        # If creature already has 4 moves, need to replace one
+        if replace_index is not None and 0 <= replace_index < len(self.moves):
+            self.moves[replace_index] = copy.deepcopy(move)
+            return True
+
+        return False
+
+    def can_learn_tm(self, tm_move_name: str) -> bool:
+        """
+        Check if creature can learn a TM move.
+
+        Args:
+            tm_move_name: Name of the TM move
+
+        Returns:
+            True if compatible, False otherwise
+        """
+        if not self.species.tm_compatible:
+            return False
+
+        return tm_move_name in self.species.tm_compatible
 
     def restore_pp(self, amount: int = None):
         """Restore PP for all moves. If amount is None, fully restores all PP."""

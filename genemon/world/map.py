@@ -284,6 +284,51 @@ class World:
         )
         self.locations[fourth_town.id] = fourth_town
 
+        # Route 4
+        route_4 = LocationBuilder.create_route(
+            "route_4",
+            "Route 4",
+            length=32
+        )
+        self.locations[route_4.id] = route_4
+
+        # Fifth town (third gym)
+        fifth_town = LocationBuilder.create_town(
+            "town_fifth",
+            "Thunderpeak City"
+        )
+        self.locations[fifth_town.id] = fifth_town
+
+        # Route 5
+        route_5 = LocationBuilder.create_route(
+            "route_5",
+            "Route 5",
+            length=38
+        )
+        self.locations[route_5.id] = route_5
+
+        # Sixth town (fourth gym)
+        sixth_town = LocationBuilder.create_town(
+            "town_sixth",
+            "Frostfield Village"
+        )
+        self.locations[sixth_town.id] = sixth_town
+
+        # Route 6
+        route_6 = LocationBuilder.create_route(
+            "route_6",
+            "Route 6",
+            length=40
+        )
+        self.locations[route_6.id] = route_6
+
+        # Seventh town (fifth gym)
+        seventh_town = LocationBuilder.create_town(
+            "town_seventh",
+            "Shadowmere Town"
+        )
+        self.locations[seventh_town.id] = seventh_town
+
         # Set up connections
         starter_town.connections["route_1"] = (starter_town.width // 2, starter_town.height - 1)
         route_1.connections["town_starter"] = (route_1.width // 2, route_1.height - 1)
@@ -299,6 +344,18 @@ class World:
         route_3.connections["town_third"] = (route_3.width // 2, route_3.height - 1)
         route_3.connections["town_fourth"] = (route_3.width // 2, 0)
         fourth_town.connections["route_3"] = (fourth_town.width // 2, fourth_town.height - 1)
+        fourth_town.connections["route_4"] = (fourth_town.width // 2, 0)
+        route_4.connections["town_fourth"] = (route_4.width // 2, route_4.height - 1)
+        route_4.connections["town_fifth"] = (route_4.width // 2, 0)
+        fifth_town.connections["route_4"] = (fifth_town.width // 2, fifth_town.height - 1)
+        fifth_town.connections["route_5"] = (fifth_town.width // 2, 0)
+        route_5.connections["town_fifth"] = (route_5.width // 2, route_5.height - 1)
+        route_5.connections["town_sixth"] = (route_5.width // 2, 0)
+        sixth_town.connections["route_5"] = (sixth_town.width // 2, sixth_town.height - 1)
+        sixth_town.connections["route_6"] = (sixth_town.width // 2, 0)
+        route_6.connections["town_sixth"] = (route_6.width // 2, route_6.height - 1)
+        route_6.connections["town_seventh"] = (route_6.width // 2, 0)
+        seventh_town.connections["route_6"] = (seventh_town.width // 2, seventh_town.height - 1)
 
     def get_location(self, location_id: str) -> Optional[Location]:
         """Get location by ID."""

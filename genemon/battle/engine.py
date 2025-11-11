@@ -376,6 +376,11 @@ class Battle:
                 if self.player_active.gain_exp(exp_gained):
                     self.log.add(f"{self.player_active.get_display_name()} grew to level {self.player_active.level}!")
 
+                    # Check if creature can learn a new move
+                    learnable_move = self.player_active.get_learnable_move()
+                    if learnable_move:
+                        self.log.add(f"{self.player_active.get_display_name()} can learn {learnable_move.name}!")
+
                     # Check if creature can evolve
                     if self.player_active.can_evolve():
                         self.log.add(f"{self.player_active.get_display_name()} can evolve!")

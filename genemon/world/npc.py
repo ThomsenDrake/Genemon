@@ -203,6 +203,114 @@ class NPCRegistry:
         )
         self.npcs[gym_leader_2.id] = gym_leader_2
 
+        # Gym Leader in fifth town - Volt type specialist
+        gym_leader_3 = NPC(
+            id="gym_leader_3",
+            name="Leader Zapper",
+            location_id="town_fifth",
+            x=10,
+            y=7,
+            sprite="G",
+            is_trainer=True,
+            is_gym_leader=True,
+            specialty_type="Volt",
+            badge_id="badge_volt",
+            badge_name="Thunder Badge",
+            badge_description="Proof of victory over Leader Zapper and mastery of Volt-type battles.",
+            dialogues=[
+                Dialogue("Feel the power of lightning!"),
+                Dialogue("Your circuits are overloaded by my electric prowess!")
+            ]
+        )
+        self.npcs[gym_leader_3.id] = gym_leader_3
+
+        # Gym Leader in sixth town - Frost type specialist
+        gym_leader_4 = NPC(
+            id="gym_leader_4",
+            name="Leader Glacia",
+            location_id="town_sixth",
+            x=10,
+            y=7,
+            sprite="G",
+            is_trainer=True,
+            is_gym_leader=True,
+            specialty_type="Frost",
+            badge_id="badge_frost",
+            badge_name="Glacier Badge",
+            badge_description="Proof of victory over Leader Glacia and mastery of Frost-type battles.",
+            dialogues=[
+                Dialogue("Welcome to Frostfield, where ice reigns supreme!"),
+                Dialogue("Your determination melted my defenses!")
+            ]
+        )
+        self.npcs[gym_leader_4.id] = gym_leader_4
+
+        # Gym Leader in seventh town - Shadow type specialist
+        gym_leader_5 = NPC(
+            id="gym_leader_5",
+            name="Leader Umbra",
+            location_id="town_seventh",
+            x=10,
+            y=7,
+            sprite="G",
+            is_trainer=True,
+            is_gym_leader=True,
+            specialty_type="Shadow",
+            badge_id="badge_shadow",
+            badge_name="Eclipse Badge",
+            badge_description="Proof of victory over Leader Umbra and mastery of Shadow-type battles.",
+            dialogues=[
+                Dialogue("The shadows are my allies..."),
+                Dialogue("You have illuminated the darkness within me!")
+            ]
+        )
+        self.npcs[gym_leader_5.id] = gym_leader_5
+
+        # Nurse Joy in Thunderpeak City
+        nurse_thunderpeak = NPC(
+            id="nurse_thunderpeak",
+            name="Nurse Joy",
+            location_id="town_fifth",
+            x=5,
+            y=5,
+            sprite="N",
+            is_healer=True,
+            dialogues=[
+                Dialogue("Welcome to Thunderpeak! Let me heal your team!")
+            ]
+        )
+        self.npcs[nurse_thunderpeak.id] = nurse_thunderpeak
+
+        # Nurse Joy in Frostfield Village
+        nurse_frostfield = NPC(
+            id="nurse_frostfield",
+            name="Nurse Joy",
+            location_id="town_sixth",
+            x=5,
+            y=5,
+            sprite="N",
+            is_healer=True,
+            dialogues=[
+                Dialogue("You look cold! Warm up and let me heal your team!")
+            ]
+        )
+        self.npcs[nurse_frostfield.id] = nurse_frostfield
+
+        # Nurse Joy in Shadowmere Town
+        nurse_shadowmere = NPC(
+            id="nurse_shadowmere",
+            name="Nurse Joy",
+            location_id="town_seventh",
+            x=5,
+            y=5,
+            sprite="N",
+            is_healer=True,
+            dialogues=[
+                Dialogue("Even in the shadows, I'll heal your team!")
+            ]
+        )
+        self.npcs[nurse_shadowmere.id] = nurse_shadowmere
+
         # Trainers on Route 1
         route1_trainer1 = NPC(
             id="trainer_route1_1",

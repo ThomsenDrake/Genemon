@@ -176,6 +176,12 @@ class CreatureGenerator:
         # Generate flavor text
         flavor_text = self._generate_flavor_text(name, types)
 
+        # Generate learnset (moves that can be learned via level-up)
+        learnset = self._generate_learnset(types, power_level)
+
+        # Generate TM compatibility
+        tm_compatible = self._generate_tm_compatibility(types)
+
         # Create species
         species = CreatureSpecies(
             id=creature_id,
@@ -186,7 +192,9 @@ class CreatureGenerator:
             flavor_text=flavor_text,
             evolution_level=None,  # Set later in evolution chain creation
             evolves_into=None,
-            sprite_data=None  # Will be generated separately
+            sprite_data=None,  # Will be generated separately
+            learnset=learnset,
+            tm_compatible=tm_compatible
         )
 
         return species
@@ -390,6 +398,114 @@ class CreatureGenerator:
         ]
 
         return self.rng.choice(templates)
+
+    def _generate_learnset(self, types: List[str], power_level: str) -> Dict[int, Move]:
+        """
+        Generate a learnset of moves that can be learned via level-up.
+
+        Args:
+            types: Creature's type(s)
+            power_level: Creature's power level
+
+        Returns:
+            Dictionary mapping level -> Move
+        """
+        learnset = {}
+
+        # Determine level range based on power level
+        level_ranges = {
+            "basic": [(7, 12), (13, 18), (21, 26), (30, 35)],
+            "starter": [(7, 12), (15, 20), (25, 30), (35, 40)],
+            "intermediate": [(10, 15), (20, 25), (30, 35), (40, 45)],
+            "advanced": [(12, 18), (25, 32), (38, 45), (50, 55)],
+            "legendary": [(15, 20), (30, 35), (45, 50), (60, 65)]
+        }
+
+        ranges = level_ranges.get(power_level, [(10, 15), (20, 25), (30, 35), (40, 45)])
+
+        # Generate 4-6 learnable moves
+        num_learnable = self.rng.randint(4, 6)
+
+        for i in range(num_learnable):
+            # Pick a level from the appropriate range
+            level_range = ranges[min(i, len(ranges) - 1)]
+            learn_level = self.rng.randint(*level_range)
+
+            # Skip if this level already has a move
+            if learn_level in learnset:
+                learn_level += self.rng.randint(1, 3)
+
+            # Generate move (favor creature's types, but allow some variety)
+            if self.rng.random() < 0.7:
+                move_type = self.rng.choice(types)
+            else:
+                move_type = self.rng.choice(TYPES)
+
+            # Power level of move scales with learn level
+            if learn_level < 15:
+                move_power = "basic"
+            elif learn_level < 30:
+                move_power = "intermediate"
+            else:
+                move_power = "advanced"
+
+            move = self._generate_move(move_type, move_power)
+            learnset[learn_level] = move
+
+        return learnset
+
+    def _generate_tm_compatibility(self, types: List[str]) -> List[str]:
+        """
+        Generate list of TM move names this creature can learn.
+
+        Args:
+            types: Creature's type(s)
+
+        Returns:
+            List of TM move names
+        """
+        # Define some common TM moves
+        # These will be created as actual TM items later
+        tm_moves = {
+            # Universal/common TMs (most creatures can learn)
+            "common": ["Swift Strike", "Mega Impact", "Fury Slash"],
+            # Type-specific TMs
+            "Flame": ["Flame Burst", "Inferno Blast", "Sacred Flame"],
+            "Aqua": ["Hydro Blast", "Aqua Storm", "Tidal Wave"],
+            "Leaf": ["Vine Storm", "Petal Burst", "Solar Beam"],
+            "Volt": ["Thunder Blast", "Volt Storm", "Electric Surge"],
+            "Frost": ["Frost Beam", "Ice Storm", "Frozen Fury"],
+            "Terra": ["Earth Blast", "Quake Storm", "Boulder Crush"],
+            "Gale": ["Aero Blast", "Sky Storm", "Whirlwind"],
+            "Toxin": ["Toxic Blast", "Poison Storm", "Venom Strike"],
+            "Mind": ["Psychic Blast", "Mind Storm", "Confusion Wave"],
+            "Spirit": ["Spirit Blast", "Ghost Storm", "Shadow Strike"],
+            "Beast": ["Wild Slash", "Feral Strike", "Primal Fury"],
+            "Brawl": ["Power Punch", "Combat Strike", "Fighting Fury"],
+            "Insect": ["Bug Blast", "Swarm Storm", "Insect Fury"],
+            "Metal": ["Steel Slash", "Metal Storm", "Iron Impact"],
+            "Mystic": ["Mystic Blast", "Fairy Storm", "Magic Strike"],
+            "Shadow": ["Dark Blast", "Shadow Storm", "Void Strike"]
+        }
+
+        compatible = []
+
+        # All creatures can learn common TMs
+        compatible.extend(tm_moves["common"])
+
+        # Add type-specific TMs
+        for creature_type in types:
+            if creature_type in tm_moves:
+                compatible.extend(tm_moves[creature_type])
+
+        # Add a few random TMs from other types (30% chance each)
+        for tm_type, moves in tm_moves.items():
+            if tm_type != "common" and tm_type not in types:
+                for move_name in moves:
+                    if self.rng.random() < 0.3:
+                        compatible.append(move_name)
+
+        return list(set(compatible))  # Remove duplicates
 
     def _create_evolution_chains(self):
         """Set up evolution relationships between creatures."""

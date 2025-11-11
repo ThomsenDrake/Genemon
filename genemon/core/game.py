@@ -359,6 +359,61 @@ class Game:
             print(f"\n{creature.species.name} did not evolve.")
             input("Press Enter to continue...")
 
+    def _handle_move_learning(self, creature: Creature):
+        """
+        Handle a creature learning a new move.
+
+        Args:
+            creature: The creature that can learn a move
+        """
+        learnable_move = creature.get_learnable_move()
+        if not learnable_move:
+            return
+
+        self.display.clear_screen()
+        self.display.print_header("NEW MOVE!")
+        print(f"\n{creature.get_display_name()} can learn {learnable_move.name}!")
+        print(f"Type: {learnable_move.type} | Power: {learnable_move.power} | Accuracy: {learnable_move.accuracy}%")
+        print(f"PP: {learnable_move.max_pp} | {learnable_move.description}")
+
+        # Check if creature has room for the move
+        if len(creature.moves) < 4:
+            print(f"\nLearn {learnable_move.name}?")
+            print("1. Yes")
+            print("2. No")
+            choice = self.display.get_menu_choice(2)
+
+            if choice == 0:  # Yes
+                creature.learn_move(learnable_move)
+                print(f"\n{creature.get_display_name()} learned {learnable_move.name}!")
+                input("Press Enter to continue...")
+            else:
+                print(f"\n{creature.get_display_name()} did not learn {learnable_move.name}.")
+                input("Press Enter to continue...")
+
+        else:
+            # Need to replace a move
+            print(f"\n{creature.get_display_name()} already knows 4 moves.")
+            print(f"Replace a move with {learnable_move.name}?")
+            print()
+
+            # Show current moves
+            for i, move in enumerate(creature.moves):
+                print(f"{i+1}. {move.name} ({move.type}, {move.power} power, {move.pp}/{move.max_pp} PP)")
+            print(f"{len(creature.moves)+1}. Don't learn {learnable_move.name}")
+
+            choice = self.display.get_menu_choice(len(creature.moves) + 1)
+
+            if choice < len(creature.moves):
+                # Replace the chosen move
+                old_move_name = creature.moves[choice].name
+                creature.learn_move(learnable_move, replace_index=choice)
+                print(f"\n{creature.get_display_name()} forgot {old_move_name} and learned {learnable_move.name}!")
+                input("Press Enter to continue...")
+            else:
+                print(f"\n{creature.get_display_name()} did not learn {learnable_move.name}.")
+                input("Press Enter to continue...")
+
     def _generate_trainer_team(self, npc: NPC) -> Team:
         """
         Generate a fixed team for a trainer NPC.
@@ -507,8 +562,13 @@ class Game:
         if battle.result == BattleResult.PLAYER_WIN:
             print("\n*** YOU WON! ***")
 
-            # Check for evolution after battle
+            # Check for move learning and evolution after battle
             for creature in self.state.player_team.creatures:
+                # Check if creature can learn a new move
+                if creature.get_learnable_move():
+                    self._handle_move_learning(creature)
+
+                # Check for evolution
                 if creature.can_evolve():
                     self._handle_evolution(creature)
 
