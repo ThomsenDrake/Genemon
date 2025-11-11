@@ -224,13 +224,21 @@ class Game:
             choice = input("> ").strip().lower()
             if choice == 'y':
                 self._move_relearner_menu()
-        elif npc.is_trainer and not npc.has_been_defeated:
-            print("\nThe trainer wants to battle!")
-            input("Press Enter to continue...")
+        elif npc.is_trainer:
+            # Check if Elite Four/Champion (can rematch)
+            is_rematchable = npc.id in ["elite_1", "elite_2", "elite_3", "elite_4", "champion"]
 
-            # Create trainer battle (simplified - no actual team yet)
-            # For now, create a random wild creature for the trainer
-            self._trainer_battle(npc)
+            if not npc.has_been_defeated:
+                print("\nThe trainer wants to battle!")
+                input("Press Enter to continue...")
+                self._trainer_battle(npc)
+            elif is_rematchable:
+                print(f"\n{npc.name} wants a rematch!")
+                print("(Rematch team will be higher level)")
+                print("\nAccept the challenge? (y/n)")
+                choice = input("> ").strip().lower()
+                if choice == 'y':
+                    self._trainer_battle(npc, is_rematch=True)
 
         input("\nPress Enter to continue...")
 
@@ -253,10 +261,13 @@ class Game:
 
         self._battle(wild_team, is_wild=True)
 
-    def _trainer_battle(self, npc: NPC):
+    def _trainer_battle(self, npc: NPC, is_rematch: bool = False):
         """Handle trainer battle."""
+        # For rematches, always generate a new stronger team
+        if is_rematch:
+            trainer_team = self._generate_trainer_team(npc, is_rematch=True)
         # Check if trainer has a fixed team stored
-        if npc.id in self.state.trainer_teams:
+        elif npc.id in self.state.trainer_teams:
             # Use stored team
             trainer_team = self.state.trainer_teams[npc.id]
         else:
@@ -420,27 +431,28 @@ class Game:
                 print(f"\n{creature.get_display_name()} did not learn {learnable_move.name}.")
                 input("Press Enter to continue...")
 
-    def _generate_trainer_team(self, npc: NPC) -> Team:
+    def _generate_trainer_team(self, npc: NPC, is_rematch: bool = False) -> Team:
         """
         Generate a fixed team for a trainer NPC.
 
         Args:
             npc: The trainer NPC
+            is_rematch: If True, generates higher-level team for rematch
 
         Returns:
             Team for the trainer
         """
         # Check for special hand-crafted teams (Elite Four and Champion)
         if npc.id == "elite_1":
-            return self._create_elite_mystica_team()
+            return self._create_elite_mystica_team(is_rematch)
         elif npc.id == "elite_2":
-            return self._create_elite_tempest_team()
+            return self._create_elite_tempest_team(is_rematch)
         elif npc.id == "elite_3":
-            return self._create_elite_steel_team()
+            return self._create_elite_steel_team(is_rematch)
         elif npc.id == "elite_4":
-            return self._create_elite_phantom_team()
+            return self._create_elite_phantom_team(is_rematch)
         elif npc.id == "champion":
-            return self._create_champion_aurora_team()
+            return self._create_champion_aurora_team(is_rematch)
 
         # Use NPC ID as seed for reproducibility
         rng = random.Random(hash(npc.id + str(self.state.seed)))
@@ -496,13 +508,16 @@ class Game:
 
         return trainer_team
 
-    def _create_elite_mystica_team(self) -> Team:
+    def _create_elite_mystica_team(self, is_rematch: bool = False) -> Team:
         """
         Create hand-crafted team for Elite Mystica (Mystic-type specialist).
-        Level 32-35 with strong Mystic and supporting types.
+        Level 32-36 normal, 50-54 rematch with strong Mystic and supporting types.
         """
         team = Team()
         rng = random.Random(hash("elite_mystica" + str(self.state.seed)))
+
+        # Rematch increases levels significantly
+        base_level = 50 if is_rematch else 32
 
         # Find creatures with Mystic type and high stats
         mystic_creatures = []
@@ -527,21 +542,22 @@ class Game:
             if candidate not in selected:
                 selected.append(candidate)
 
-        # Create team with levels 32-35
+        # Create team with progressive levels
         for i, species in enumerate(selected):
-            level = 32 + i  # Levels 32, 33, 34, 35, 36
+            level = base_level + i  # 32-36 normal, 50-54 rematch
             creature = Creature(species=species, level=level)
             team.add_creature(creature)
 
         return team
 
-    def _create_elite_tempest_team(self) -> Team:
+    def _create_elite_tempest_team(self, is_rematch: bool = False) -> Team:
         """
         Create hand-crafted team for Elite Tempest (Gale-type specialist).
-        Level 33-36 with fast, powerful Gale types.
+        Level 33-37 normal, 51-55 rematch with fast, powerful Gale types.
         """
         team = Team()
         rng = random.Random(hash("elite_tempest" + str(self.state.seed)))
+        base_level = 51 if is_rematch else 33
 
         # Find Gale-type creatures
         gale_creatures = []
@@ -569,21 +585,22 @@ class Game:
                 if candidate not in selected:
                     selected.append(candidate)
 
-        # Create team with levels 33-37
+        # Create team with progressive levels
         for i, species in enumerate(selected):
-            level = 33 + i
+            level = base_level + i
             creature = Creature(species=species, level=level)
             team.add_creature(creature)
 
         return team
 
-    def _create_elite_steel_team(self) -> Team:
+    def _create_elite_steel_team(self, is_rematch: bool = False) -> Team:
         """
         Create hand-crafted team for Elite Steel (Metal-type specialist).
-        Level 34-37 with defensive Metal types and hard-hitting attacks.
+        Level 34-38 normal, 52-56 rematch with defensive Metal types and hard-hitting attacks.
         """
         team = Team()
         rng = random.Random(hash("elite_steel" + str(self.state.seed)))
+        base_level = 52 if is_rematch else 34
 
         # Find Metal-type creatures
         metal_creatures = []
@@ -609,21 +626,22 @@ class Game:
                 if candidate not in selected:
                     selected.append(candidate)
 
-        # Create team with levels 34-38
+        # Create team with progressive levels
         for i, species in enumerate(selected):
-            level = 34 + i
+            level = base_level + i
             creature = Creature(species=species, level=level)
             team.add_creature(creature)
 
         return team
 
-    def _create_elite_phantom_team(self) -> Team:
+    def _create_elite_phantom_team(self, is_rematch: bool = False) -> Team:
         """
         Create hand-crafted team for Elite Phantom (Spirit-type specialist).
-        Level 35-38 with evasive Spirit and Shadow types.
+        Level 35-39 normal, 53-57 rematch with evasive Spirit and Shadow types.
         """
         team = Team()
         rng = random.Random(hash("elite_phantom" + str(self.state.seed)))
+        base_level = 53 if is_rematch else 35
 
         # Find Spirit and Shadow-type creatures
         spirit_shadow_creatures = []
@@ -647,22 +665,23 @@ class Game:
                     if candidate not in selected:
                         selected.append(candidate)
 
-        # Create team with levels 35-39
+        # Create team with progressive levels
         for i, species in enumerate(selected):
-            level = 35 + i
+            level = base_level + i
             creature = Creature(species=species, level=level)
             team.add_creature(creature)
 
         return team
 
-    def _create_champion_aurora_team(self) -> Team:
+    def _create_champion_aurora_team(self, is_rematch: bool = False) -> Team:
         """
         Create hand-crafted team for Champion Aurora.
-        Level 38-42 with a perfectly balanced team covering all weaknesses.
+        Level 38-43 normal, 55-60 rematch with a perfectly balanced team covering all weaknesses.
         Uses the strongest creatures from diverse types.
         """
         team = Team()
         rng = random.Random(hash("champion_aurora" + str(self.state.seed)))
+        base_level = 55 if is_rematch else 38
 
         # Champion has a diverse team - select strongest from each type category
         type_priorities = ["Flame", "Aqua", "Leaf", "Volt", "Terra", "Shadow"]
@@ -684,9 +703,9 @@ class Game:
                                         reverse=True)
                 selected.append(sorted_creatures[0])
 
-        # Create team with levels 38-43 (Champion's team)
+        # Create team with progressive levels
         for i, species in enumerate(selected):
-            level = 38 + i  # Levels 38, 39, 40, 41, 42, 43
+            level = base_level + i  # 38-43 normal, 55-60 rematch
             creature = Creature(species=species, level=level)
             team.add_creature(creature)
 

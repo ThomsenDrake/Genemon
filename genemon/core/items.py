@@ -129,12 +129,20 @@ class Item:
             return f"{name}'s PP was fully restored!"
 
         elif self.effect == ItemEffect.CURE_STATUS:
-            # Will be implemented with status effects
-            return f"{name}'s status was cured!"
+            if creature.has_status():
+                status_name = creature.status.value.capitalize()
+                creature.cure_status()
+                return f"{name}'s {status_name} was cured!"
+            else:
+                return f"{name} has no status to cure!"
 
         elif self.effect == ItemEffect.CURE_ALL_STATUS:
-            # Will be implemented with status effects
-            return f"{name}'s status was fully restored!"
+            if creature.has_status():
+                status_name = creature.status.value.capitalize()
+                creature.cure_status()
+                return f"{name}'s {status_name} was cured!"
+            else:
+                return f"{name} has no status to cure!"
 
         return "The item had no effect."
 

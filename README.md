@@ -10,7 +10,7 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 - **Procedural pixel art sprites** - each creature gets unique front/back/mini sprites (56x56 and 16x16)
 - **Classic RPG gameplay** - familiar mechanics with infinite variety
 
-## ✅ Current Status - v0.7.0
+## ✅ Current Status - v0.8.0
 
 **This project is being autonomously developed by Claude Code in a sandboxed environment.**
 
@@ -28,6 +28,7 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 - [x] **Badge system** - Collect all 8 badges by defeating gym leaders
 - [x] **Hand-crafted Elite Four teams** - 4 elite trainers with strategic, type-optimized teams (levels 32-39)
 - [x] **Champion with ultimate team** - Champion Aurora with perfectly balanced 6-creature team (levels 38-43)
+- [x] **Elite Four & Champion rematch** - Rebattle at higher levels (50-60) for endgame challenge
 - [x] **Victory Road** - Challenging path to the Elite Four
 - [x] **Post-game content** - Battle Tower and Legendary Sanctuary accessible after defeating Champion
 - [x] **Move Relearner** - Special NPC to reteach forgotten moves
@@ -37,7 +38,8 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 - [x] **Item system** - Potions, status healers, PP restore, TMs, and capture balls (63 items total)
 - [x] **Shop system** - Buy items from merchants with in-game money
 - [x] **PP tracking** - Moves have limited uses with PP restoration
-- [x] **Status effects** - Burn, poison, paralysis, sleep, and frozen effects
+- [x] **Full status effect mechanics** - Burn reduces attack 50%, Paralysis reduces speed 75%, plus damage/immobilization
+- [x] **Status cure items** - Antidote, Paralyze Heal, Awakening, and more to cure status effects
 - [x] **Catching mechanics** - Capture wild creatures with capture balls
 - [x] **Save/load system** - Multiple save files with full persistence
 - [x] **Pokedex tracking** - Track seen and caught creatures

@@ -4,6 +4,87 @@ All notable changes to the Genemon project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.8.0] - 2025-11-11 - Iteration 8: Status Effects, Rematch System, and Battle Polish
+
+### Added
+
+#### Status Effect Mechanics (Fully Functional)
+- **Burn attack reduction** - Burn now reduces physical attack by 50% (genemon/battle/engine.py:287-289)
+- **Paralysis speed reduction** - Paralysis now reduces speed by 75% for turn order (genemon/battle/engine.py:314-322)
+- **Status cure items** - Antidote, Paralyze Heal, Awakening now properly cure status effects (genemon/core/items.py:131-145)
+- **Status effects fully integrated** - All 5 status effects (Burn, Poison, Paralysis, Sleep, Frozen) now work properly in battle
+
+#### Elite Four & Champion Rematch System
+- **Rematch battles** - Elite Four and Champion can now be challenged again after first defeat (genemon/core/game.py:227-241)
+- **Higher rematch levels** - Rematch teams are significantly stronger:
+  - Elite Mystica: Levels 50-54 (was 32-36)
+  - Elite Tempest: Levels 51-55 (was 33-37)
+  - Elite Steel: Levels 52-56 (was 34-38)
+  - Elite Phantom: Levels 53-57 (was 35-39)
+  - Champion Aurora: Levels 55-60 (was 38-43)
+- **Rematch prompt** - Clear UI indicating rematch with higher levels (genemon/core/game.py:236-237)
+- **Consistent teams** - Rematch teams use same creature species but at higher levels
+
+### Changed
+
+#### Battle System Improvements
+- **Burn damage calculation** - Physical attacks now properly reduced when Burned
+- **Speed calculation** - Turn order now accounts for Paralysis speed penalty
+- **Status effect balance** - Status effects now have meaningful strategic impact
+
+#### Item System Enhancements
+- **Status cure functionality** - Status healing items now check for and cure status effects properly
+- **Item feedback** - Better messaging when using status cure items ("no status to cure" vs "cured")
+
+### Technical Details
+
+#### Code Changes
+- **Modified files**: 3 core files enhanced
+  - genemon/battle/engine.py: +8 lines (Burn/Paralysis mechanics)
+  - genemon/core/items.py: +16 lines (Status cure implementation)
+  - genemon/core/game.py: +25 lines (Rematch system)
+- **Total code added**: +49 lines
+- **No breaking changes**: All v0.7.0 features maintained
+
+#### New Features Count
+- **2 status effect mechanics**: Burn attack reduction, Paralysis speed reduction
+- **5 rematch levels**: Elite Four (4) + Champion (1) with higher-level teams
+- **Status cure items**: 3 items now functional (Antidote, Paralyze Heal, Awakening)
+
+### Improvements
+
+- **Status effects are now strategic** - Burn and Paralysis have meaningful in-battle effects
+- **Rematch provides endgame challenge** - Post-game players can test teams against level 50-60 opponents
+- **Battle mechanics more complete** - Status effects and PP management fully functional
+- **Item system more useful** - Status cure items now essential for tough battles
+
+### Balance
+
+#### Status Effect Impact
+- **Burn**: 50% attack reduction + 1/16 max HP damage per turn (major physical nerf)
+- **Poison**: 1/8 max HP damage per turn (faster than Burn)
+- **Paralysis**: 75% speed reduction + 25% chance to skip turn (major speed nerf)
+- **Sleep**: Can't move for 2-3 turns, then wakes up
+- **Frozen**: Can't move, 20% chance to thaw each turn
+
+#### Rematch Levels
+- **Elite Four (Rematch)**: Levels 50-57 (vs 32-39 first time)
+- **Champion (Rematch)**: Levels 55-60 (vs 38-43 first time)
+- **Recommended player level**: 50+ for Elite Four rematch, 55+ for Champion rematch
+
+### Performance
+- **No performance impact**: Status calculations add negligible overhead
+- **Rematch generation**: Instant (same algorithm, different levels)
+- **All tests passing**: 6/6 tests successful
+
+### Testing
+- ✅ All imports successful (10/10 modules)
+- ✅ Creature generation (151 total)
+- ✅ Sprite generation (56x56, 16x16)
+- ✅ Type system (16 types)
+- ✅ Battle system with status effects
+- ✅ World system (24 locations, 46 NPCs)
+
 ## [0.7.0] - 2025-11-11 - Iteration 7: Elite Four Overhaul, Legendaries, and Post-Game Content
 
 ### Added

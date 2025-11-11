@@ -284,6 +284,10 @@ class Battle:
         defense_stat = defender.defense
         power = move.power
 
+        # Burn reduces attack by 50%
+        if attacker.status == StatusEffect.BURN:
+            attack_stat = int(attack_stat * 0.5)
+
         # Base damage formula (simplified)
         damage = ((2 * level / 5 + 2) * power * attack_stat / defense_stat / 50) + 2
 
@@ -307,9 +311,19 @@ class Battle:
         Returns:
             True if player goes first
         """
-        if self.player_active.speed > self.opponent_active.speed:
+        # Get effective speed (Paralysis reduces speed by 75%)
+        player_speed = self.player_active.speed
+        opponent_speed = self.opponent_active.speed
+
+        if self.player_active.status == StatusEffect.PARALYSIS:
+            player_speed = int(player_speed * 0.25)
+
+        if self.opponent_active.status == StatusEffect.PARALYSIS:
+            opponent_speed = int(opponent_speed * 0.25)
+
+        if player_speed > opponent_speed:
             return True
-        elif self.player_active.speed < self.opponent_active.speed:
+        elif player_speed < opponent_speed:
             return False
         else:
             return random.choice([True, False])
