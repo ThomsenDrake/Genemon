@@ -4,7 +4,18 @@ Creature data model and related classes.
 
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Tuple
+from enum import Enum
 import json
+
+
+class StatusEffect(Enum):
+    """Status effects that can afflict creatures."""
+    NONE = "none"
+    BURN = "burn"        # Deals damage each turn, reduces attack
+    POISON = "poison"    # Deals damage each turn
+    PARALYSIS = "paralysis"  # May prevent movement, reduces speed
+    SLEEP = "sleep"      # Cannot move for several turns
+    FROZEN = "frozen"    # Cannot move until thawed
 
 
 @dataclass
@@ -116,6 +127,13 @@ class Creature:
     exp: int = 0
     nickname: Optional[str] = None
 
+    # Individual move instances (separate from species moves for PP tracking)
+    moves: List[Move] = field(default_factory=list, init=False)
+
+    # Status effect
+    status: StatusEffect = StatusEffect.NONE
+    status_turns: int = 0  # Number of turns status has been active (for sleep, etc.)
+
     # Current battle stats (can be modified by stat changes)
     attack: int = field(init=False)
     defense: int = field(init=False)
@@ -124,6 +142,10 @@ class Creature:
 
     def __post_init__(self):
         """Calculate initial stats based on level and base stats."""
+        # Copy moves from species if not already set
+        if not self.moves:
+            import copy
+            self.moves = [copy.deepcopy(move) for move in self.species.moves]
         self._calculate_stats()
 
     def _calculate_stats(self):
@@ -191,6 +213,77 @@ class Creature:
                 self.level >= self.species.evolution_level and
                 self.species.evolves_into is not None)
 
+    def restore_pp(self, amount: int = None):
+        """Restore PP for all moves. If amount is None, fully restores all PP."""
+        for move in self.moves:
+            if amount is None:
+                move.pp = move.max_pp
+            else:
+                move.pp = min(move.pp + amount, move.max_pp)
+
+    def has_usable_moves(self) -> bool:
+        """Check if creature has any moves with PP remaining."""
+        return any(move.pp > 0 for move in self.moves)
+
+    def apply_status(self, status: StatusEffect, turns: int = 0):
+        """Apply a status effect to the creature."""
+        if self.status == StatusEffect.NONE:
+            self.status = status
+            self.status_turns = turns
+
+    def cure_status(self):
+        """Cure the creature's status effect."""
+        self.status = StatusEffect.NONE
+        self.status_turns = 0
+
+    def has_status(self) -> bool:
+        """Check if creature has a status effect."""
+        return self.status != StatusEffect.NONE
+
+    def process_status_damage(self) -> int:
+        """
+        Process end-of-turn status damage.
+
+        Returns:
+            Damage dealt by status effect
+        """
+        damage = 0
+        if self.status == StatusEffect.BURN:
+            damage = max(1, self.max_hp // 16)  # 1/16 of max HP
+            self.take_damage(damage)
+        elif self.status == StatusEffect.POISON:
+            damage = max(1, self.max_hp // 8)   # 1/8 of max HP
+            self.take_damage(damage)
+        return damage
+
+    def can_move(self) -> tuple[bool, str]:
+        """
+        Check if creature can move this turn based on status.
+
+        Returns:
+            (can_move, message) tuple
+        """
+        if self.status == StatusEffect.SLEEP:
+            self.status_turns += 1
+            if self.status_turns >= 3:  # Wake up after 2-3 turns
+                self.cure_status()
+                return True, f"{self.get_display_name()} woke up!"
+            return False, f"{self.get_display_name()} is asleep!"
+
+        elif self.status == StatusEffect.PARALYSIS:
+            import random
+            if random.random() < 0.25:  # 25% chance to be fully paralyzed
+                return False, f"{self.get_display_name()} is paralyzed and can't move!"
+
+        elif self.status == StatusEffect.FROZEN:
+            import random
+            if random.random() < 0.20:  # 20% chance to thaw
+                self.cure_status()
+                return True, f"{self.get_display_name()} thawed out!"
+            return False, f"{self.get_display_name()} is frozen solid!"
+
+        return True, ""
+
     def to_dict(self) -> dict:
         """Convert creature to dictionary for serialization."""
         return {
@@ -199,7 +292,10 @@ class Creature:
             'current_hp': self.current_hp,
             'max_hp': self.max_hp,
             'exp': self.exp,
-            'nickname': self.nickname
+            'nickname': self.nickname,
+            'moves': [m.to_dict() for m in self.moves],
+            'status': self.status.value,
+            'status_turns': self.status_turns
         }
 
     @classmethod
@@ -215,6 +311,16 @@ class Creature:
         # Override max_hp from saved data if needed
         if 'max_hp' in data and data['max_hp'] != creature.max_hp:
             creature.max_hp = data['max_hp']
+
+        # Restore moves with their PP if saved
+        if 'moves' in data:
+            creature.moves = [Move.from_dict(m) for m in data['moves']]
+
+        # Restore status effect
+        if 'status' in data:
+            creature.status = StatusEffect(data['status'])
+            creature.status_turns = data.get('status_turns', 0)
+
         return creature
 
 
@@ -257,9 +363,10 @@ class Team:
         return self.get_first_active() is not None
 
     def heal_all(self):
-        """Fully heal all creatures in the team."""
+        """Fully heal all creatures in the team and restore their PP."""
         for creature in self.creatures:
             creature.heal()
+            creature.restore_pp()
 
     def to_dict(self) -> dict:
         """Convert team to dictionary for serialization."""

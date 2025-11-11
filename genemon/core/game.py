@@ -280,7 +280,7 @@ class Game:
             if choice == 0:  # Attack
                 self.display.show_moves(battle.player_active)
                 move_choice = self.display.get_menu_choice(
-                    len(battle.player_active.species.moves)
+                    len(battle.player_active.moves)
                 )
                 battle.execute_turn(BattleAction.ATTACK, move_choice)
 

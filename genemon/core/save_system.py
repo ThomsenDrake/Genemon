@@ -40,11 +40,13 @@ class GameState:
         self.pokedex_seen: set = set()
         self.pokedex_caught: set = set()
 
-        # Inventory
+        # Inventory (item_id -> quantity)
         self.items: Dict[str, int] = {
-            "Potion": 5,
-            "Capture Ball": 10
+            "potion": 5,
+            "ether": 3,
+            "capture_ball": 10
         }
+        self.money: int = 1000  # Starting money for shops
 
     def to_dict(self) -> dict:
         """Serialize game state to dictionary."""
@@ -68,7 +70,8 @@ class GameState:
             'defeated_trainers': self.defeated_trainers,
             'pokedex_seen': list(self.pokedex_seen),
             'pokedex_caught': list(self.pokedex_caught),
-            'items': self.items
+            'items': self.items,
+            'money': self.money
         }
 
     @classmethod
@@ -108,7 +111,8 @@ class GameState:
         state.defeated_trainers = data.get('defeated_trainers', [])
         state.pokedex_seen = set(data.get('pokedex_seen', []))
         state.pokedex_caught = set(data.get('pokedex_caught', []))
-        state.items = data.get('items', {"Potion": 5, "Capture Ball": 10})
+        state.items = data.get('items', {"potion": 5, "ether": 3, "capture_ball": 10})
+        state.money = data.get('money', 1000)
 
         return state
 

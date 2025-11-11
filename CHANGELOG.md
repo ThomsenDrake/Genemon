@@ -4,6 +4,99 @@ All notable changes to the Genemon project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.2.0] - 2025-11-11 - Iteration 2: PP Tracking, Items, and Status Effects
+
+### Added
+
+#### PP (Power Points) System
+- **Individual move instances** - Each creature now has its own copy of moves with separate PP tracking
+- **PP depletion** - Moves consume PP when used in battle (genemon/core/creature.py:131)
+- **PP restoration** - Creatures can restore PP via items or healing (genemon/core/creature.py:201-207)
+- **Struggle move** - When all moves are out of PP, creatures use Struggle (deals recoil damage) (genemon/battle/engine.py:227-244)
+- **PP display** - Move lists now show current PP / max PP, with warnings when PP is 0 (genemon/ui/display.py:202-207)
+- **Team healing restores PP** - heal_all() now restores both HP and PP (genemon/core/creature.py:284-288)
+
+#### Item System
+- **Item class** - Complete item system with types, effects, and usage logic (genemon/core/items.py)
+- **ItemType enum** - HEALING, PP_RESTORE, STATUS_HEAL, CAPTURE, BATTLE categories
+- **ItemEffect enum** - Specific effects like HEAL_HP, RESTORE_PP, CURE_STATUS, etc.
+- **Item inventory** - GameState tracks items by ID with quantities (genemon/core/save_system.py:44-49)
+- **Money system** - Added money field to GameState for shop purchases (genemon/core/save_system.py:49)
+- **13 pre-defined items**:
+  - Healing: Potion (20 HP), Super Potion (50 HP), Hyper Potion (120 HP), Full Heal (full HP)
+  - PP Restore: Ether (10 PP to all moves), Max Ether (full PP)
+  - Status Healers: Antidote, Awakening, Burn Heal, Paralyze Heal, Full Restore
+  - Capture: Capture Ball
+
+#### Status Effect System
+- **StatusEffect enum** - BURN, POISON, PARALYSIS, SLEEP, FROZEN (genemon/core/creature.py:11-18)
+- **Status tracking** - Creatures track current status and turn count (genemon/core/creature.py:134-135)
+- **Status application** - apply_status() method to inflict status effects (genemon/core/creature.py:228-232)
+- **Status curing** - cure_status() method to remove status effects (genemon/core/creature.py:234-237)
+- **Status damage processing** - Burn and Poison deal damage each turn (genemon/core/creature.py:243-257)
+- **Movement restrictions** - Sleep, Paralysis, and Frozen can prevent actions (genemon/core/creature.py:259-285)
+- **Battle integration** - Status effects checked before moves and damage processed after (genemon/battle/engine.py:182-186, 224-225)
+- **Status display** - Team summary shows status effects (BRN, PSN, PAR, SLP, FRZ) (genemon/ui/display.py:89-97)
+- **Status messages** - Battle log shows status damage and effects (genemon/battle/engine.py:397-415)
+
+### Changed
+
+#### Creature System
+- **Move ownership** - Creatures now own their move instances instead of referencing species moves (genemon/core/creature.py:120)
+- **Move serialization** - Creature to_dict/from_dict now includes move PP state (genemon/core/creature.py:287-324)
+- **Status serialization** - Creature to_dict/from_dict now includes status effects (genemon/core/creature.py:297-298, 319-322)
+
+#### Battle Engine
+- **Move selection** - Battle engine now uses creature.moves instead of species.moves (genemon/battle/engine.py:383-385)
+- **PP checking** - Attacks check and deduct PP before execution (genemon/battle/engine.py:189-196)
+- **AI move selection** - Opponent AI only chooses moves with PP > 0 (genemon/battle/engine.py:157-169)
+- **Status integration** - can_move() checked before each attack (genemon/battle/engine.py:182-187)
+- **End-of-turn processing** - Status damage applied after each action (genemon/battle/engine.py:224-225)
+
+#### Save System
+- **Item storage format** - Items now stored by item_id instead of item name (genemon/core/save_system.py:44-49, 114-115)
+- **Money persistence** - Money now saved and loaded with game state (genemon/core/save_system.py:74, 115)
+- **Starting inventory** - New games start with 5 Potions, 3 Ethers, 10 Capture Balls, and 1000 money
+
+#### UI System
+- **Move display** - Shows PP with "OUT OF PP!" warning when depleted (genemon/ui/display.py:199-208)
+- **Team display** - Shows status effect abbreviations next to creature HP (genemon/ui/display.py:82-98)
+
+### Technical Details
+
+#### Code Changes
+- **3 new classes**: StatusEffect (enum), Item, ItemEffect (enum)
+- **15 new methods**: restore_pp, has_usable_moves, apply_status, cure_status, has_status, process_status_damage, can_move, _execute_struggle, _process_status_damage, and item-related methods
+- **Modified files**: 7 core files updated
+  - genemon/core/creature.py: +120 lines (status effects, PP management)
+  - genemon/core/items.py: +280 lines (new file)
+  - genemon/core/save_system.py: +3 lines (money, updated defaults)
+  - genemon/battle/engine.py: +60 lines (PP tracking, status processing, Struggle)
+  - genemon/ui/display.py: +12 lines (PP/status display)
+  - genemon/core/game.py: +1 line (creature.moves reference)
+
+#### Architecture Improvements
+- **Separation of concerns** - Items separated into dedicated module
+- **Extensibility** - Status effect system ready for additional effects
+- **Data integrity** - PP tracked per-creature, not shared across species
+
+### Bug Fixes
+- **Move sharing bug** - Fixed issue where all creatures of same species shared PP
+- **Serialization completeness** - Moves now properly saved with their PP state
+
+### Known Limitations
+- Item usage not yet implemented in game UI (infrastructure ready)
+- Shop system not yet implemented (items defined, money system ready)
+- NPC trainers still use random creatures (not fixed teams)
+- Status-inflicting moves not yet implemented (system ready for them)
+
+### Compatibility
+- Save files from v0.1.0 will load but creatures will have full PP (moves regenerated from species)
+- Item inventory format changed from names to IDs
+- Fully backwards compatible otherwise
+
+---
+
 ## [0.1.0] - 2025-11-11 - Initial Release
 
 ### Added - Core Game Systems

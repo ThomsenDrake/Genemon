@@ -5,7 +5,7 @@ Battle engine with turn-based combat mechanics.
 import random
 from typing import Optional, List, Tuple
 from enum import Enum
-from ..core.creature import Creature, Move, Team
+from ..core.creature import Creature, Move, Team, StatusEffect
 from ..creatures.types import get_effectiveness
 
 
@@ -153,16 +153,20 @@ class Battle:
         if self.opponent_active.is_fainted():
             return
 
-        # Simple AI: random move
-        moves = self.opponent_active.species.moves
-        if moves:
-            move = random.choice(moves)
+        # Simple AI: random move with PP
+        usable_moves = [m for m in self.opponent_active.moves if m.pp > 0]
+        if usable_moves:
+            move = random.choice(usable_moves)
             self._execute_attack(
                 self.opponent_active,
                 self.player_active,
                 move,
                 is_player=False
             )
+        else:
+            # No PP left - use Struggle (a special move)
+            self.log.add(f"{self.opponent_active.get_display_name()} has no PP left!")
+            self._execute_struggle(self.opponent_active, self.player_active, is_player=False)
 
     def _execute_attack(
         self,
@@ -174,6 +178,22 @@ class Battle:
         """Execute an attack move."""
         attacker_name = attacker.get_display_name()
         defender_name = defender.get_display_name()
+
+        # Check if attacker can move (status effects)
+        can_move, message = attacker.can_move()
+        if not can_move:
+            self.log.add(message)
+            self._process_status_damage(attacker, defender)
+            return
+
+        # Check if move has PP
+        if move.pp <= 0:
+            self.log.add(f"{move.name} has no PP left!")
+            self._execute_struggle(attacker, defender, is_player)
+            return
+
+        # Deduct PP
+        move.pp -= 1
 
         self.log.add(f"{attacker_name} used {move.name}!")
 
@@ -200,6 +220,38 @@ class Battle:
         # Check if defender fainted
         if defender.is_fainted():
             self.log.add(f"{defender_name} fainted!")
+
+        # Process status damage at end of turn
+        self._process_status_damage(attacker, defender)
+
+    def _execute_struggle(
+        self,
+        attacker: Creature,
+        defender: Creature,
+        is_player: bool
+    ):
+        """Execute Struggle move (used when no PP remaining)."""
+        attacker_name = attacker.get_display_name()
+        defender_name = defender.get_display_name()
+
+        self.log.add(f"{attacker_name} used Struggle!")
+
+        # Struggle always hits and does recoil damage
+        damage = max(1, int(attacker.attack * 0.5))
+        actual_damage = defender.take_damage(damage)
+
+        self.log.add(f"{defender_name} took {actual_damage} damage!")
+
+        # Recoil damage (25% of max HP)
+        recoil = max(1, int(attacker.max_hp * 0.25))
+        attacker.take_damage(recoil)
+        self.log.add(f"{attacker_name} is hurt by recoil!")
+
+        # Check if either fainted
+        if defender.is_fainted():
+            self.log.add(f"{defender_name} fainted!")
+        if attacker.is_fainted():
+            self.log.add(f"{attacker_name} fainted from recoil!")
 
     def _calculate_damage(
         self,
@@ -337,10 +389,30 @@ class Battle:
         creature: Creature,
         index: int
     ) -> Optional[Move]:
-        """Get move by index."""
-        if 0 <= index < len(creature.species.moves):
-            return creature.species.moves[index]
+        """Get move by index from creature's personal moves."""
+        if 0 <= index < len(creature.moves):
+            return creature.moves[index]
         return None
+
+    def _process_status_damage(self, attacker: Creature, defender: Creature):
+        """Process status damage for both creatures at end of turn."""
+        # Process attacker status
+        if attacker.has_status():
+            damage = attacker.process_status_damage()
+            if damage > 0:
+                status_name = attacker.status.value.capitalize()
+                self.log.add(f"{attacker.get_display_name()} is hurt by {status_name}! ({damage} damage)")
+                if attacker.is_fainted():
+                    self.log.add(f"{attacker.get_display_name()} fainted from {status_name}!")
+
+        # Process defender status
+        if defender.has_status():
+            damage = defender.process_status_damage()
+            if damage > 0:
+                status_name = defender.status.value.capitalize()
+                self.log.add(f"{defender.get_display_name()} is hurt by {status_name}! ({damage} damage)")
+                if defender.is_fainted():
+                    self.log.add(f"{defender.get_display_name()} fainted from {status_name}!")
 
     def try_capture(self, ball_strength: float = 1.0) -> bool:
         """

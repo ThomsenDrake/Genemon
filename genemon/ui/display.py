@@ -87,7 +87,12 @@ class Display:
             print("  (Empty)")
         else:
             for i, creature in enumerate(team.creatures, 1):
-                status = "FNT" if creature.is_fainted() else "OK"
+                if creature.is_fainted():
+                    status = "FNT"
+                elif creature.has_status():
+                    status = creature.status.value.upper()[:3]
+                else:
+                    status = "OK"
                 print(f"{i}. {creature.get_display_name()} Lv.{creature.level} "
                       f"HP: {creature.current_hp}/{creature.max_hp} [{status}]")
         print()
@@ -197,11 +202,14 @@ class Display:
 
     @staticmethod
     def show_moves(creature: Creature) -> None:
-        """Display creature's moves."""
+        """Display creature's moves with PP information."""
         print(f"\n=== {creature.get_display_name()}'s Moves ===")
-        for i, move in enumerate(creature.species.moves, 1):
+        for i, move in enumerate(creature.moves, 1):
+            pp_display = f"PP: {move.pp}/{move.max_pp}"
+            if move.pp == 0:
+                pp_display += " (OUT OF PP!)"
             print(f"{i}. {move.name} ({move.type}) - "
-                  f"Power: {move.power} Acc: {move.accuracy}% PP: {move.pp}/{move.max_pp}")
+                  f"Power: {move.power} Acc: {move.accuracy}% {pp_display}")
         print()
 
     @staticmethod
