@@ -299,6 +299,8 @@ class CreatureGenerator:
 
     def _generate_move(self, move_type: str, power_level: str) -> Move:
         """Generate a single move."""
+        from ..core.creature import StatusEffect
+
         # Generate name
         prefix = self.rng.choice(MOVE_PREFIXES)
         suffix = self.rng.choice(MOVE_SUFFIXES)
@@ -330,6 +332,36 @@ class CreatureGenerator:
 
         description = f"A {move_type}-type attack."
 
+        # 30% chance to have a status effect (type-appropriate)
+        status_effect = None
+        status_chance = 0
+
+        if self.rng.random() < 0.30:
+            # Map types to appropriate status effects
+            type_to_status = {
+                "Flame": StatusEffect.BURN,
+                "Frost": StatusEffect.FROZEN,
+                "Volt": StatusEffect.PARALYSIS,
+                "Toxin": StatusEffect.POISON,
+                "Mind": StatusEffect.SLEEP,
+                "Spirit": StatusEffect.SLEEP,
+                "Shadow": StatusEffect.POISON,
+            }
+
+            status_effect = type_to_status.get(move_type)
+            if status_effect:
+                # Lower power moves have higher status chance
+                if power < 40:
+                    status_chance = self.rng.randint(20, 40)
+                elif power < 70:
+                    status_chance = self.rng.randint(10, 25)
+                else:
+                    status_chance = self.rng.randint(5, 15)
+
+                # Update description
+                status_name = status_effect.value.capitalize()
+                description = f"A {move_type}-type attack that may inflict {status_name}."
+
         return Move(
             name=name,
             type=move_type,
@@ -337,7 +369,9 @@ class CreatureGenerator:
             accuracy=accuracy,
             pp=max_pp,
             max_pp=max_pp,
-            description=description
+            description=description,
+            status_effect=status_effect,
+            status_chance=status_chance
         )
 
     def _generate_flavor_text(self, name: str, types: List[str]) -> str:

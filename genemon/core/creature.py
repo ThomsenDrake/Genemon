@@ -29,6 +29,8 @@ class Move:
     pp: int
     max_pp: int
     description: str
+    status_effect: Optional[StatusEffect] = None  # Status effect inflicted
+    status_chance: int = 0  # Chance (0-100) to inflict status
 
     def to_dict(self) -> dict:
         """Convert move to dictionary for serialization."""
@@ -39,12 +41,17 @@ class Move:
             'accuracy': self.accuracy,
             'pp': self.pp,
             'max_pp': self.max_pp,
-            'description': self.description
+            'description': self.description,
+            'status_effect': self.status_effect.value if self.status_effect else None,
+            'status_chance': self.status_chance
         }
 
     @classmethod
     def from_dict(cls, data: dict) -> 'Move':
         """Create move from dictionary."""
+        status_effect_val = data.get('status_effect')
+        if status_effect_val:
+            data['status_effect'] = StatusEffect(status_effect_val)
         return cls(**data)
 
 

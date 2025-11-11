@@ -4,6 +4,119 @@ All notable changes to the Genemon project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.0] - 2025-11-11 - Iteration 3: Items UI, Shop System, Status Moves, and Trainer Teams
+
+### Added
+
+#### Item Usage UI
+- **Battle Items menu** - Items can now be used during battles via new "Items" option (genemon/core/game.py:287-425)
+- **Overworld Items menu** - Items can be used outside battle from main menu (genemon/core/game.py:447-512)
+- **Inventory display** - New UI method to show items with descriptions and quantities (genemon/ui/display.py:236-259)
+- **Item validation** - Proper checks for item usability (HP, PP, status requirements)
+- **Item consumption** - Items properly deducted from inventory after use
+- **Money display** - Shows current money in Items menu
+- **Capture ball tracking** - Capture balls now properly consumed when used
+
+#### Shop System
+- **Shop menu UI** - Complete shop interface with purchase confirmation (genemon/core/game.py:526-597)
+- **Shop inventory** - NPCs can now have shop_inventory with items to sell
+- **Money system** - Buy items with money, see prices and current balance
+- **Quantity selection** - Buy multiple items at once
+- **Affordability checks** - Prevents purchases when insufficient funds
+- **Merchant Mae** - Shopkeeper in Oakwood City sells 8 different items
+- **Shop integration** - Automatic shop interaction when talking to shopkeeper NPCs
+
+#### Healer System
+- **Healer NPCs** - NPCs can now be marked as healers (genemon/world/npc.py:34)
+- **Free healing** - Talk to Nurse Joy to fully heal team (HP + PP + status)
+- **Healer interaction** - Automatic healing prompt when talking to healer NPCs
+
+#### Status-Inflicting Moves
+- **Move status fields** - Moves can now have status_effect and status_chance (genemon/core/creature.py:32-33)
+- **Type-appropriate effects** - Moves inflict logical status based on type:
+  - Flame → Burn (20-40% for weak moves, 5-15% for strong)
+  - Frost → Frozen
+  - Volt → Paralysis
+  - Toxin/Shadow → Poison
+  - Mind/Spirit → Sleep
+- **30% of moves have status** - Procedurally generated with appropriate chances
+- **Status application in battle** - Moves apply status effects when they hit (genemon/battle/engine.py:220-226)
+- **Status messaging** - Battle log shows when status is inflicted
+- **Single status limit** - Creatures can only have one status at a time
+
+#### Fixed Trainer Teams
+- **Trainer team generation** - Each trainer gets a fixed, reproducible team (genemon/core/game.py:264-305)
+- **Seed-based teams** - Uses NPC ID + save seed for reproducibility
+- **Team persistence** - Trainer teams saved in GameState.trainer_teams
+- **Level-appropriate teams** - Team size and levels scale with trainer type:
+  - Gym Leaders: 3-6 creatures, levels 12-18
+  - Rivals: 2-4 creatures, levels 8-14
+  - Regular trainers: 1-3 creatures, levels 5-12
+- **Rematch consistency** - Same trainer always has same team per save file
+
+### Changed
+
+#### NPC System
+- **New NPC flags** - Added is_shopkeeper, shop_inventory, is_healer fields (genemon/world/npc.py:32-34)
+- **Enhanced NPC interaction** - Automatically handles shops, healers, and battles (genemon/core/game.py:201-226)
+- **Shopkeeper setup** - Merchant Mae configured with 8 items for sale
+
+#### Battle System
+- **Items option added** - Battle menu now includes Items between Attack and Team
+- **Capture ball requirement** - Capture option checks for capture balls before use
+- **Status infliction** - Moves can now inflict status effects based on chance
+
+#### Game Loop
+- **Items in main menu** - Added "Items" option to overworld menu (3rd option)
+- **Menu order updated** - Move, Team, Items, Pokedex, Save, Quit
+
+#### Save System
+- **Trainer teams storage** - GameState now includes trainer_teams field (genemon/core/save_system.py:44)
+- **Team serialization** - Trainer teams saved and loaded with game state (genemon/core/save_system.py:76-79, 122-127)
+- **Version compatibility** - Old saves will generate trainer teams on first encounter
+
+### Technical Details
+
+#### Code Changes
+- **Modified files**: 7 core files enhanced
+  - genemon/core/game.py: +190 lines (item usage, shop, healer, trainer teams)
+  - genemon/core/creature.py: +3 lines (move status fields)
+  - genemon/core/save_system.py: +15 lines (trainer teams persistence)
+  - genemon/creatures/generator.py: +42 lines (status move generation)
+  - genemon/battle/engine.py: +7 lines (status application)
+  - genemon/ui/display.py: +24 lines (inventory display)
+  - genemon/world/npc.py: +17 lines (shop/healer flags and inventory)
+
+#### New Features Count
+- **4 major systems**: Item usage UI, Shop system, Status-inflicting moves, Fixed trainer teams
+- **14 new methods**: _use_item_in_battle, _show_items_menu, _shop_menu, _generate_trainer_team, show_inventory
+- **3 new NPC fields**: is_shopkeeper, shop_inventory, is_healer
+- **2 new Move fields**: status_effect, status_chance
+- **1 new GameState field**: trainer_teams
+
+### Bug Fixes
+- **Capture ball consumption** - Fixed capture balls not being deducted when used
+- **Move serialization** - Status effect fields properly saved and loaded
+
+### Improvements
+- **Better UX** - Clear money/quantity displays in shops
+- **Strategic depth** - Status-inflicting moves add variety to battles
+- **Consistency** - Trainer teams are fixed per save, not random each time
+- **Accessibility** - Items usable both in and out of battle
+
+### Known Limitations
+- Item revival (reviving fainted creatures) not yet implemented
+- Status healing items work but specific status items (Antidote, etc.) cure any status
+- No held items for creatures yet
+- Shop inventory is fixed, not dynamic
+
+### Compatibility
+- **Mostly compatible** with v0.2.0 saves
+- Trainer teams will be generated on first encounter with trainers
+- All new fields have sensible defaults
+
+---
+
 ## [0.2.0] - 2025-11-11 - Iteration 2: PP Tracking, Items, and Status Effects
 
 ### Added

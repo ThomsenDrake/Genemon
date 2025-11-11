@@ -40,6 +40,9 @@ class GameState:
         self.pokedex_seen: set = set()
         self.pokedex_caught: set = set()
 
+        # Trainer teams (npc_id -> Team) - fixed teams per save
+        self.trainer_teams: Dict[str, Team] = {}
+
         # Inventory (item_id -> quantity)
         self.items: Dict[str, int] = {
             "potion": 5,
@@ -70,6 +73,10 @@ class GameState:
             'defeated_trainers': self.defeated_trainers,
             'pokedex_seen': list(self.pokedex_seen),
             'pokedex_caught': list(self.pokedex_caught),
+            'trainer_teams': {
+                npc_id: team.to_dict()
+                for npc_id, team in self.trainer_teams.items()
+            },
             'items': self.items,
             'money': self.money
         }
@@ -111,6 +118,14 @@ class GameState:
         state.defeated_trainers = data.get('defeated_trainers', [])
         state.pokedex_seen = set(data.get('pokedex_seen', []))
         state.pokedex_caught = set(data.get('pokedex_caught', []))
+
+        # Reconstruct trainer teams
+        trainer_teams_data = data.get('trainer_teams', {})
+        state.trainer_teams = {
+            npc_id: Team.from_dict(team_data, state.species_dict)
+            for npc_id, team_data in trainer_teams_data.items()
+        }
+
         state.items = data.get('items', {"potion": 5, "ether": 3, "capture_ball": 10})
         state.money = data.get('money', 1000)
 

@@ -232,3 +232,28 @@ class Display:
         for msg in messages:
             print(f"  {msg}")
         print()
+
+    @staticmethod
+    def show_inventory(items: dict, show_descriptions: bool = False) -> None:
+        """
+        Display player's inventory.
+
+        Args:
+            items: Dictionary of item_id -> quantity
+            show_descriptions: If True, show item descriptions
+        """
+        from ..core.items import get_item
+
+        print("\n=== INVENTORY ===")
+        if not items:
+            print("  (Empty)")
+        else:
+            for i, (item_id, quantity) in enumerate(items.items(), 1):
+                item = get_item(item_id)
+                if item:
+                    print(f"{i}. {item.name} x{quantity}", end="")
+                    if show_descriptions:
+                        print(f" - {item.description}")
+                    else:
+                        print()
+        print()

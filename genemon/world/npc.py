@@ -29,6 +29,9 @@ class NPC:
     is_trainer: bool = False
     trainer_team: Optional[Team] = None
     has_been_defeated: bool = False
+    is_shopkeeper: bool = False
+    shop_inventory: List[str] = field(default_factory=list)  # List of item IDs sold
+    is_healer: bool = False
 
     def get_dialogue(self, game_state: Dict = None) -> str:
         """
@@ -135,6 +138,17 @@ class NPCRegistry:
             x=15,
             y=5,
             sprite="S",
+            is_shopkeeper=True,
+            shop_inventory=[
+                'potion',
+                'super_potion',
+                'ether',
+                'antidote',
+                'awakening',
+                'burn_heal',
+                'paralyze_heal',
+                'capture_ball'
+            ],
             dialogues=[
                 Dialogue("Welcome to my shop!"),
                 Dialogue("I sell potions and capture balls!")
@@ -166,6 +180,7 @@ class NPCRegistry:
             x=14,
             y=5,
             sprite="H",
+            is_healer=True,
             dialogues=[
                 Dialogue("I can heal your creatures!"),
                 Dialogue("Come back anytime!")

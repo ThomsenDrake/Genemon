@@ -217,6 +217,14 @@ class Battle:
         elif effectiveness < 0.75:
             self.log.add("It's not very effective...")
 
+        # Try to apply status effect from move (only if defender not fainted)
+        if move.status_effect and move.status_chance > 0 and not defender.is_fainted():
+            if not defender.has_status():  # Can't inflict status if already has one
+                if random.randint(1, 100) <= move.status_chance:
+                    defender.apply_status(move.status_effect)
+                    status_name = move.status_effect.value.capitalize()
+                    self.log.add(f"{defender_name} was afflicted with {status_name}!")
+
         # Check if defender fainted
         if defender.is_fainted():
             self.log.add(f"{defender_name} fainted!")
