@@ -1,0 +1,22 @@
+# PROJECT RULES - READ FIRST
+
+This file documents critical project rules that must be followed.
+
+## READ-ONLY FILES (NEVER MODIFY)
+- prompt.md - The project specification and requirements
+
+## PROGRESS TRACKING
+Use these files to document changes and progress across iterations:
+- CHANGELOG.md - Log of all code changes, additions, deletions
+- PROGRESS.md or DEVELOPMENT_LOG.md - Notes on what was accomplished each iteration
+
+## LANGUAGE REQUIREMENTS
+- Minimum 70% of codebase must be Python 3.x
+- Core game logic, systems, and features MUST be Python
+- Helper scripts (build, setup) may use other languages
+
+## DEVELOPMENT APPROACH
+- Iterative evolution of a single codebase
+- Refactor, optimize, and prune as needed
+- Never start from scratch - build on previous work
+- Document all major changes in CHANGELOG.md
