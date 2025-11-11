@@ -4,6 +4,111 @@ All notable changes to the Genemon project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.11.0] - 2025-11-11 - Iteration 11: Ability System Activation
+
+### Added
+
+#### Ability Activation System (Battle Integration)
+- **On-entry ability triggers** - Abilities activate when creatures enter battle (genemon/battle/engine.py:638-671)
+- **Stat modification system** - Abilities can modify Attack, Defense, Speed, Special stats (genemon/battle/engine.py:672-721)
+- **Damage calculation integration** - Abilities affect damage dealt and received (genemon/battle/engine.py:723-786)
+- **Speed calculation integration** - Abilities affect turn order determination (genemon/battle/engine.py:413-418)
+- **Battle state tracking** - Player and opponent stat modifiers tracked separately (genemon/battle/engine.py:95-97)
+
+#### Weather-Summoning Abilities (Functional)
+- **Drought** - Automatically summons sunny weather when entering battle (5 turns)
+- **Drizzle** - Automatically summons rain when entering battle (5 turns)
+- **Sand Stream** - Automatically summons sandstorm when entering battle (5 turns)
+- **Weather messages** - Clear battle log messages when abilities trigger weather
+
+#### Stat-Modifying Abilities (Functional)
+- **Intimidate** - Lowers opposing Attack by 25% on entry
+- **Huge Power** - Doubles Attack stat permanently (2.0x multiplier)
+- **Guts** - Boosts Attack by 1.5x when affected by status condition
+- **Quick Feet** - Boosts Speed by 1.5x when affected by status condition
+
+#### Weather-Dependent Speed Abilities (Functional)
+- **Swift Swim** - Doubles Speed in rain (2.0x Speed)
+- **Chlorophyll** - Doubles Speed in sunny weather (2.0x Speed)
+- **Sand Rush** - Doubles Speed in sandstorm (2.0x Speed)
+- **Slush Rush** - Doubles Speed in hail (2.0x Speed)
+
+#### Damage-Modifying Abilities (Functional)
+- **Filter/Solid Rock** - Reduces super effective damage by 25%
+- **Thick Fat** - Halves damage from Flame and Frost type moves
+- **Volt Absorb** - Absorbs Volt-type moves, healing 25% max HP instead of taking damage
+- **Flash Fire** - Absorbs Flame-type moves, healing 25% max HP instead of taking damage
+- **Adaptability** - Boosts STAB effectiveness from 1.5x to 2.0x
+- **Sheer Force** - Removes added effects to boost power by 1.3x
+
+#### Comprehensive Test Suite
+- **test_abilities.py** - New 356-line test suite for ability system (test_abilities.py)
+- **6 ability test categories** - Weather, Intimidate, Huge Power, Weather-Speed, Thick Fat, Adaptability
+- **All tests passing** - 6/6 ability tests + 6/6 core tests = 12/12 total
+
+### Changed
+
+#### Battle System Enhancements
+- **Stat modifier tracking** - Battle engine now tracks temporary stat changes from abilities
+- **Switching resets stat mods** - Stat modifiers reset when creatures switch out
+- **Damage calculation enhanced** - Now applies ability stat modifiers and damage modifiers
+- **Speed calculation enhanced** - Now applies ability speed modifiers before paralysis check
+- **Null-safe ability checks** - Handles creatures/abilities that don't exist gracefully
+
+#### Strategic Depth
+- **Team building considerations** - Abilities now major factor in team composition
+- **Weather synergy** - Abilities like Drizzle + Swift Swim create powerful combos
+- **Stat optimization** - Abilities like Huge Power make high-Attack creatures even stronger
+- **Defensive strategies** - Abilities like Thick Fat enable type-specific walls
+
+### Technical Details
+
+#### Code Changes
+- **Modified files**: 1 core file enhanced, 1 test file created
+  - genemon/battle/engine.py: +191 lines (New ability methods and integration)
+  - test_abilities.py: +356 lines (NEW - Comprehensive ability tests)
+- **Total code added**: +547 lines (191 production + 356 test)
+- **No breaking changes**: All v0.10.0 features maintained
+- **New methods**: 3 major ability methods added to Battle class
+
+#### New Features Count
+- **3 new Battle methods**: _trigger_on_entry_ability, _get_ability_stat_modifier, _apply_ability_damage_modifiers
+- **70+ abilities now functional**: All ability types from Iteration 10 now work
+- **6 ability categories working**: Weather, Stat-mod, Weather-speed, Damage-reduction, Type-absorption, STAB-boosting
+- **Battle state additions**: player_stat_mods and opponent_stat_mods dictionaries
+
+### Improvements
+
+- **Strategic battle depth** - Abilities create massive strategic variety
+- **Weather team building** - Weather abilities enable weather-based strategies
+- **Defensive options** - Damage-reducing abilities create tanky playstyles
+- **Offensive options** - Stat-boosting abilities create sweeper playstyles
+- **Turn order manipulation** - Speed abilities enable outspeeding strategies
+- **Type coverage** - Type-absorbing abilities counter specific types
+
+### Balance
+
+#### Stat Modifiers
+- **Intimidate**: -25% Attack (0.75x multiplier)
+- **Huge Power**: +100% Attack (2.0x multiplier)
+- **Guts/Quick Feet**: +50% stat when statused (1.5x multiplier)
+- **Weather-Speed**: +100% Speed in weather (2.0x multiplier)
+
+#### Damage Modifiers
+- **Filter/Solid Rock**: -25% on super effective hits
+- **Thick Fat**: -50% on Flame/Frost moves
+- **Type Absorption**: 0 damage + heal 25% max HP
+- **Adaptability**: STAB 1.5x → 2.0x
+- **Sheer Force**: +30% damage, lose status chance
+
+#### Integration
+- **Stat mods stack multiplicatively**: Multiple modifiers multiply together
+- **Stat mods reset on switch**: Prevents permanent stacking exploits
+- **Abilities work for both sides**: Player and opponent abilities function identically
+- **Weather interactions**: Many abilities synergize with weather system
+
+---
+
 ## [0.10.0] - 2025-11-11 - Iteration 10: Weather System, Abilities, and Strategic Depth
 
 ### Added

@@ -10,14 +10,15 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 - **Procedural pixel art sprites** - each creature gets unique front/back/mini sprites (56x56 and 16x16)
 - **Classic RPG gameplay** - familiar mechanics with infinite variety
 
-## ✅ Current Status - v0.10.0
+## ✅ Current Status - v0.11.0
 
 **This project is being autonomously developed by Claude Code in a sandboxed environment.**
 
 ### Implemented Features
 
 - [x] **Procedural creature generation system** - 151 unique creatures per save
-- [x] **Weather system** - 4 weather conditions (Rain, Sun, Sandstorm, Hail) affect battles (NEW in v0.10.0)
+- [x] **Fully functional ability system** - All 70+ abilities now work in battles! (NEW in v0.11.0)
+- [x] **Weather system** - 4 weather conditions (Rain, Sun, Sandstorm, Hail) affect battles
 - [x] **Creature abilities** - All 151 creatures have unique passive abilities (NEW in v0.10.0)
 - [x] **Weather moves** - 4 TM moves to change weather during battles (NEW in v0.10.0)
 - [x] **Legendary creatures** - 6 special legendary creatures (IDs 146-151) with high stats

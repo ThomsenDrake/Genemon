@@ -92,11 +92,19 @@ class Battle:
         self.weather = Weather.NONE
         self.weather_turns = 0  # Number of turns weather lasts (0 = infinite until changed)
 
+        # Ability stat modifiers (temporary stat changes from abilities)
+        self.player_stat_mods = {"attack": 1.0, "defense": 1.0, "speed": 1.0, "special": 1.0}
+        self.opponent_stat_mods = {"attack": 1.0, "defense": 1.0, "speed": 1.0, "special": 1.0}
+
         # Battle start message
         if is_wild:
             self.log.add(f"A wild {self.opponent_active.species.name} appeared!")
         else:
             self.log.add("Battle started!")
+
+        # Trigger on-entry abilities for both creatures
+        self._trigger_on_entry_ability(self.player_active, True)
+        self._trigger_on_entry_ability(self.opponent_active, False)
 
     def execute_turn(
         self,
@@ -309,11 +317,22 @@ class Battle:
         Returns:
             Damage amount
         """
+        # Determine if attacker is player or opponent
+        is_attacker_player = (attacker == self.player_active)
+        is_defender_player = (defender == self.player_active)
+
         # Base damage calculation
         level = attacker.level
         attack_stat = attacker.attack
         defense_stat = defender.defense
         power = move.power
+
+        # Apply ability stat modifiers
+        attack_modifier = self._get_ability_stat_modifier(attacker, is_attacker_player, "attack")
+        defense_modifier = self._get_ability_stat_modifier(defender, is_defender_player, "defense")
+
+        attack_stat = int(attack_stat * attack_modifier)
+        defense_stat = int(defense_stat * defense_modifier)
 
         # Burn reduces attack by 50%
         if attacker.status == StatusEffect.BURN:
@@ -345,6 +364,9 @@ class Battle:
         # Random factor (85-100%)
         damage *= random.uniform(0.85, 1.0)
 
+        # Apply ability-based damage modifiers
+        damage = self._apply_ability_damage_modifiers(attacker, defender, move, int(damage))
+
         return max(1, int(damage))
 
     def _determine_order(self) -> bool:
@@ -354,10 +376,18 @@ class Battle:
         Returns:
             True if player goes first
         """
-        # Get effective speed (Paralysis reduces speed by 75%)
+        # Get base speed
         player_speed = self.player_active.speed
         opponent_speed = self.opponent_active.speed
 
+        # Apply ability speed modifiers
+        player_speed_mod = self._get_ability_stat_modifier(self.player_active, True, "speed")
+        opponent_speed_mod = self._get_ability_stat_modifier(self.opponent_active, False, "speed")
+
+        player_speed = int(player_speed * player_speed_mod)
+        opponent_speed = int(opponent_speed * opponent_speed_mod)
+
+        # Paralysis reduces speed by 75%
         if self.player_active.status == StatusEffect.PARALYSIS:
             player_speed = int(player_speed * 0.25)
 
@@ -406,10 +436,18 @@ class Battle:
             if not new_creature.is_fainted():
                 if is_player:
                     self.player_active = new_creature
+                    # Reset player stat modifiers when switching
+                    self.player_stat_mods = {"attack": 1.0, "defense": 1.0, "speed": 1.0, "special": 1.0}
                     self.log.add(f"Go, {new_creature.get_display_name()}!")
+                    # Trigger on-entry ability
+                    self._trigger_on_entry_ability(new_creature, True)
                 else:
                     self.opponent_active = new_creature
+                    # Reset opponent stat modifiers when switching
+                    self.opponent_stat_mods = {"attack": 1.0, "defense": 1.0, "speed": 1.0, "special": 1.0}
                     self.log.add(f"Opponent sent out {new_creature.get_display_name()}!")
+                    # Trigger on-entry ability
+                    self._trigger_on_entry_ability(new_creature, False)
 
     def _check_fainted(self):
         """Check for fainted creatures and prompt for switches."""
@@ -596,3 +634,156 @@ class Battle:
                 self.log.add(f"{weather_name} started!")
             else:
                 self.log.add(f"The weather changed to {weather_name}!")
+
+    def _trigger_on_entry_ability(self, creature: Creature, is_player: bool):
+        """
+        Trigger abilities that activate when a creature enters battle.
+
+        Args:
+            creature: The creature entering battle
+            is_player: True if this is the player's creature
+        """
+        if not creature:
+            return
+
+        ability = creature.species.ability
+        if not ability:
+            return
+
+        creature_name = creature.get_display_name()
+
+        # Weather-summoning abilities
+        if ability.effect_type == "weather_sun":
+            self.set_weather(Weather.SUN, turns=5)
+            self.log.add(f"{creature_name}'s {ability.name} made it sunny!")
+        elif ability.effect_type == "weather_rain":
+            self.set_weather(Weather.RAIN, turns=5)
+            self.log.add(f"{creature_name}'s {ability.name} made it rain!")
+        elif ability.effect_type == "weather_sandstorm":
+            self.set_weather(Weather.SANDSTORM, turns=5)
+            self.log.add(f"{creature_name}'s {ability.name} whipped up a sandstorm!")
+
+        # Intimidate - lowers opponent's Attack on entry
+        elif ability.effect_type == "lower_attack_entry":
+            if is_player:
+                self.opponent_stat_mods["attack"] *= 0.75  # 25% Attack reduction
+                self.log.add(f"{creature_name}'s {ability.name} lowered the foe's Attack!")
+            else:
+                self.player_stat_mods["attack"] *= 0.75
+                self.log.add(f"The opposing {creature_name}'s {ability.name} lowered your Attack!")
+
+    def _get_ability_stat_modifier(self, creature: Creature, is_player: bool, stat: str) -> float:
+        """
+        Get the stat modifier from abilities for a given creature and stat.
+
+        Args:
+            creature: The creature whose stat to modify
+            is_player: True if this is the player's creature
+            stat: The stat to modify ("attack", "defense", "speed", "special")
+
+        Returns:
+            Stat modifier (1.0 = no change, 2.0 = doubled, 0.5 = halved)
+        """
+        ability = creature.species.ability
+        if not ability:
+            return 1.0
+
+        modifier = 1.0
+
+        # Get base stat mods from Intimidate, etc.
+        if is_player:
+            modifier *= self.player_stat_mods.get(stat, 1.0)
+        else:
+            modifier *= self.opponent_stat_mods.get(stat, 1.0)
+
+        # Huge Power - doubles Attack
+        if ability.effect_type == "double_attack" and stat == "attack":
+            modifier *= 2.0
+
+        # Guts - boosts Attack when statused
+        if ability.effect_type == "attack_boost_status" and stat == "attack":
+            if creature.status != StatusEffect.NONE:
+                modifier *= 1.5
+
+        # Quick Feet - boosts Speed when statused
+        if ability.effect_type == "speed_boost_status" and stat == "speed":
+            if creature.status != StatusEffect.NONE:
+                modifier *= 1.5
+
+        # Weather-dependent speed abilities
+        if stat == "speed":
+            if ability.effect_type == "speed_rain" and self.weather == Weather.RAIN:
+                modifier *= 2.0  # Swift Swim
+            elif ability.effect_type == "speed_sun" and self.weather == Weather.SUN:
+                modifier *= 2.0  # Chlorophyll
+            elif ability.effect_type == "speed_sandstorm" and self.weather == Weather.SANDSTORM:
+                modifier *= 2.0  # Sand Rush
+            elif ability.effect_type == "speed_hail" and self.weather == Weather.HAIL:
+                modifier *= 2.0  # Slush Rush
+
+        return modifier
+
+    def _apply_ability_damage_modifiers(
+        self,
+        attacker: Creature,
+        defender: Creature,
+        move,
+        damage: int
+    ) -> int:
+        """
+        Apply ability-based damage modifications.
+
+        Args:
+            attacker: The attacking creature
+            defender: The defending creature
+            move: The move being used
+            damage: Base damage before ability modifications
+
+        Returns:
+            Modified damage value
+        """
+        # Get defender's ability
+        defender_ability = defender.species.ability
+
+        if not defender_ability:
+            return damage
+
+        # Filter/Solid Rock - reduces super effective damage
+        if defender_ability.effect_type == "reduce_super":
+            effectiveness = get_effectiveness(move.type, defender.species.types)
+            if effectiveness > 1.0:
+                damage = int(damage * 0.75)  # 25% reduction on super effective hits
+
+        # Thick Fat - reduces Flame and Frost damage
+        if defender_ability.effect_type == "resist_flame_frost":
+            if move.type in ["Flame", "Frost"]:
+                damage = int(damage * 0.5)  # 50% reduction
+
+        # Type absorption abilities (Volt Absorb, Flash Fire effect, etc.)
+        if defender_ability.effect_type == "absorb_type":
+            # Check if move type matches absorption (simplified - would need type tracking)
+            if (defender_ability.name == "Volt Absorb" and move.type == "Volt") or \
+               (defender_ability.name == "Flash Fire" and move.type == "Flame"):
+                # Heal instead of damage (handled separately, return 0 damage)
+                heal_amount = int(defender.max_hp * 0.25)
+                defender.heal(heal_amount)
+                self.log.add(f"{defender.get_display_name()}'s {defender_ability.name} absorbed the attack!")
+                return 0  # No damage dealt
+
+        # Get attacker's ability
+        attacker_ability = attacker.species.ability
+
+        if attacker_ability:
+            # Adaptability - boosts STAB effectiveness
+            if attacker_ability.effect_type == "boost_stab":
+                if move.type in attacker.species.types:
+                    # STAB is already applied in damage calculation (1.5x)
+                    # Adaptability makes it 2.0x instead
+                    damage = int(damage * (2.0 / 1.5))  # Increase from 1.5x to 2.0x
+
+            # Sheer Force - removes added effects to boost power
+            if attacker_ability.effect_type == "power_no_effects":
+                if move.status_effect or move.status_chance > 0:
+                    damage = int(damage * 1.3)  # 30% boost, but move loses status chance
+
+        return damage
