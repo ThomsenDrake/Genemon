@@ -96,6 +96,11 @@ class Battle:
         self.player_stat_mods = {"attack": 1.0, "defense": 1.0, "speed": 1.0, "special": 1.0}
         self.opponent_stat_mods = {"attack": 1.0, "defense": 1.0, "speed": 1.0, "special": 1.0}
 
+        # Stat stages (-6 to +6, 0 = neutral)
+        # Each stage increases/decreases stat by 50% (2/2, 3/2, 4/2, 5/2, 6/2, 7/2, 8/2)
+        self.player_stat_stages = {"attack": 0, "defense": 0, "speed": 0, "special": 0, "accuracy": 0, "evasion": 0}
+        self.opponent_stat_stages = {"attack": 0, "defense": 0, "speed": 0, "special": 0, "accuracy": 0, "evasion": 0}
+
         # Battle start message
         if is_wild:
             self.log.add(f"A wild {self.opponent_active.species.name} appeared!")
@@ -247,7 +252,7 @@ class Battle:
 
         self.log.add(f"{attacker_name} used {move.name}!")
 
-        # Check for weather-changing moves (power 0 indicates status/weather move)
+        # Check for weather-changing moves and stat-changing moves (power 0 indicates non-damaging move)
         if move.power == 0:
             weather_moves = {
                 "Rain Dance": Weather.RAIN,
@@ -258,6 +263,19 @@ class Battle:
             if move.name in weather_moves:
                 self.set_weather(weather_moves[move.name], turns=5)
                 return  # Weather moves don't deal damage
+
+            # Handle stat-changing moves (power 0, has stat_changes)
+            if move.stat_changes and not attacker.is_fainted():
+                # Determine target
+                if move.stat_change_target == "self":
+                    target_is_player = is_player
+                else:  # "opponent"
+                    target_is_player = not is_player
+
+                # Apply each stat change
+                for stat, stages in move.stat_changes.items():
+                    self.modify_stat_stage(target_is_player, stat, stages, move.name)
+                return  # Stat-changing moves don't deal damage
 
         # Check accuracy
         if random.randint(1, 100) > move.accuracy:
@@ -349,6 +367,20 @@ class Battle:
                     status_name = move.status_effect.value.capitalize()
                     self.log.add(f"{defender_name} was afflicted with {status_name}!")
 
+        # Apply stat changes from move
+        if move.stat_changes and not attacker.is_fainted():
+            # Check if stat changes should apply (chance-based)
+            if random.randint(1, 100) <= move.stat_change_chance:
+                # Determine target
+                if move.stat_change_target == "self":
+                    target_is_player = is_player
+                else:  # "opponent"
+                    target_is_player = not is_player
+
+                # Apply each stat change
+                for stat, stages in move.stat_changes.items():
+                    self.modify_stat_stage(target_is_player, stat, stages, move.name)
+
         # Check if defender fainted
         if defender.is_fainted():
             self.log.add(f"{defender_name} fainted!")
@@ -410,16 +442,33 @@ class Battle:
 
         # Base damage calculation
         level = attacker.level
-        attack_stat = attacker.attack
-        defense_stat = defender.defense
         power = move.power
 
-        # Apply ability stat modifiers
-        attack_modifier = self._get_ability_stat_modifier(attacker, is_attacker_player, "attack")
-        defense_modifier = self._get_ability_stat_modifier(defender, is_defender_player, "defense")
+        # Check for Unaware ability (ignores opponent's stat stages)
+        attacker_has_unaware = (attacker.species.ability and
+                                attacker.species.ability.effect_type == "ignore_stat_stages")
+        defender_has_unaware = (defender.species.ability and
+                                defender.species.ability.effect_type == "ignore_stat_stages")
 
-        attack_stat = int(attack_stat * attack_modifier)
-        defense_stat = int(defense_stat * defense_modifier)
+        # Get attack stat (defender's Unaware ignores attacker's Attack stages)
+        if defender_has_unaware:
+            # Calculate attack without stat stages
+            attack_stat = attacker.attack
+            attack_modifier = self._get_ability_stat_modifier(attacker, is_attacker_player, "attack")
+            attack_stat = int(attack_stat * attack_modifier)
+        else:
+            # Normal: includes stat stages
+            attack_stat = self.get_modified_stat(attacker, "attack", is_attacker_player)
+
+        # Get defense stat (attacker's Unaware ignores defender's Defense stages)
+        if attacker_has_unaware:
+            # Calculate defense without stat stages
+            defense_stat = defender.defense
+            defense_modifier = self._get_ability_stat_modifier(defender, is_defender_player, "defense")
+            defense_stat = int(defense_stat * defense_modifier)
+        else:
+            # Normal: includes stat stages
+            defense_stat = self.get_modified_stat(defender, "defense", is_defender_player)
 
         # Burn reduces attack by 50%
         if attacker.status == StatusEffect.BURN:
@@ -522,16 +571,9 @@ class Battle:
         Returns:
             True if player goes first
         """
-        # Get base speed
-        player_speed = self.player_active.speed
-        opponent_speed = self.opponent_active.speed
-
-        # Apply ability speed modifiers
-        player_speed_mod = self._get_ability_stat_modifier(self.player_active, True, "speed")
-        opponent_speed_mod = self._get_ability_stat_modifier(self.opponent_active, False, "speed")
-
-        player_speed = int(player_speed * player_speed_mod)
-        opponent_speed = int(opponent_speed * opponent_speed_mod)
+        # Get modified speed (includes stat stages and ability modifiers)
+        player_speed = self.get_modified_stat(self.player_active, "speed", True)
+        opponent_speed = self.get_modified_stat(self.opponent_active, "speed", False)
 
         # Paralysis reduces speed by 75%
         if self.player_active.status == StatusEffect.PARALYSIS:
@@ -609,15 +651,17 @@ class Battle:
             if not new_creature.is_fainted():
                 if is_player:
                     self.player_active = new_creature
-                    # Reset player stat modifiers when switching
+                    # Reset player stat modifiers and stages when switching
                     self.player_stat_mods = {"attack": 1.0, "defense": 1.0, "speed": 1.0, "special": 1.0}
+                    self.reset_stat_stages(True)
                     self.log.add(f"Go, {new_creature.get_display_name()}!")
                     # Trigger on-entry ability
                     self._trigger_on_entry_ability(new_creature, True)
                 else:
                     self.opponent_active = new_creature
-                    # Reset opponent stat modifiers when switching
+                    # Reset opponent stat modifiers and stages when switching
                     self.opponent_stat_mods = {"attack": 1.0, "defense": 1.0, "speed": 1.0, "special": 1.0}
+                    self.reset_stat_stages(False)
                     self.log.add(f"Opponent sent out {new_creature.get_display_name()}!")
                     # Trigger on-entry ability
                     self._trigger_on_entry_ability(new_creature, False)
@@ -960,3 +1004,159 @@ class Battle:
                     damage = int(damage * 1.3)  # 30% boost, but move loses status chance
 
         return damage
+
+    def _get_stat_stage_multiplier(self, stage: int) -> float:
+        """
+        Get the stat multiplier for a given stage.
+
+        Args:
+            stage: Stat stage from -6 to +6
+
+        Returns:
+            Multiplier (0.25x at -6, 4.0x at +6)
+        """
+        # Standard competitive formula: (2 + max(0, stage)) / (2 + max(0, -stage))
+        if stage >= 0:
+            return (2 + stage) / 2.0
+        else:
+            return 2.0 / (2 - stage)
+
+    def modify_stat_stage(
+        self,
+        is_player: bool,
+        stat: str,
+        stages: int,
+        source_name: str = None
+    ) -> bool:
+        """
+        Modify a creature's stat stage.
+
+        Args:
+            is_player: True to modify player's creature, False for opponent
+            stat: Stat to modify ("attack", "defense", "speed", "special", "accuracy", "evasion")
+            stages: Number of stages to change (can be negative)
+            source_name: Name of the move/ability causing the change
+
+        Returns:
+            True if stat was changed, False if already at limit
+        """
+        creature = self.player_active if is_player else self.opponent_active
+        stat_stages = self.player_stat_stages if is_player else self.opponent_stat_stages
+
+        if not creature or stat not in stat_stages:
+            return False
+
+        # Check for abilities that affect stat stage changes
+        ability = creature.species.ability
+        ability_modifier = 1
+        ability_inverts = False
+
+        if ability:
+            # Simple - doubles stat stage changes
+            if ability.effect_type == "double_stat_changes":
+                ability_modifier = 2
+            # Contrary - inverts stat stage changes
+            elif ability.effect_type == "invert_stat_changes":
+                ability_inverts = True
+
+        # Apply ability modifiers
+        if ability_inverts:
+            stages = -stages
+        if ability_modifier != 1:
+            stages *= ability_modifier
+
+        # Calculate new stage (clamped to -6 to +6)
+        old_stage = stat_stages[stat]
+        new_stage = max(-6, min(6, old_stage + stages))
+        actual_change = new_stage - old_stage
+
+        # If no change, stat is at limit
+        if actual_change == 0:
+            creature_name = creature.get_display_name()
+            # Check if trying to raise or lower
+            if stages > 0:
+                self.log.add(f"{creature_name}'s {stat.capitalize()} won't go any higher!")
+            else:
+                self.log.add(f"{creature_name}'s {stat.capitalize()} won't go any lower!")
+            return False
+
+        # Update the stage
+        stat_stages[stat] = new_stage
+
+        # Generate message
+        creature_name = creature.get_display_name()
+        stat_name = stat.capitalize()
+
+        # Determine magnitude description
+        abs_change = abs(actual_change)
+        if abs_change == 1:
+            magnitude = ""
+        elif abs_change == 2:
+            magnitude = " sharply"
+        elif abs_change >= 3:
+            magnitude = " drastically"
+        else:
+            magnitude = ""
+
+        # Build message
+        if actual_change > 0:
+            if source_name:
+                self.log.add(f"{creature_name}'s {stat_name}{magnitude} rose!")
+            else:
+                self.log.add(f"{creature_name}'s {stat_name}{magnitude} rose!")
+        else:
+            if source_name:
+                self.log.add(f"{creature_name}'s {stat_name}{magnitude} fell!")
+            else:
+                self.log.add(f"{creature_name}'s {stat_name}{magnitude} fell!")
+
+        # Show ability message if Contrary or Simple activated
+        if ability:
+            if ability_inverts and stages != 0:
+                self.log.add(f"{creature_name}'s {ability.name} reversed the change!")
+            elif ability_modifier == 2 and stages != 0:
+                self.log.add(f"{creature_name}'s {ability.name} doubled the effect!")
+
+        return True
+
+    def reset_stat_stages(self, is_player: bool):
+        """
+        Reset all stat stages to 0 when creature switches out.
+
+        Args:
+            is_player: True to reset player's creature, False for opponent
+        """
+        stat_stages = self.player_stat_stages if is_player else self.opponent_stat_stages
+        for stat in stat_stages:
+            stat_stages[stat] = 0
+
+    def get_modified_stat(self, creature: Creature, stat: str, is_player: bool) -> int:
+        """
+        Get a creature's stat with all modifiers applied (stages, abilities, etc.).
+
+        Args:
+            creature: The creature
+            stat: The stat to get ("attack", "defense", "speed", "special")
+            is_player: True if this is the player's creature
+
+        Returns:
+            Modified stat value
+        """
+        # Get base stat
+        base_stat = getattr(creature.species.base_stats, stat)
+
+        # Apply stat stage modifier
+        stat_stages = self.player_stat_stages if is_player else self.opponent_stat_stages
+        if stat in stat_stages:
+            stage_multiplier = self._get_stat_stage_multiplier(stat_stages[stat])
+        else:
+            stage_multiplier = 1.0
+
+        # Apply ability stat modifiers (existing system)
+        stat_mods = self.player_stat_mods if is_player else self.opponent_stat_mods
+        ability_multiplier = stat_mods.get(stat, 1.0)
+
+        # Calculate final stat
+        modified_stat = int(base_stat * stage_multiplier * ability_multiplier)
+
+        return max(1, modified_stat)  # Minimum 1

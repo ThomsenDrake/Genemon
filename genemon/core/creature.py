@@ -67,6 +67,9 @@ class Move:
     multi_hit: Tuple[int, int] = (1, 1)  # Multi-hit range (min, max) - (2, 5) for multi-hit moves
     recoil_percent: int = 0  # Recoil damage as % of damage dealt (e.g., 25 = 25% recoil)
     priority: int = 0  # Priority level (-7 to +7, higher goes first)
+    stat_changes: Optional[Dict[str, int]] = None  # Stat stage changes: {"attack": 2, "defense": 1}
+    stat_change_target: str = "self"  # "self" or "opponent" - who gets the stat changes
+    stat_change_chance: int = 100  # Chance (0-100) to apply stat changes
 
     def to_dict(self) -> dict:
         """Convert move to dictionary for serialization."""
@@ -83,7 +86,10 @@ class Move:
             'crit_rate': self.crit_rate,
             'multi_hit': list(self.multi_hit),
             'recoil_percent': self.recoil_percent,
-            'priority': self.priority
+            'priority': self.priority,
+            'stat_changes': self.stat_changes,
+            'stat_change_target': self.stat_change_target,
+            'stat_change_chance': self.stat_change_chance
         }
 
     @classmethod
@@ -101,6 +107,12 @@ class Move:
             data['recoil_percent'] = 0
         if 'priority' not in data:
             data['priority'] = 0
+        if 'stat_changes' not in data:
+            data['stat_changes'] = None
+        if 'stat_change_target' not in data:
+            data['stat_change_target'] = "self"
+        if 'stat_change_chance' not in data:
+            data['stat_change_chance'] = 100
         # Convert list back to tuple for multi_hit
         if isinstance(data.get('multi_hit'), list):
             data['multi_hit'] = tuple(data['multi_hit'])

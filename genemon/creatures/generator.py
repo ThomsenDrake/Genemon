@@ -414,6 +414,56 @@ class CreatureGenerator:
                 if status_effect is None and multi_hit == (1, 1) and recoil_percent == 0:
                     description = f"An extremely fast {move_type}-type attack that always strikes first."
 
+        # Determine if stat-changing move (roughly 10% of moves)
+        stat_changes = None
+        stat_change_target = "self"
+        stat_change_chance = 100
+
+        if self.rng.random() < 0.10:
+            # Determine if offensive stat boost or defensive stat drop
+            move_style = self.rng.choice(["offensive_boost", "defensive_boost", "debuff", "mixed"])
+
+            if move_style == "offensive_boost":
+                # Boost own attack or special
+                stat = self.rng.choice(["attack", "special"])
+                stages = self.rng.choice([1, 2])  # +1 or +2 stages
+                stat_changes = {stat: stages}
+                power = 0  # Pure stat-boosting moves don't deal damage
+                description = f"Sharply raises the user's {stat.capitalize()}!" if stages == 2 else f"Raises the user's {stat.capitalize()}."
+
+            elif move_style == "defensive_boost":
+                # Boost own defense or speed
+                stat = self.rng.choice(["defense", "speed"])
+                stages = self.rng.choice([1, 2])
+                stat_changes = {stat: stages}
+                power = 0
+                description = f"Sharply raises the user's {stat.capitalize()}!" if stages == 2 else f"Raises the user's {stat.capitalize()}."
+
+            elif move_style == "debuff":
+                # Lower opponent's stats
+                stat = self.rng.choice(["attack", "defense", "speed", "special"])
+                stages = self.rng.choice([-1, -2])  # -1 or -2 stages
+                stat_changes = {stat: stages}
+                stat_change_target = "opponent"
+                power = 0
+                description = f"Harshly lowers the foe's {stat.capitalize()}!" if stages == -2 else f"Lowers the foe's {stat.capitalize()}."
+
+            elif move_style == "mixed":
+                # Stat change + damage (weaker effect or chance-based)
+                if self.rng.random() < 0.5:
+                    # Self-boost with damage (like Ancient Power)
+                    stat_changes = {self.rng.choice(["attack", "defense", "speed"]): 1}
+                    stat_change_chance = 10  # Low chance
+                    description = f"A {move_type}-type attack that may raise the user's stats."
+                else:
+                    # Opponent debuff with damage (like Icy Wind)
+                    stat = self.rng.choice(["attack", "speed"])
+                    stat_changes = {stat: -1}
+                    stat_change_target = "opponent"
+                    stat_change_chance = 100  # Always applies
+                    power = max(30, power // 2)  # Reduced damage
+                    description = f"A {move_type}-type attack that lowers the foe's {stat.capitalize()}."
+
         return Move(
             name=name,
             type=move_type,
@@ -427,7 +477,10 @@ class CreatureGenerator:
             crit_rate=crit_rate,
             multi_hit=multi_hit,
             recoil_percent=recoil_percent,
-            priority=priority
+            priority=priority,
+            stat_changes=stat_changes,
+            stat_change_target=stat_change_target,
+            stat_change_chance=stat_change_chance
         )
 
     def _generate_flavor_text(self, name: str, types: List[str]) -> str:
@@ -632,6 +685,7 @@ class CreatureGenerator:
                 ("Sniper", "Boosts critical hit power", "crit_power_boost"),
                 ("Skill Link", "Multi-hit moves always hit maximum times", "multi_hit_max"),
                 ("Rock Head", "Protects from recoil damage", "no_recoil"),
+                ("Simple", "Doubles stat stage changes", "double_stat_changes"),
             ])
 
         # High Defense abilities
@@ -657,6 +711,7 @@ class CreatureGenerator:
                 ("Magic Guard", "Only damaged by attacks", "no_indirect_damage"),
                 ("Adaptability", "Boosts STAB effectiveness", "boost_stab"),
                 ("Rivalry", "Boosts against same type", "boost_same_type"),
+                ("Contrary", "Inverts stat stage changes", "invert_stat_changes"),
             ])
 
         # Universal abilities (any creature can have these)
@@ -669,6 +724,7 @@ class CreatureGenerator:
             ("Shed Skin", "May heal status each turn", "heal_status_chance"),
             ("Regenerator", "Restores HP when switching out", "heal_switch"),
             ("Moxie", "Boosts Attack after knocking out opponent", "attack_ko_boost"),
+            ("Unaware", "Ignores opponent's stat stages", "ignore_stat_stages"),
         ]
 
         # Choose ability based on type and stats
