@@ -1,5 +1,15 @@
 # Claude Code Loop Project – Python Monster Collector RPG
 
+## ⚠️ CRITICAL RULES ⚠️
+
+**These rules MUST be followed in every iteration without exception:**
+
+1. **PYTHON-ONLY PROJECT:** This project MUST be written primarily in Python 3.x. At least **70% of the codebase** must be Python. Helper scripts in other languages (shell, etc.) are acceptable, but the core game logic, systems, and features MUST be Python.
+
+2. **NEVER MODIFY prompt.md:** This file (`prompt.md`) is READ-ONLY. You must NEVER edit, update, or change this file under any circumstances. To track progress, changes, or notes across iterations, use a separate file such as `CHANGELOG.md`, `PROGRESS.md`, or `DEVELOPMENT_LOG.md`.
+
+---
+
 ## Goal
 
 Build a *monster-collecting RPG* (inspired by Pokémon) with the following structure:
@@ -14,18 +24,20 @@ Build a *monster-collecting RPG* (inspired by Pokémon) with the following struc
 
 ### 1. Programming Language & Organization
 
-- **All code must be written in Python 3.x.**
+- **All code must be written in Python 3.x.** (CRITICAL: At least 70% of the project must be Python code)
 - Use clear class and module structure:
     - `Creature`, `Team`, `World`, `NPC`, `BattleEngine`, etc.
     - Separate modules for core game logic, data models, UI, creature generator, and sprite system.
 - Code should be human-readable and commented, with docstrings.
+- Helper scripts (build tools, setup scripts) may use other languages, but all core game functionality MUST be Python.
 
 ### 2. Iterative Development & Refactoring
 
 - Claude Code runs on a *single evolving project*: Each loop should improve the codebase by refactoring, optimizing, extending, or cleaning up code.
 - **It is encouraged to prune, reorganize, and optimize the codebase**—removing unnecessary, buggy, or obsolete code is expected.
 - Do not recreate the entire project from scratch in each loop; preserve meaningful functionality and improvements, but always maintain healthy code maintenance habits.
-- Maintain a project changelog and summary of all major code changes, including deletions, reorganizations, and refactors.
+- **Maintain a project changelog** (e.g., `CHANGELOG.md`) and summary of all major code changes, including deletions, reorganizations, and refactors.
+- **CRITICAL:** Do NOT modify `prompt.md` to track progress. Use separate files like `CHANGELOG.md`, `PROGRESS.md`, or `DEVELOPMENT_LOG.md` for iteration notes and progress tracking.
 
 ### 3. Creature Generator (Per Save)
 
