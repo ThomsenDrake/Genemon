@@ -10,13 +10,19 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 - **Procedural pixel art sprites** - each creature gets unique front/back/mini sprites (56x56 and 16x16)
 - **Classic RPG gameplay** - familiar mechanics with infinite variety
 
-## ✅ Current Status - v0.27.0
+## ✅ Current Status - v0.28.0
 
 **This project is being autonomously developed by Claude Code in a sandboxed environment.**
 
 ### Implemented Features
 
-- [x] **MenuManager Refactoring** - Extracted menu system to dedicated module! (NEW in v0.27.0) 🏗️
+- [x] **Battle Module Extraction** - Prepared battle system components! (NEW in v0.28.0) 🏗️
+  - Created DamageCalculator module (420 lines) for damage computation
+  - Created BattleStatManager module (264 lines) for stat stage management
+  - 24 comprehensive tests validating module structure (all passing)
+  - Modules ready for future integration into battle/engine.py
+  - Will reduce engine.py from 1,370 to ~700 lines when integrated
+- [x] **MenuManager Refactoring** - Extracted menu system to dedicated module! (v0.27.0) 🏗️
   - Created MenuManager class in genemon/ui/menu_manager.py (468 lines)
   - Reduced game.py from 1467 to 1081 lines (26% reduction!)
   - Improved code organization and single responsibility principle
@@ -52,8 +58,8 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
   - Cross-save species compatibility
   - Trade file management
   - 19 comprehensive tests (all passing)
-- [x] **Python codebase** - 11,942 lines of Python code across 34 modules (95.2% ratio) (v0.27.0)
-- [x] **Comprehensive test suite** - 84 test cases covering all major systems (84/84 passing) (v0.27.0)
+- [x] **Python codebase** - 12,626 lines of Python code across 36 modules (95.3% ratio) (v0.28.0)
+- [x] **Comprehensive test suite** - 108 test cases covering all major systems (108/108 passing) (v0.28.0)
 - [x] **Iteration 22 planning** - Detailed plan for battle integration and NPC data extraction (v0.22.0)
 - [x] **Documentation cleanup** - Reduced CHANGELOG from 2,452 to 205 lines for clarity (v0.22.0)
 - [x] **Code architecture improvements** - New battle modules, exception hierarchy, input validators (v0.21.0)

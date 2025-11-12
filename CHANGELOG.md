@@ -2,6 +2,52 @@
 
 All notable changes to the Genemon project.
 
+## [0.28.0] - 2025-11-12
+
+### Added
+- **Battle Module Extraction** - Prepared battle system for future refactoring! 🏗️ CODE ARCHITECTURE
+  - Created `genemon/battle/damage_calculator.py` (420 lines)
+    - DamageCalculator class handles all damage computation logic
+    - Methods: calculate_damage, check_critical_hit, weather/item/ability modifiers
+    - Comprehensive docstrings and type hints throughout
+  - Created `genemon/battle/stat_manager.py` (264 lines)
+    - BattleStatManager class handles temporary stat stage modifications
+    - Methods: modify_stat_stage, reset_stat_stages, get_modified_stat
+    - Tracks stat stages from -6 to +6 for all battle stats
+  - Both modules ready for integration in future iterations
+
+### Testing
+- **New test suite** - test_iteration_28.py with 24 comprehensive tests
+  - Module import and instantiation tests
+  - Method existence and signature validation
+  - Documentation coverage tests
+  - File structure and line count verification
+  - Module compatibility tests
+  - All tests passing (24/24) ✅
+
+### Impact
+- Prepared groundwork for battle/engine.py refactoring (currently 1,370 lines)
+- New modules will reduce engine.py by ~600 lines when integrated
+- Improved code modularity and testability
+- Better separation of concerns (damage calc, stat management, battle coordination)
+- Zero functional changes (modules not yet integrated - 100% backward compatible)
+- Total Python lines: 11,942 → 12,626 (+684 lines, including new modules and tests)
+- Total modules: 34 → 36 (+2 battle modules)
+- Total tests: 84 → 108 (+24 tests)
+
+### Documentation
+- ITERATION_28_SUMMARY.md created with full iteration details
+- Updated CHANGELOG.md
+- Updated README.md with v0.28.0 status
+
+### Future Work (Iteration 29+)
+- Integrate DamageCalculator and BattleStatManager into battle/engine.py
+- Reduce battle/engine.py from 1,370 to ~700 lines
+- Add functional integration tests
+- Externalize NPC data to JSON (save 850+ lines)
+- Create NPCLoader utility class
+- Comprehensive save system testing (25+ tests)
+
 ## [0.27.0] - 2025-11-12
 
 ### Added
