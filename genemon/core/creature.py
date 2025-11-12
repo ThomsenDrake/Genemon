@@ -257,6 +257,26 @@ class CreatureSpecies:
         # TM compatibility is already a list, no conversion needed
         return cls(**data)
 
+    @property
+    def primary_type(self) -> Optional[str]:
+        """
+        Get the primary type of this species.
+
+        Returns:
+            The first type in the types list, or None if no types
+        """
+        return self.types[0] if self.types else None
+
+    @property
+    def secondary_type(self) -> Optional[str]:
+        """
+        Get the secondary type of this species.
+
+        Returns:
+            The second type in the types list, or None if single-type
+        """
+        return self.types[1] if len(self.types) > 1 else None
+
 
 @dataclass
 class Creature:

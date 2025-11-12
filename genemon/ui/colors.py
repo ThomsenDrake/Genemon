@@ -84,7 +84,9 @@ class TerminalColors:
                 kernel32 = ctypes.windll.kernel32
                 kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
                 return True
-            except:
+            except (AttributeError, OSError):
+                # AttributeError: ctypes.windll doesn't exist on non-Windows
+                # OSError: SetConsoleMode failed
                 return False
 
         # Unix-like systems generally support ANSI

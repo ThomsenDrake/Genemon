@@ -3,6 +3,7 @@ Type system with effectiveness calculations.
 """
 
 from typing import Dict, List
+from functools import lru_cache
 
 
 # Define custom types for this game (not using Pokemon names)
@@ -98,16 +99,20 @@ TYPE_EFFECTIVENESS: Dict[str, Dict[str, float]] = {
 }
 
 
-def get_effectiveness(attack_type: str, defending_types: List[str]) -> float:
+@lru_cache(maxsize=512)
+def get_effectiveness(attack_type: str, defending_types: tuple) -> float:
     """
-    Calculate type effectiveness multiplier.
+    Calculate type effectiveness multiplier with caching for performance.
 
     Args:
         attack_type: The type of the attacking move
-        defending_types: List of types of the defending creature
+        defending_types: Tuple of types of the defending creature (tuple for hashability)
 
     Returns:
         Multiplier (e.g., 2.0 for super effective, 0.5 for not very effective)
+
+    Note:
+        This function uses LRU caching for performance. Pass defending_types as a tuple.
     """
     if attack_type not in TYPE_EFFECTIVENESS:
         return 1.0
@@ -119,6 +124,20 @@ def get_effectiveness(attack_type: str, defending_types: List[str]) -> float:
             multiplier *= type_chart[def_type]
 
     return multiplier
+
+
+def calculate_type_effectiveness(attack_type: str, defending_types: List[str]) -> float:
+    """
+    Convenience wrapper for get_effectiveness that accepts a list.
+
+    Args:
+        attack_type: The type of the attacking move
+        defending_types: List of types of the defending creature
+
+    Returns:
+        Multiplier (e.g., 2.0 for super effective, 0.5 for not very effective)
+    """
+    return get_effectiveness(attack_type, tuple(defending_types))
 
 
 def get_type_color(type_name: str) -> str:
