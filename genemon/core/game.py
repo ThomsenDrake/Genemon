@@ -6,10 +6,12 @@ import random
 from typing import Optional
 from .save_system import GameState, SaveManager
 from .creature import Creature, Team, Badge
+from .trading import TradeManager
 from ..world.map import World, Location
 from ..world.npc import NPCRegistry, NPC
 from ..battle.engine import Battle, BattleAction, BattleResult
 from ..ui.display import Display
+from ..ui.trading_ui import TradingUI
 
 
 class Game:
@@ -23,6 +25,7 @@ class Game:
 
         self.state: Optional[GameState] = None
         self.save_manager = SaveManager()
+        self.trade_manager = TradeManager()
         self.world = World()
         self.npc_registry = NPCRegistry()
         self.display = Display()
@@ -172,6 +175,7 @@ class Game:
                 "Items",
                 "Badges",
                 "Pokedex",
+                "Trading Center",
                 "Type Chart",
                 "Sprite Viewer",
                 "Settings",
@@ -193,16 +197,18 @@ class Game:
             elif choice == 4:
                 self._show_pokedex()
             elif choice == 5:
-                self._show_type_chart_menu()
+                self._show_trading_menu()
             elif choice == 6:
-                self._show_sprite_viewer_menu()
+                self._show_type_chart_menu()
             elif choice == 7:
-                self._show_settings_menu()
+                self._show_sprite_viewer_menu()
             elif choice == 8:
+                self._show_settings_menu()
+            elif choice == 9:
                 self.save_manager.save_game(self.state)
                 print("\nGame saved!")
                 input("Press Enter to continue...")
-            elif choice == 9:
+            elif choice == 10:
                 self.state = None  # Exit to main menu
 
     def _handle_movement(self, location: Location, npcs: list):
@@ -1346,3 +1352,16 @@ class Game:
                     config.reset_to_defaults()
                     print("\nSettings reset to defaults!")
                     input("Press Enter to continue...")
+
+    def _show_trading_menu(self):
+        """Show the trading center menu."""
+        trading_ui = TradingUI(self.trade_manager, self.state)
+
+        while True:
+            if not trading_ui.show_trading_menu():
+                break
+
+        # Auto-save after trading
+        self.save_manager.save_game(self.state)
+        print("\nProgress saved!")
+        input("Press Enter to continue...")

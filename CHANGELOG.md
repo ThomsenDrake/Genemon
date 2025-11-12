@@ -2,6 +2,24 @@
 
 All notable changes to the Genemon project.
 
+## [0.23.0] - 2025-11-12
+
+### Added
+- **Trading System (1,260 lines)** - Complete creature trading between save files! ⭐ NEW FEATURE
+  - Export creatures from team or storage to .trade files
+  - Import creatures from other save files
+  - Trade history tracking with timestamps
+  - Cross-save species compatibility (species auto-added to Pokedex)
+  - Trade file management (list, view, delete)
+  - Trade statistics (total trades, unique saves, unique species)
+  - New "Trading Center" menu in main game loop
+  - Comprehensive test suite (19 tests, all passing)
+
+### Improved
+- Python code ratio increased from 53% to 95.2% (17,162 Python lines)
+- Reduced active markdown documentation from 1,593 to 865 lines
+- Archived iteration planning documents to keep repository clean
+
 ## [0.22.0] - 2025-11-12
 
 ### Added
