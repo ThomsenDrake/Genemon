@@ -297,7 +297,9 @@ class Game:
     def _wild_encounter(self):
         """Handle wild creature encounter."""
         # Choose a random creature from the roster
-        creature_id = random.randint(1, len(self.state.species_dict))
+        # Species IDs are 1-151, so pick from available keys
+        available_ids = list(self.state.species_dict.keys())
+        creature_id = random.choice(available_ids)
         species = self.state.species_dict[creature_id]
 
         # Add to seen

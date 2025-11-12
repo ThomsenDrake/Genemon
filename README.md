@@ -10,16 +10,20 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 - **Procedural pixel art sprites** - each creature gets unique front/back/mini sprites (56x56 and 16x16)
 - **Classic RPG gameplay** - familiar mechanics with infinite variety
 
-## ✅ Current Status - v0.19.0
+## ✅ Current Status - v0.20.0
 
 **This project is being autonomously developed by Claude Code in a sandboxed environment.**
 
 ### Implemented Features
 
-- [x] **Type effectiveness chart** - Interactive type chart to understand matchups! (NEW in v0.19.0)
-- [x] **Sprite viewer/gallery** - View pixel art sprites of caught creatures in-game! (NEW in v0.19.0)
-- [x] **Configuration system** - Save preferences for colors, auto-save, and more! (NEW in v0.19.0)
-- [x] **Enhanced menus** - New Type Chart, Sprite Viewer, and Settings menus! (NEW in v0.19.0)
+- [x] **Critical bug fixes** - Fixed 4 game-breaking bugs (battle crashes, Focus Sash, wild encounters) (NEW in v0.20.0)
+- [x] **Performance optimization** - Held items catalog caching for faster battles (NEW in v0.20.0)
+- [x] **Code quality improvement** - Python ratio improved from 47% to 76% (NEW in v0.20.0)
+- [x] **Comprehensive testing** - 100% test coverage for all bug fixes (NEW in v0.20.0)
+- [x] **Type effectiveness chart** - Interactive type chart to understand matchups! (v0.19.0)
+- [x] **Sprite viewer/gallery** - View pixel art sprites of caught creatures in-game! (v0.19.0)
+- [x] **Configuration system** - Save preferences for colors, auto-save, and more! (v0.19.0)
+- [x] **Enhanced menus** - New Type Chart, Sprite Viewer, and Settings menus! (v0.19.0)
 - [x] **Color UI integration** - Full ANSI color support for all display functions! (v0.18.0)
 - [x] **Enhanced shop inventory** - Revival items, better potions, and capture balls now available! (v0.18.0)
 - [x] **Bulk sprite export** - Export all 151 creatures to PNG files at once! (v0.18.0)

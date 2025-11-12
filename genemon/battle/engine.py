@@ -87,8 +87,14 @@ class Battle:
         self.is_wild = is_wild
         self.can_run = can_run
 
+        # Validate both teams have at least one active creature
         self.player_active = player_team.get_first_active()
         self.opponent_active = opponent_team.get_first_active()
+
+        if self.player_active is None:
+            raise ValueError("Player team has no active creatures available for battle")
+        if self.opponent_active is None:
+            raise ValueError("Opponent team has no active creatures available for battle")
 
         self.log = BattleLog()
         self.result = BattleResult.ONGOING
@@ -106,6 +112,14 @@ class Battle:
         # Each stage increases/decreases stat by 50% (2/2, 3/2, 4/2, 5/2, 6/2, 7/2, 8/2)
         self.player_stat_stages = {"attack": 0, "defense": 0, "speed": 0, "special": 0, "accuracy": 0, "evasion": 0}
         self.opponent_stat_stages = {"attack": 0, "defense": 0, "speed": 0, "special": 0, "accuracy": 0, "evasion": 0}
+
+        # Reset one-time battle effects for all creatures
+        for creature in self.player_team.creatures:
+            creature.focus_sash_used = False
+            creature.choice_locked_move = None
+        for creature in self.opponent_team.creatures:
+            creature.focus_sash_used = False
+            creature.choice_locked_move = None
 
         # Battle start message
         if is_wild:

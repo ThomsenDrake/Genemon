@@ -26,6 +26,10 @@ EFFECT_CONTACT_DAMAGE = "contact_damage"  # Damages attackers on contact moves
 EFFECT_AUTO_STATUS = "auto_status"  # Auto-inflicts status on holder
 
 
+# Global catalog cache (initialized lazily)
+_HELD_ITEMS_CATALOG = None
+
+
 def create_held_items_catalog() -> Dict[str, HeldItem]:
     """
     Create the catalog of all available held items.
@@ -247,6 +251,19 @@ def get_random_held_item(rng: random.Random = None) -> HeldItem:
     return catalog[item_name]
 
 
+def get_held_items_catalog() -> Dict[str, HeldItem]:
+    """
+    Get the cached held items catalog (lazy initialization).
+
+    Returns:
+        Dictionary mapping item names to HeldItem objects
+    """
+    global _HELD_ITEMS_CATALOG
+    if _HELD_ITEMS_CATALOG is None:
+        _HELD_ITEMS_CATALOG = create_held_items_catalog()
+    return _HELD_ITEMS_CATALOG
+
+
 def get_held_item_by_name(name: str) -> HeldItem:
     """
     Get a specific held item by name.
@@ -257,7 +274,7 @@ def get_held_item_by_name(name: str) -> HeldItem:
     Returns:
         HeldItem if found, None otherwise
     """
-    catalog = create_held_items_catalog()
+    catalog = get_held_items_catalog()
     return catalog.get(name)
 
 
@@ -271,7 +288,7 @@ def get_type_boost_item(type_name: str) -> HeldItem:
     Returns:
         HeldItem for that type, or None if not found
     """
-    catalog = create_held_items_catalog()
+    catalog = get_held_items_catalog()
     for item in catalog.values():
         if (item.effect_type == EFFECT_TYPE_BOOST and
             item.effect_data and

@@ -300,6 +300,11 @@ class Creature:
         if not self.moves:
             import copy
             self.moves = [copy.deepcopy(move) for move in self.species.moves]
+
+        # Validate creature has at least one move
+        if not self.moves:
+            raise ValueError(f"Creature {self.species.name} (ID: {self.species.id}) has no moves. Species must have at least one move.")
+
         self._calculate_stats()
 
     def _calculate_stats(self):
