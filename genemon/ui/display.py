@@ -324,3 +324,153 @@ class Display:
                     else:
                         print()
         print()
+
+    @staticmethod
+    def show_type_chart(selected_type: Optional[str] = None) -> None:
+        """
+        Display type effectiveness chart.
+
+        Args:
+            selected_type: If provided, show detailed info for this type
+        """
+        from ..creatures.types import TYPES, TYPE_EFFECTIVENESS
+
+        if selected_type:
+            # Show detailed chart for one type
+            if selected_type not in TYPES:
+                print(f"Unknown type: {selected_type}")
+                return
+
+            print(f"\n{'=' * 60}")
+            print(f"  {bold(colored_type(selected_type))} TYPE EFFECTIVENESS")
+            print(f"{'=' * 60}")
+
+            effectiveness = TYPE_EFFECTIVENESS.get(selected_type, {})
+
+            # Strong against (2x damage)
+            strong = [t for t, mult in effectiveness.items() if mult == 2.0]
+            if strong:
+                print(f"\n  {colored('STRONG AGAINST (2x damage):', TerminalColors.BRIGHT_GREEN)}")
+                for t in strong:
+                    print(f"    - {colored_type(t)}")
+
+            # Weak against (0.5x damage)
+            weak = [t for t, mult in effectiveness.items() if mult == 0.5]
+            if weak:
+                print(f"\n  {colored('WEAK AGAINST (0.5x damage):', TerminalColors.BRIGHT_YELLOW)}")
+                for t in weak:
+                    print(f"    - {colored_type(t)}")
+
+            # No effect (0x damage)
+            no_effect = [t for t, mult in effectiveness.items() if mult == 0.0]
+            if no_effect:
+                print(f"\n  {colored('NO EFFECT (immune):', TerminalColors.BRIGHT_RED)}")
+                for t in no_effect:
+                    print(f"    - {colored_type(t)}")
+
+            # Neutral (1x damage - default for types not listed)
+            listed_types = set(strong + weak + no_effect)
+            neutral = [t for t in TYPES if t not in listed_types]
+            if neutral:
+                print(f"\n  {colored('NEUTRAL (1x damage):', TerminalColors.WHITE)}")
+                neutral_str = ', '.join([colored_type(t) for t in neutral])
+                print(f"    {neutral_str}")
+
+            print(f"\n{'=' * 60}\n")
+        else:
+            # Show all types overview
+            print(f"\n{'=' * 60}")
+            print(f"  {bold('TYPE EFFECTIVENESS CHART')}")
+            print(f"{'=' * 60}")
+            print(f"\n  {colored('Legend:', TerminalColors.BOLD)}")
+            print(f"    {colored('++', TerminalColors.BRIGHT_GREEN)} = Super effective (2x damage)")
+            print(f"    {colored('--', TerminalColors.BRIGHT_YELLOW)} = Not very effective (0.5x damage)")
+            print(f"    {colored('XX', TerminalColors.BRIGHT_RED)} = No effect (0x damage)")
+            print(f"    {colored('==', TerminalColors.WHITE)} = Neutral (1x damage)")
+            print(f"\n  All {len(TYPES)} types:")
+
+            # Display types in columns
+            types_per_row = 4
+            for i in range(0, len(TYPES), types_per_row):
+                row_types = TYPES[i:i + types_per_row]
+                formatted_types = [f"{colored_type(t):20}" for t in row_types]
+                print(f"    {''.join(formatted_types)}")
+
+            print(f"\n  Tip: Use the Type Chart menu to view specific type matchups!")
+            print(f"{'=' * 60}\n")
+
+    @staticmethod
+    def show_sprite_viewer(creature_id: int, species_dict: dict, caught: set) -> None:
+        """
+        Display sprite viewer for a specific creature.
+
+        Args:
+            creature_id: ID of creature to view
+            species_dict: Dictionary of all creature species
+            caught: Set of caught creature IDs
+        """
+        if creature_id not in species_dict:
+            print(f"\nCreature #{creature_id:03d} does not exist!")
+            return
+
+        if creature_id not in caught:
+            print(f"\nYou haven't caught creature #{creature_id:03d} yet!")
+            print("Catch it first to view its sprites.")
+            return
+
+        species = species_dict[creature_id]
+
+        print(f"\n{'=' * 60}")
+        print(f"  {bold('SPRITE VIEWER')}")
+        print(f"  #{species.id:03d}: {bold(species.name.upper())}")
+        print(f"{'=' * 60}")
+
+        # Display type
+        colored_types = ' / '.join([colored_type(t) for t in species.types])
+        print(f"\n  Type: {colored_types}")
+
+        # Show front sprite
+        if hasattr(species, 'front_sprite') and species.front_sprite:
+            print(f"\n  {bold('FRONT SPRITE (Battle View):')}")
+            Display._render_sprite_ascii(species.front_sprite)
+
+        # Show back sprite
+        if hasattr(species, 'back_sprite') and species.back_sprite:
+            print(f"\n  {bold('BACK SPRITE (Your Team View):')}")
+            Display._render_sprite_ascii(species.back_sprite)
+
+        # Show mini sprite
+        if hasattr(species, 'mini_sprite') and species.mini_sprite:
+            print(f"\n  {bold('MINI SPRITE (Overworld):')}")
+            Display._render_sprite_ascii(species.mini_sprite)
+
+        print(f"\n{'=' * 60}\n")
+
+    @staticmethod
+    def _render_sprite_ascii(sprite_data: List[List[str]], scale: int = 1) -> None:
+        """
+        Render sprite data as colored ASCII art.
+
+        Args:
+            sprite_data: 2D array of hex color strings
+            scale: Scale factor for rendering
+        """
+        if not sprite_data:
+            print("    (No sprite data)")
+            return
+
+        # Render sprite with colored blocks
+        for row in sprite_data:
+            line = "    "  # Indent
+            for _ in range(scale):  # Vertical scaling
+                for color_hex in row:
+                    if color_hex == "#000000" or color_hex.lower() == "transparent":
+                        # Transparent or black - use space
+                        char = "  " * scale
+                    else:
+                        # Use colored block character
+                        char = "\u2588\u2588" * scale  # Full block
+                    line += char
+                print(line)
+                if scale > 1:
+                    line = "    "

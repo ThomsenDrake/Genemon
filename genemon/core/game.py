@@ -17,6 +17,10 @@ class Game:
 
     def __init__(self):
         """Initialize the game engine."""
+        # Initialize configuration first
+        from .config import init_config
+        init_config()
+
         self.state: Optional[GameState] = None
         self.save_manager = SaveManager()
         self.world = World()
@@ -168,6 +172,9 @@ class Game:
                 "Items",
                 "Badges",
                 "Pokedex",
+                "Type Chart",
+                "Sprite Viewer",
+                "Settings",
                 "Save",
                 "Quit to Menu"
             ]
@@ -186,10 +193,16 @@ class Game:
             elif choice == 4:
                 self._show_pokedex()
             elif choice == 5:
+                self._show_type_chart_menu()
+            elif choice == 6:
+                self._show_sprite_viewer_menu()
+            elif choice == 7:
+                self._show_settings_menu()
+            elif choice == 8:
                 self.save_manager.save_game(self.state)
                 print("\nGame saved!")
                 input("Press Enter to continue...")
-            elif choice == 6:
+            elif choice == 9:
                 self.state = None  # Exit to main menu
 
     def _handle_movement(self, location: Location, npcs: list):
@@ -1223,3 +1236,111 @@ class Game:
                 self.state.pokedex_caught
             )
             input("\nPress Enter to continue...")
+
+    def _show_type_chart_menu(self):
+        """Show type effectiveness chart menu."""
+        from ..creatures.types import TYPES
+
+        while True:
+            self.display.clear_screen()
+            print("\n=== TYPE CHART ===")
+            print("1. View all types overview")
+            print("2. View specific type effectiveness")
+            print("0. Back")
+
+            choice = self._get_int_input("\n> ", default=0, min_val=0, max_val=2)
+
+            if choice == 0:
+                break
+            elif choice == 1:
+                self.display.show_type_chart()
+                input("Press Enter to continue...")
+            elif choice == 2:
+                print("\nAvailable types:")
+                for i, type_name in enumerate(TYPES, 1):
+                    print(f"{i}. {type_name}")
+
+                type_choice = self._get_int_input(
+                    "\nSelect type (or 0 to cancel): ",
+                    default=0,
+                    min_val=0,
+                    max_val=len(TYPES)
+                )
+
+                if type_choice > 0:
+                    selected_type = TYPES[type_choice - 1]
+                    self.display.show_type_chart(selected_type)
+                    input("Press Enter to continue...")
+
+    def _show_sprite_viewer_menu(self):
+        """Show sprite viewer menu."""
+        self.display.clear_screen()
+        print("\n=== SPRITE VIEWER ===")
+        print(f"Caught: {len(self.state.pokedex_caught)}/151")
+        print("\nView sprites for which creature?")
+        print("Enter creature number (1-151) or 0 to go back:")
+
+        choice = self._get_int_input("> ", default=0, min_val=0, max_val=151)
+
+        if 1 <= choice <= 151:
+            self.display.show_sprite_viewer(
+                choice,
+                self.state.species_dict,
+                self.state.pokedex_caught
+            )
+            input("Press Enter to continue...")
+
+    def _show_settings_menu(self):
+        """Show settings menu."""
+        from .config import get_config
+
+        config = get_config()
+
+        while True:
+            self.display.clear_screen()
+            config.show_settings()
+
+            print("1. Toggle Terminal Colors")
+            print("2. Toggle Auto-Save")
+            print("3. Toggle Battle Animations")
+            print("4. Toggle Type Effectiveness Display")
+            print("5. Toggle Run Confirmation")
+            print("6. Reset to Defaults")
+            print("0. Back")
+
+            choice = self._get_int_input("\n> ", default=0, min_val=0, max_val=6)
+
+            if choice == 0:
+                break
+            elif choice == 1:
+                new_val = config.toggle("colors_enabled")
+                print(f"\nTerminal Colors: {'ON' if new_val else 'OFF'}")
+                config.save()
+                input("Press Enter to continue...")
+            elif choice == 2:
+                new_val = config.toggle("auto_save")
+                print(f"\nAuto-Save: {'ON' if new_val else 'OFF'}")
+                config.save()
+                input("Press Enter to continue...")
+            elif choice == 3:
+                new_val = config.toggle("battle_animations")
+                print(f"\nBattle Animations: {'ON' if new_val else 'OFF'}")
+                config.save()
+                input("Press Enter to continue...")
+            elif choice == 4:
+                new_val = config.toggle("show_type_effectiveness")
+                print(f"\nType Effectiveness Display: {'ON' if new_val else 'OFF'}")
+                config.save()
+                input("Press Enter to continue...")
+            elif choice == 5:
+                new_val = config.toggle("confirm_run")
+                print(f"\nRun Confirmation: {'ON' if new_val else 'OFF'}")
+                config.save()
+                input("Press Enter to continue...")
+            elif choice == 6:
+                print("\nAre you sure you want to reset all settings? (y/n)")
+                confirm = input("> ").strip().lower()
+                if confirm == 'y':
+                    config.reset_to_defaults()
+                    print("\nSettings reset to defaults!")
+                    input("Press Enter to continue...")
