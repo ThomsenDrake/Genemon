@@ -2,6 +2,51 @@
 
 All notable changes to the Genemon project.
 
+## [0.31.0] - 2025-11-12
+
+### Added
+- **Performance Profiling Infrastructure** - New profiling and benchmarking system! 📊 PERFORMANCE
+  - Created `genemon/utils/profiler.py` (280 lines)
+    - PerformanceProfiler class for measuring execution time
+    - Multiple profiling methods: decorator, context manager, manual timing
+    - Automatic result aggregation (min/max/avg/total duration)
+    - Metadata support for additional context
+    - Global profiler instance for easy access
+  - Created new utils module structure
+    - `genemon/utils/__init__.py`
+    - Clean separation for utility modules
+    - Ready for additional utilities
+  - Performance baselines established
+    - Creature generation: < 100ms per creature
+    - Damage calculation: < 10ms per calculation
+    - NPC loading: < 1s for 10 full loads
+
+### Testing
+- **New test suite** - test_iteration_31.py with 14 comprehensive tests
+  - Profiler functionality tests (11 tests)
+    - Initialization, context manager, decorator, manual timing
+    - Multiple iterations, metadata, result sorting
+    - Clear operations and global profiler
+  - Performance benchmark tests (3 tests)
+    - Creature generation performance
+    - Battle damage calculation performance
+    - NPC data loading performance
+  - All tests passing (14/14) ✅
+
+### Impact
+- Added comprehensive profiling infrastructure (280 Python lines)
+- Established performance baselines for critical systems
+- Created performance regression test framework
+- Zero breaking changes (100% backward compatible)
+- Total Python lines: 12,387 → 12,667 (+280 profiler)
+- Total modules: 37 → 38 (+1 utils/profiler.py)
+- Total tests: 154 → 168 (+14 tests)
+
+### Documentation
+- ITERATION_31_SUMMARY.md created with comprehensive details
+- Updated CHANGELOG.md (this file)
+- Ready for README.md update
+
 ## [0.30.0] - 2025-11-12
 
 ### Added
