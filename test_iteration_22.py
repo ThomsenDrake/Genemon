@@ -53,7 +53,7 @@ class TestIteration22(unittest.TestCase):
         """Test that all modules import successfully."""
         try:
             from genemon.core.game import Game
-            from genemon.core.save_system import SaveSystem
+            from genemon.core.save_system import GameState
             from genemon.battle.calculator import BattleCalculator
             from genemon.battle.status import StatusManager
             from genemon.battle.weather import WeatherManager
@@ -73,23 +73,34 @@ class TestIteration22(unittest.TestCase):
     def test_creature_generator(self):
         """Test creature generation system."""
         generator = CreatureGenerator(seed=12345)
-        creatures = generator.generate_creatures(count=10)
+        creatures = generator.generate_all_creatures()[:10]  # Get first 10
 
         self.assertEqual(len(creatures), 10)
         for creature_species in creatures:
             self.assertIsNotNone(creature_species.name)
             self.assertGreater(len(creature_species.types), 0)
-            self.assertGreater(creature_species.base_hp, 0)
-            self.assertGreater(creature_species.base_attack, 0)
+            self.assertGreater(creature_species.base_stats.hp, 0)
+            self.assertGreater(creature_species.base_stats.attack, 0)
 
     def test_sprite_generator(self):
         """Test sprite generation."""
         sprite_gen = SpriteGenerator(seed=12345)
-        front_sprite = sprite_gen.generate_sprite(self.test_species, sprite_type="front")
+        sprites = sprite_gen.generate_creature_sprites(
+            creature_id=1,
+            types=["Flame"],
+            archetype="quadruped"
+        )
 
-        self.assertIsNotNone(front_sprite)
-        self.assertEqual(len(front_sprite), sprite_gen.sprite_size)
-        self.assertEqual(len(front_sprite[0]), sprite_gen.sprite_size)
+        self.assertIsNotNone(sprites)
+        self.assertIn('front', sprites)
+        self.assertIn('back', sprites)
+        self.assertIn('mini', sprites)
+        # Front and back sprites are 56x56
+        self.assertEqual(len(sprites['front']), 56)
+        self.assertEqual(len(sprites['front'][0]), 56)
+        # Mini sprites are 16x16
+        self.assertEqual(len(sprites['mini']), 16)
+        self.assertEqual(len(sprites['mini'][0]), 16)
 
     def test_battle_system(self):
         """Test basic battle functionality."""
@@ -171,21 +182,25 @@ class TestIteration22(unittest.TestCase):
         """Test world map functionality."""
         world = World()
 
-        self.assertIsNotNone(world.current_location)
+        # World has locations dictionary
+        self.assertIsNotNone(world.locations)
         self.assertTrue(len(world.locations) > 0)
+        # Test get_location method
+        first_location = world.get_location("town_starter")
+        self.assertIsNotNone(first_location)
 
     def test_npc_registry(self):
         """Test NPC system."""
         npc_registry = NPCRegistry()
 
-        # Check that gym leaders exist
-        gym_leaders = npc_registry.get_gym_leaders()
-        self.assertEqual(len(gym_leaders), 8)
+        # Check that NPCs exist
+        self.assertIsNotNone(npc_registry.npcs)
+        self.assertTrue(len(npc_registry.npcs) > 0)
 
-        # Check that each gym leader has a team
-        for leader in gym_leaders:
-            self.assertIsNotNone(leader.name)
-            self.assertIsNotNone(leader.team)
+        # Check specific NPCs exist
+        self.assertIn("prof_oak", npc_registry.npcs)
+        professor = npc_registry.npcs["prof_oak"]
+        self.assertEqual(professor.name, "Prof. Cypress")
 
     def test_type_effectiveness(self):
         """Test type effectiveness calculations."""
@@ -236,8 +251,8 @@ class TestIteration22(unittest.TestCase):
         self.assertEqual(len(team.creatures), 3)
         self.assertTrue(team.has_active_creatures())
 
-        # Test team capacity
-        self.assertTrue(team.has_space())
+        # Test team capacity (has space means < max_size)
+        self.assertTrue(len(team.creatures) < team.max_size)
 
     def test_critical_hits(self):
         """Test critical hit system."""

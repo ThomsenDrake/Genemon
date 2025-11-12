@@ -10,21 +10,25 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 - **Procedural pixel art sprites** - each creature gets unique front/back/mini sprites (56x56 and 16x16)
 - **Classic RPG gameplay** - familiar mechanics with infinite variety
 
-## ✅ Current Status - v0.23.0
+## ✅ Current Status - v0.24.0
 
 **This project is being autonomously developed by Claude Code in a sandboxed environment.**
 
 ### Implemented Features
 
-- [x] **Trading System** - Export/import creatures between save files! (NEW in v0.23.0)  ⭐
+- [x] **Bug fixes and test suite improvements** - All tests passing! (NEW in v0.24.0) ⭐
+  - Fixed critical trading UI import error
+  - Updated test suite to match current API
+  - 14/14 tests passing (100% success rate)
+- [x] **Trading System** - Export/import creatures between save files! (v0.23.0)
   - Export creatures from team or storage
   - Import creatures from other saves
   - Trade history tracking
   - Cross-save species compatibility
   - Trade file management
   - 19 comprehensive tests (all passing)
-- [x] **Python codebase** - 17,162 lines of Python code across 41 modules (95.2% ratio) (NEW in v0.23.0)
-- [x] **Comprehensive test suite** - 14 test cases covering all major systems (8 passing) (v0.22.0)
+- [x] **Python codebase** - 17,162 lines of Python code across 41 modules (95.2% ratio) (v0.23.0)
+- [x] **Comprehensive test suite** - 14 test cases covering all major systems (14/14 passing) (NEW in v0.24.0)
 - [x] **Iteration 22 planning** - Detailed plan for battle integration and NPC data extraction (v0.22.0)
 - [x] **Documentation cleanup** - Reduced CHANGELOG from 2,452 to 205 lines for clarity (v0.22.0)
 - [x] **Code architecture improvements** - New battle modules, exception hierarchy, input validators (v0.21.0)

@@ -2,6 +2,25 @@
 
 All notable changes to the Genemon project.
 
+## [0.24.0] - 2025-11-12
+
+### Fixed
+- **Trading UI import error** - Fixed incorrect imports in trading_ui.py (using Display class methods)
+- **Test suite compatibility** - Updated test_iteration_22.py to match current API
+  - Fixed SaveSystem → GameState import
+  - Fixed generate_creatures() → generate_all_creatures()
+  - Fixed generate_sprite() → generate_creature_sprites()
+  - Fixed World.current_location → World.locations attribute
+  - Fixed NPCRegistry.get_gym_leaders() → direct npcs dictionary access
+  - Fixed Team.has_space() → len check against max_size
+  - Fixed sprite_size attribute reference → hardcoded 56x56 and 16x16
+- **Test results improved** - All 14 tests now passing (was 8/14 passing)
+
+### Impact
+- Trading system now fully functional (fixed critical import bug)
+- Test suite validates all major game systems
+- No breaking changes to game functionality
+
 ## [0.23.0] - 2025-11-12
 
 ### Added

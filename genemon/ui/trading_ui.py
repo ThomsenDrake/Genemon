@@ -8,7 +8,7 @@ from typing import Optional, List, Tuple
 from ..core.trading import TradeManager, TradePackage
 from ..core.creature import Creature, Team, CreatureSpecies
 from ..core.save_system import GameState
-from .display import clear_screen, display_header, display_menu
+from .display import Display
 
 
 class TradingUI:
@@ -34,8 +34,8 @@ class TradingUI:
         Returns:
             True to continue in menu, False to exit
         """
-        clear_screen()
-        display_header("Trading Center")
+        Display.clear_screen()
+        Display.print_header("Trading Center")
 
         print("\nWelcome to the Trading Center!")
         print("Here you can export and import creatures between save files.\n")
@@ -49,7 +49,11 @@ class TradingUI:
             "Back to Main Menu"
         ]
 
-        choice = display_menu(options)
+        Display.print_menu("Select an option:", options)
+        try:
+            choice = int(input("Choice: "))
+        except ValueError:
+            return True
 
         if choice == 1:
             self._export_creature_menu()
@@ -68,12 +72,16 @@ class TradingUI:
 
     def _export_creature_menu(self):
         """Menu for exporting a creature."""
-        clear_screen()
-        display_header("Export Creature")
+        Display.clear_screen()
+        Display.print_header("Export Creature")
 
         print("\nChoose where to export from:\n")
         options = ["Team", "Storage", "Cancel"]
-        choice = display_menu(options)
+        Display.print_menu("Select option:", options)
+        try:
+            choice = int(input("Choice: "))
+        except ValueError:
+            return
 
         if choice == 1:
             self._export_from_team()
@@ -92,8 +100,8 @@ class TradingUI:
             input("\nPress Enter to continue...")
             return
 
-        clear_screen()
-        display_header("Export from Team")
+        Display.clear_screen()
+        Display.print_header("Export from Team")
 
         print("\nSelect a creature to export:\n")
 
@@ -147,8 +155,8 @@ class TradingUI:
             input("\nPress Enter to continue...")
             return
 
-        clear_screen()
-        display_header("Export from Storage")
+        Display.clear_screen()
+        Display.print_header("Export from Storage")
 
         print("\nSelect a creature to export:\n")
 
@@ -202,14 +210,14 @@ class TradingUI:
         trade_files = self.trade_manager.list_trade_files()
 
         if not trade_files:
-            clear_screen()
-            display_header("Import Creature")
+            Display.clear_screen()
+            Display.print_header("Import Creature")
             print("\nNo trade files available!")
             input("\nPress Enter to continue...")
             return
 
-        clear_screen()
-        display_header("Import Creature")
+        Display.clear_screen()
+        Display.print_header("Import Creature")
 
         print("\nAvailable trade files:\n")
 
@@ -284,8 +292,8 @@ class TradingUI:
         """View and manage trade files."""
         trade_files = self.trade_manager.list_trade_files()
 
-        clear_screen()
-        display_header("Trade Files")
+        Display.clear_screen()
+        Display.print_header("Trade Files")
 
         if not trade_files:
             print("\nNo trade files available!")
@@ -304,8 +312,8 @@ class TradingUI:
         """View trade history."""
         history = self.trade_manager.get_trade_history(limit=20)
 
-        clear_screen()
-        display_header("Trade History")
+        Display.clear_screen()
+        Display.print_header("Trade History")
 
         if not history:
             print("\nNo trades recorded yet!")
@@ -323,8 +331,8 @@ class TradingUI:
         """View trade statistics."""
         stats = self.trade_manager.get_trade_stats()
 
-        clear_screen()
-        display_header("Trade Statistics")
+        Display.clear_screen()
+        Display.print_header("Trade Statistics")
 
         print("\nOverall Trading Statistics:\n")
         print(f"Total Trades: {stats['total_trades']}")
@@ -336,8 +344,8 @@ class TradingUI:
 
 def display_trading_tutorial():
     """Display a tutorial about the trading system."""
-    clear_screen()
-    display_header("Trading System Tutorial")
+    Display.clear_screen()
+    Display.print_header("Trading System Tutorial")
 
     print("""
 The Trading System allows you to exchange creatures between different save files!
