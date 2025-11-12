@@ -8,6 +8,7 @@ from .save_system import GameState, SaveManager
 from .creature import Creature, Team, Badge
 from .trading import TradeManager
 from .shiny import create_creature_with_shiny_check, get_shiny_indicator, get_shiny_text
+from .input_validator import InputValidator
 from ..world.map import World, Location
 from ..world.npc import NPCRegistry, NPC
 from ..battle.engine import Battle, BattleAction, BattleResult
@@ -33,35 +34,6 @@ class Game:
         self.display = Display()
         self.breeding_ui = BreedingUI(self.display)
         self.running = False
-
-    def _get_int_input(self, prompt: str = "> ", default: int = 0, min_val: int = 0, max_val: int = 999999) -> int:
-        """
-        Safely get integer input from user with validation.
-
-        Args:
-            prompt: The input prompt to display
-            default: Default value if input is empty or invalid
-            min_val: Minimum allowed value
-            max_val: Maximum allowed value
-
-        Returns:
-            Valid integer within the specified range
-        """
-        while True:
-            try:
-                user_input = input(prompt).strip()
-                if not user_input:
-                    return default
-                value = int(user_input)
-                if min_val <= value <= max_val:
-                    return value
-                else:
-                    print(f"Please enter a number between {min_val} and {max_val}.")
-            except ValueError:
-                print(f"Invalid input. Please enter a number (or press Enter for {default}).")
-            except (KeyboardInterrupt, EOFError):
-                # Handle Ctrl+C or Ctrl+D gracefully
-                return default
 
     def run(self):
         """Main game loop."""
@@ -915,7 +887,7 @@ class Game:
         # Get item choice
         print("Select item to use (or 0 to cancel):")
         item_list = list(self.state.items.keys())
-        choice = self._get_int_input("> ", default=0, min_val=0, max_val=len(item_list))
+        choice = InputValidator.get_valid_choice("> ", 0, len(item_list), allow_empty=True, empty_value=0)
 
         if choice < 1 or choice > len(item_list):
             return  # Cancel
@@ -945,7 +917,7 @@ class Game:
         print("\nUse on which creature?")
         self.display.show_team_summary(self.state.player_team)
 
-        target_choice = self._get_int_input("> ", default=0, min_val=0, max_val=len(self.state.player_team.creatures))
+        target_choice = InputValidator.get_valid_choice("> ", 0, len(self.state.player_team.creatures), allow_empty=True, empty_value=0)
 
         if target_choice < 1 or target_choice > len(self.state.player_team.creatures):
             return  # Cancel
@@ -987,7 +959,7 @@ class Game:
             return
 
         print("Select a creature to view (or 0 to go back):")
-        choice = self._get_int_input("> ", default=0, min_val=0, max_val=len(self.state.player_team.creatures))
+        choice = InputValidator.get_valid_choice("> ", 0, len(self.state.player_team.creatures), allow_empty=True, empty_value=0)
 
         if 1 <= choice <= len(self.state.player_team.creatures):
             creature = self.state.player_team.creatures[choice - 1]
@@ -1009,7 +981,7 @@ class Game:
 
         print("Select item to use (or 0 to go back):")
         item_list = list(self.state.items.keys())
-        choice = self._get_int_input("> ", default=0, min_val=0, max_val=len(item_list))
+        choice = InputValidator.get_valid_choice("> ", 0, len(item_list), allow_empty=True, empty_value=0)
 
         if choice < 1 or choice > len(item_list):
             return  # Cancel
@@ -1036,7 +1008,7 @@ class Game:
             input("Press Enter to continue...")
             return
 
-        target_choice = self._get_int_input("> ", default=0, min_val=0, max_val=len(self.state.player_team.creatures))
+        target_choice = InputValidator.get_valid_choice("> ", 0, len(self.state.player_team.creatures), allow_empty=True, empty_value=0)
 
         if target_choice < 1 or target_choice > len(self.state.player_team.creatures):
             return  # Cancel
@@ -1085,7 +1057,7 @@ class Game:
                     print(f"   {item.description}")
 
             print("\nSelect item to buy (or 0 to exit):")
-            choice = self._get_int_input("> ", default=0, min_val=0, max_val=len(npc.shop_inventory))
+            choice = InputValidator.get_valid_choice("> ", 0, len(npc.shop_inventory), allow_empty=True, empty_value=0)
 
             if choice < 1 or choice > len(npc.shop_inventory):
                 break  # Exit shop
@@ -1101,7 +1073,7 @@ class Game:
             # Ask quantity
             print(f"\nHow many {item.name} would you like to buy?")
             print(f"Price: ${item.price} each")
-            quantity = self._get_int_input("> ", default=0, min_val=0, max_val=999)
+            quantity = InputValidator.get_valid_choice("> ", 0, 999, allow_empty=True, empty_value=0)
 
             if quantity < 1:
                 continue
@@ -1245,7 +1217,7 @@ class Game:
         print(f"Caught: {len(self.state.pokedex_caught)}/151\n")
 
         print("Enter creature number (1-151) or 0 to go back:")
-        choice = self._get_int_input("> ", default=0, min_val=0, max_val=151)
+        choice = InputValidator.get_valid_choice("> ", 0, 151, allow_empty=True, empty_value=0)
 
         if 1 <= choice <= 151:
             self.display.show_pokedex_entry(
@@ -1267,7 +1239,7 @@ class Game:
             print("2. View specific type effectiveness")
             print("0. Back")
 
-            choice = self._get_int_input("\n> ", default=0, min_val=0, max_val=2)
+            choice = InputValidator.get_valid_choice("\n> ", 0, 2, allow_empty=True, empty_value=0)
 
             if choice == 0:
                 break
@@ -1279,11 +1251,12 @@ class Game:
                 for i, type_name in enumerate(TYPES, 1):
                     print(f"{i}. {type_name}")
 
-                type_choice = self._get_int_input(
+                type_choice = InputValidator.get_valid_choice(
                     "\nSelect type (or 0 to cancel): ",
-                    default=0,
-                    min_val=0,
-                    max_val=len(TYPES)
+                    0,
+                    len(TYPES),
+                    allow_empty=True,
+                    empty_value=0
                 )
 
                 if type_choice > 0:
@@ -1299,7 +1272,7 @@ class Game:
         print("\nView sprites for which creature?")
         print("Enter creature number (1-151) or 0 to go back:")
 
-        choice = self._get_int_input("> ", default=0, min_val=0, max_val=151)
+        choice = InputValidator.get_valid_choice("> ", 0, 151, allow_empty=True, empty_value=0)
 
         if 1 <= choice <= 151:
             self.display.show_sprite_viewer(
@@ -1327,7 +1300,7 @@ class Game:
             print("6. Reset to Defaults")
             print("0. Back")
 
-            choice = self._get_int_input("\n> ", default=0, min_val=0, max_val=6)
+            choice = InputValidator.get_valid_choice("\n> ", 0, 6, allow_empty=True, empty_value=0)
 
             if choice == 0:
                 break

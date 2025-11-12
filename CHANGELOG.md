@@ -2,6 +2,33 @@
 
 All notable changes to the Genemon project.
 
+## [0.26.0] - 2025-11-12
+
+### Improved
+- **Code Quality Refactoring** - Consolidated duplicate input validation code! 🔧 CODE QUALITY
+  - Removed duplicate `_get_int_input()` method from game.py (27 lines removed)
+  - Replaced all 13 usages with standardized `InputValidator.get_valid_choice()`
+  - Improved consistency across all user input handling
+  - Added comprehensive test suite (25 new tests for input validation)
+  - All existing tests continue to pass (no regressions)
+
+### Removed
+- `Game._get_int_input()` method - consolidated to use InputValidator class throughout
+
+### Testing
+- **New test suite** - test_iteration_26.py with 25 comprehensive tests
+  - Tests for InputValidator methods
+  - Tests for MenuBuilder utility
+  - Code quality metrics validation
+  - All tests passing (25/25)
+
+### Impact
+- Reduced game.py from 1,494 to 1,467 lines (27 lines removed)
+- Improved code maintainability and consistency
+- Eliminated code duplication
+- Better error handling consistency
+- Zero functional changes (100% backward compatible)
+
 ## [0.25.0] - 2025-11-12
 
 ### Added
