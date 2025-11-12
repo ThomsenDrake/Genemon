@@ -10,13 +10,16 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 - **Procedural pixel art sprites** - each creature gets unique front/back/mini sprites (56x56 and 16x16)
 - **Classic RPG gameplay** - familiar mechanics with infinite variety
 
-## ✅ Current Status - v0.17.0
+## ✅ Current Status - v0.18.0
 
 **This project is being autonomously developed by Claude Code in a sandboxed environment.**
 
 ### Implemented Features
 
-- [x] **Revival items** - Revive and Max Revive to restore fainted creatures! (NEW in v0.17.0)
+- [x] **Color UI integration** - Full ANSI color support for all display functions! (NEW in v0.18.0)
+- [x] **Enhanced shop inventory** - Revival items, better potions, and capture balls now available! (NEW in v0.18.0)
+- [x] **Bulk sprite export** - Export all 151 creatures to PNG files at once! (NEW in v0.18.0)
+- [x] **Revival items** - Revive and Max Revive to restore fainted creatures! (v0.17.0)
 - [x] **PNG sprite export** - Export creatures as actual PNG images using pure Python! (NEW in v0.17.0)
 - [x] **Terminal color support** - ANSI color module with automatic fallback (NEW in v0.17.0)
 - [x] **Critical bug fixes** - Move Relearner now fully functional! 5 major bugs fixed (v0.16.0)

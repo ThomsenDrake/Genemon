@@ -530,3 +530,67 @@ class SpriteGenerator:
             os.path.join(output_dir, f"{creature_name}_mini.png"),
             scale=scale * 2  # Mini sprites get extra scaling since they're smaller
         )
+
+    @staticmethod
+    def export_all_creatures_to_png(species_dict: dict,
+                                   output_dir: str = "sprites_export",
+                                   scale: int = 2,
+                                   progress_callback=None):
+        """
+        Export all 151 creatures to PNG files in bulk.
+
+        Args:
+            species_dict: Dictionary of creature_id -> CreatureSpecies
+            output_dir: Directory to save all sprites (will be created if needed)
+            scale: Scale factor for upscaling (default 2x)
+            progress_callback: Optional function(current, total, name) called for each creature
+
+        Returns:
+            Number of creatures exported successfully
+        """
+        import os
+
+        # Create output directory if it doesn't exist
+        os.makedirs(output_dir, exist_ok=True)
+
+        total = len(species_dict)
+        exported = 0
+
+        for creature_id, species in sorted(species_dict.items()):
+            try:
+                # Get sprite data (handle both dict and list formats)
+                if hasattr(species, 'sprite_data') and species.sprite_data:
+                    sprite_data = species.sprite_data
+                else:
+                    # Skip if no sprite data
+                    print(f"Warning: No sprite data for creature #{creature_id} ({species.name})")
+                    continue
+
+                # Convert hex sprites to Color sprites
+                front_color = SpriteGenerator.hex_array_to_color_array(sprite_data['front'])
+                back_color = SpriteGenerator.hex_array_to_color_array(sprite_data['back'])
+                mini_color = SpriteGenerator.hex_array_to_color_array(sprite_data['mini'])
+
+                # Create sanitized filename
+                safe_name = f"{creature_id:03d}_{species.name.replace(' ', '_').replace('/', '_')}"
+
+                # Export all three sprites
+                SpriteGenerator.export_creature_sprites_to_png(
+                    front_color,
+                    back_color,
+                    mini_color,
+                    safe_name,
+                    output_dir,
+                    scale
+                )
+
+                exported += 1
+
+                # Call progress callback if provided
+                if progress_callback:
+                    progress_callback(exported, total, species.name)
+
+            except Exception as e:
+                print(f"Error exporting creature #{creature_id} ({species.name}): {e}")
+
+        return exported

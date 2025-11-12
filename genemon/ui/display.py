@@ -6,6 +6,10 @@ from typing import List, Optional
 from ..core.creature import Creature, Team
 from ..world.map import Location
 from ..world.npc import NPC
+from .colors import (
+    colored, colored_type, colored_hp, colored_status,
+    bold, underline, TerminalColors
+)
 
 
 class Display:
@@ -23,9 +27,9 @@ class Display:
 
     @staticmethod
     def print_header(text: str):
-        """Print a header."""
+        """Print a header with colors."""
         Display.print_separator()
-        print(f"  {text}")
+        print(f"  {bold(text)}")
         Display.print_separator()
 
     @staticmethod
@@ -66,35 +70,51 @@ class Display:
 
     @staticmethod
     def show_creature_summary(creature: Creature) -> None:
-        """Display summary of a creature."""
+        """Display summary of a creature with colors."""
         species = creature.species
         print(f"\n{'=' * 50}")
-        print(f"  {creature.get_display_name().upper()} (Lv. {creature.level})")
+        print(f"  {bold(creature.get_display_name().upper())} (Lv. {creature.level})")
         print(f"{'=' * 50}")
-        print(f"  Type: {' / '.join(species.types)}")
-        print(f"  HP: {creature.current_hp}/{creature.max_hp}")
+
+        # Color type names
+        colored_types = ' / '.join([colored_type(t) for t in species.types])
+        print(f"  Type: {colored_types}")
+
+        # Color HP based on percentage
+        print(f"  HP: {colored_hp(creature.current_hp, creature.max_hp)}")
         print(f"  Attack: {creature.attack}  Defense: {creature.defense}")
         print(f"  Special: {creature.special}  Speed: {creature.speed}")
         print(f"  EXP: {creature.exp}")
+
+        # Show status if present
+        if creature.has_status():
+            print(f"  Status: {colored_status(creature.status.value)}")
+
         print(f"\n  {species.flavor_text}")
         print(f"{'=' * 50}\n")
 
     @staticmethod
     def show_team_summary(team: Team) -> None:
-        """Display summary of player's team."""
-        print("\n=== YOUR TEAM ===")
+        """Display summary of player's team with colors."""
+        print(f"\n=== {bold('YOUR TEAM')} ===")
         if not team.creatures:
             print("  (Empty)")
         else:
             for i, creature in enumerate(team.creatures, 1):
+                # Status indicator
                 if creature.is_fainted():
-                    status = "FNT"
+                    status = colored("[FNT]", TerminalColors.RED)
                 elif creature.has_status():
-                    status = creature.status.value.upper()[:3]
+                    status_text = creature.status.value.upper()[:3]
+                    status = f"[{colored_status(creature.status.value)}]"
                 else:
-                    status = "OK"
-                print(f"{i}. {creature.get_display_name()} Lv.{creature.level} "
-                      f"HP: {creature.current_hp}/{creature.max_hp} [{status}]")
+                    status = colored("[OK]", TerminalColors.BRIGHT_GREEN)
+
+                # Colored HP
+                hp_display = colored_hp(creature.current_hp, creature.max_hp)
+
+                print(f"{i}. {bold(creature.get_display_name())} Lv.{creature.level} "
+                      f"HP: {hp_display} {status}")
         print()
 
     @staticmethod
@@ -103,34 +123,64 @@ class Display:
         opponent_creature: Creature,
         is_wild: bool = False
     ) -> None:
-        """Display battle state."""
+        """Display battle state with colors."""
         Display.print_separator()
+
+        # Opponent header
+        opponent_name = bold(opponent_creature.species.name.upper())
         if is_wild:
-            print(f"  WILD {opponent_creature.species.name.upper()}")
+            print(f"  WILD {opponent_name}")
         else:
-            print(f"  OPPONENT'S {opponent_creature.species.name.upper()}")
+            print(f"  OPPONENT'S {opponent_name}")
+
+        # Opponent type display
+        opponent_types = ' / '.join([colored_type(t) for t in opponent_creature.species.types])
+        print(f"  Type: {opponent_types}")
 
         print(f"  Lv.{opponent_creature.level}  "
-              f"HP: {opponent_creature.current_hp}/{opponent_creature.max_hp}")
+              f"HP: {colored_hp(opponent_creature.current_hp, opponent_creature.max_hp)}")
 
-        # Simple HP bar
+        # Colored HP bar
         hp_percent = opponent_creature.current_hp / opponent_creature.max_hp
         bar_length = 20
         filled = int(hp_percent * bar_length)
-        bar = "[" + "#" * filled + "-" * (bar_length - filled) + "]"
+        bar_filled = colored("#" * filled, TerminalColors.BRIGHT_GREEN if hp_percent > 0.5
+                            else TerminalColors.BRIGHT_YELLOW if hp_percent > 0.2
+                            else TerminalColors.BRIGHT_RED)
+        bar = "[" + bar_filled + "-" * (bar_length - filled) + "]"
         print(f"  {bar}")
+
+        # Show opponent status if present
+        if opponent_creature.has_status():
+            print(f"  Status: {colored_status(opponent_creature.status.value)}")
 
         Display.print_separator()
 
-        print(f"\n  YOUR {player_creature.get_display_name().upper()}")
-        print(f"  Lv.{player_creature.level}  "
-              f"HP: {player_creature.current_hp}/{player_creature.max_hp}")
+        # Player header
+        player_name = bold(player_creature.get_display_name().upper())
+        print(f"\n  YOUR {player_name}")
 
-        # Simple HP bar
+        # Player type display
+        player_types = ' / '.join([colored_type(t) for t in player_creature.species.types])
+        print(f"  Type: {player_types}")
+
+        print(f"  Lv.{player_creature.level}  "
+              f"HP: {colored_hp(player_creature.current_hp, player_creature.max_hp)}")
+
+        # Colored HP bar
         hp_percent = player_creature.current_hp / player_creature.max_hp
         filled = int(hp_percent * bar_length)
-        bar = "[" + "#" * filled + "-" * (bar_length - filled) + "]"
-        print(f"  {bar}\n")
+        bar_filled = colored("#" * filled, TerminalColors.BRIGHT_GREEN if hp_percent > 0.5
+                            else TerminalColors.BRIGHT_YELLOW if hp_percent > 0.2
+                            else TerminalColors.BRIGHT_RED)
+        bar = "[" + bar_filled + "-" * (bar_length - filled) + "]"
+        print(f"  {bar}")
+
+        # Show player status if present
+        if player_creature.has_status():
+            print(f"  Status: {colored_status(player_creature.status.value)}")
+
+        print()
 
     @staticmethod
     def show_location(
@@ -175,40 +225,57 @@ class Display:
 
     @staticmethod
     def show_pokedex_entry(creature_id: int, species_dict: dict, seen: set, caught: set):
-        """Show Pokedex entry for a creature."""
+        """Show Pokedex entry for a creature with colors."""
         if creature_id not in seen:
-            print(f"#{creature_id:03d}: ??? (Not yet seen)")
+            print(f"#{creature_id:03d}: {colored('??? (Not yet seen)', TerminalColors.GRAY)}")
             return
 
         species = species_dict[creature_id]
-        status = "CAUGHT" if creature_id in caught else "SEEN"
+        status = colored("CAUGHT", TerminalColors.BRIGHT_GREEN) if creature_id in caught else colored("SEEN", TerminalColors.BRIGHT_YELLOW)
 
         print(f"\n{'=' * 60}")
-        print(f"  #{species.id:03d}: {species.name.upper()} [{status}]")
+        print(f"  #{species.id:03d}: {bold(species.name.upper())} [{status}]")
         print(f"{'=' * 60}")
-        print(f"  Type: {' / '.join(species.types)}")
+
+        # Color type names
+        colored_types = ' / '.join([colored_type(t) for t in species.types])
+        print(f"  Type: {colored_types}")
 
         if creature_id in caught:
             stats = species.base_stats
-            print(f"\n  Base Stats:")
+            print(f"\n  {bold('Base Stats:')}")
             print(f"    HP: {stats.hp}  Attack: {stats.attack}  Defense: {stats.defense}")
             print(f"    Special: {stats.special}  Speed: {stats.speed}")
-            print(f"\n  Moves:")
+            print(f"\n  {bold('Moves:')}")
             for move in species.moves[:4]:  # Show first 4 moves
-                print(f"    - {move.name} ({move.type}) Power: {move.power}")
+                move_type = colored_type(move.type)
+                print(f"    - {move.name} ({move_type}) Power: {move.power}")
             print(f"\n  {species.flavor_text}")
 
         print(f"{'=' * 60}\n")
 
     @staticmethod
     def show_moves(creature: Creature) -> None:
-        """Display creature's moves with PP information."""
-        print(f"\n=== {creature.get_display_name()}'s Moves ===")
+        """Display creature's moves with PP information and colors."""
+        print(f"\n=== {bold(creature.get_display_name())}'s Moves ===")
         for i, move in enumerate(creature.moves, 1):
-            pp_display = f"PP: {move.pp}/{move.max_pp}"
+            # Color PP based on remaining amount
+            pp_percent = move.pp / move.max_pp if move.max_pp > 0 else 0
+            if pp_percent > 0.5:
+                pp_color = TerminalColors.BRIGHT_GREEN
+            elif pp_percent > 0:
+                pp_color = TerminalColors.BRIGHT_YELLOW
+            else:
+                pp_color = TerminalColors.BRIGHT_RED
+
+            pp_display = colored(f"PP: {move.pp}/{move.max_pp}", pp_color)
             if move.pp == 0:
-                pp_display += " (OUT OF PP!)"
-            print(f"{i}. {move.name} ({move.type}) - "
+                pp_display += colored(" (OUT OF PP!)", TerminalColors.BRIGHT_RED)
+
+            # Color move type
+            move_type = colored_type(move.type)
+
+            print(f"{i}. {bold(move.name)} ({move_type}) - "
                   f"Power: {move.power} Acc: {move.accuracy}% {pp_display}")
         print()
 

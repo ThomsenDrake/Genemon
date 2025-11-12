@@ -147,16 +147,22 @@ class NPCRegistry:
             shop_inventory=[
                 'potion',
                 'super_potion',
+                'hyper_potion',
+                'max_potion',
+                'revive',
+                'max_revive',
                 'ether',
                 'antidote',
                 'awakening',
                 'burn_heal',
                 'paralyze_heal',
-                'capture_ball'
+                'capture_ball',
+                'great_ball',
+                'ultra_ball'
             ],
             dialogues=[
                 Dialogue("Welcome to my shop!"),
-                Dialogue("I sell potions and capture balls!")
+                Dialogue("I sell potions, revival items, and capture balls!")
             ]
         )
         self.npcs[shopkeeper.id] = shopkeeper
