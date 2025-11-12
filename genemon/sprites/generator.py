@@ -81,7 +81,8 @@ class SpriteGenerator:
         self,
         creature_id: int,
         types: List[str],
-        archetype: str = "quadruped"
+        archetype: str = "quadruped",
+        is_shiny: bool = False
     ) -> Dict[str, List[List[str]]]:
         """
         Generate all sprites for a creature.
@@ -90,6 +91,7 @@ class SpriteGenerator:
             creature_id: Unique ID for reproducibility
             types: Creature types (for color palette)
             archetype: Body type (bird, fish, quadruped, etc.)
+            is_shiny: If True, generates shiny (alternate color) variant
 
         Returns:
             Dictionary with 'front', 'back', and 'mini' sprite data
@@ -98,8 +100,8 @@ class SpriteGenerator:
         # Set seed based on creature ID for reproducibility
         self.rng.seed(self.seed + creature_id)
 
-        # Get color palette
-        palette = self._get_palette(types)
+        # Get color palette (shiny or normal)
+        palette = self._get_palette(types, is_shiny=is_shiny)
 
         # Generate sprites
         front = self._generate_front_sprite(palette, archetype)
@@ -112,14 +114,27 @@ class SpriteGenerator:
             'mini': self._sprite_to_hex_array(mini)
         }
 
-    def _get_palette(self, types: List[str]) -> List[Color]:
-        """Get color palette based on creature types."""
+    def _get_palette(self, types: List[str], is_shiny: bool = False) -> List[Color]:
+        """
+        Get color palette based on creature types.
+
+        Args:
+            types: List of creature types
+            is_shiny: If True, generates shiny (alternate) color palette
+
+        Returns:
+            List of Color objects for sprite rendering
+        """
         primary_type = types[0] if types else "Beast"
 
         if primary_type in TYPE_COLORS:
             base_colors = TYPE_COLORS[primary_type].copy()
         else:
             base_colors = TYPE_COLORS["Beast"].copy()
+
+        # Apply shiny transformation if requested
+        if is_shiny:
+            base_colors = self._shinyfy_palette(base_colors)
 
         # Add some variation
         palette = base_colors + [
@@ -130,6 +145,50 @@ class SpriteGenerator:
         ]
 
         return palette
+
+    def _shinyfy_palette(self, palette: List[Color]) -> List[Color]:
+        """
+        Transform a color palette into a shiny variant.
+        Applies color shifts to create rare, alternate colorations.
+
+        Args:
+            palette: Original color palette
+
+        Returns:
+            Shiny variant palette
+        """
+        shiny_palette = []
+
+        for color in palette:
+            # Apply golden/sparkle tint for shiny variants
+            # Shift hue by rotating RGB values and adjusting saturation
+            r, g, b = color.r, color.g, color.b
+
+            # Different shiny strategies based on color intensity
+            avg = (r + g + b) // 3
+
+            if avg < 85:  # Dark colors -> shift to purple/blue
+                shiny_color = Color(
+                    min(255, r + 50),
+                    min(255, g + 30),
+                    min(255, b + 100)
+                )
+            elif avg < 170:  # Mid colors -> shift to gold/bronze
+                shiny_color = Color(
+                    min(255, r + 60),
+                    min(255, g + 40),
+                    max(0, b - 30)
+                )
+            else:  # Light colors -> shift to silver/cyan
+                shiny_color = Color(
+                    min(255, max(0, r - 20)),
+                    min(255, g + 20),
+                    min(255, b + 40)
+                )
+
+            shiny_palette.append(shiny_color)
+
+        return shiny_palette
 
     def _generate_front_sprite(
         self,

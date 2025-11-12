@@ -9,6 +9,7 @@ from datetime import datetime
 from .creature import Team, CreatureSpecies, Creature, Badge
 from ..creatures.generator import CreatureGenerator
 from ..sprites.generator import SpriteGenerator
+from .breeding import BreedingCenter, Egg
 
 
 class GameState:
@@ -51,6 +52,9 @@ class GameState:
         }
         self.money: int = 1000  # Starting money for shops
 
+        # Breeding center
+        self.breeding_center: BreedingCenter = BreedingCenter()
+
     def to_dict(self) -> dict:
         """Serialize game state to dictionary."""
         return {
@@ -78,7 +82,8 @@ class GameState:
                 for npc_id, team in self.trainer_teams.items()
             },
             'items': self.items,
-            'money': self.money
+            'money': self.money,
+            'breeding_eggs': [egg.to_dict() for egg in self.breeding_center.eggs]
         }
 
     @classmethod
@@ -130,6 +135,13 @@ class GameState:
 
         state.items = data.get('items', {"potion": 5, "ether": 3, "capture_ball": 10})
         state.money = data.get('money', 1000)
+
+        # Reconstruct breeding center eggs
+        breeding_eggs_data = data.get('breeding_eggs', [])
+        for egg_data in breeding_eggs_data:
+            species = state.species_dict[egg_data['species_id']]
+            egg = Egg.from_dict(egg_data, species)
+            state.breeding_center.eggs.append(egg)
 
         return state
 

@@ -7,11 +7,13 @@ from typing import Optional
 from .save_system import GameState, SaveManager
 from .creature import Creature, Team, Badge
 from .trading import TradeManager
+from .shiny import create_creature_with_shiny_check, get_shiny_indicator, get_shiny_text
 from ..world.map import World, Location
 from ..world.npc import NPCRegistry, NPC
 from ..battle.engine import Battle, BattleAction, BattleResult
 from ..ui.display import Display
 from ..ui.trading_ui import TradingUI
+from ..ui.breeding_ui import BreedingUI
 
 
 class Game:
@@ -29,6 +31,7 @@ class Game:
         self.world = World()
         self.npc_registry = NPCRegistry()
         self.display = Display()
+        self.breeding_ui = BreedingUI(self.display)
         self.running = False
 
     def _get_int_input(self, prompt: str = "> ", default: int = 0, min_val: int = 0, max_val: int = 999999) -> int:
@@ -176,6 +179,7 @@ class Game:
                 "Badges",
                 "Pokedex",
                 "Trading Center",
+                "Breeding Center",
                 "Type Chart",
                 "Sprite Viewer",
                 "Settings",
@@ -199,16 +203,18 @@ class Game:
             elif choice == 5:
                 self._show_trading_menu()
             elif choice == 6:
-                self._show_type_chart_menu()
+                self._show_breeding_menu()
             elif choice == 7:
-                self._show_sprite_viewer_menu()
+                self._show_type_chart_menu()
             elif choice == 8:
-                self._show_settings_menu()
+                self._show_sprite_viewer_menu()
             elif choice == 9:
+                self._show_settings_menu()
+            elif choice == 10:
                 self.save_manager.save_game(self.state)
                 print("\nGame saved!")
                 input("Press Enter to continue...")
-            elif choice == 10:
+            elif choice == 11:
                 self.state = None  # Exit to main menu
 
     def _handle_movement(self, location: Location, npcs: list):
@@ -311,9 +317,14 @@ class Game:
         # Add to seen
         self.state.pokedex_seen.add(creature_id)
 
-        # Create wild creature at appropriate level
+        # Create wild creature at appropriate level with shiny check
         level = random.randint(2, 10)
-        wild_creature = Creature(species=species, level=level, current_hp=0)
+        wild_creature = create_creature_with_shiny_check(species=species, level=level)
+
+        # Display shiny encounter message if applicable
+        if wild_creature.is_shiny:
+            print(f"\n✨ A wild SHINY {species.name} appeared! ✨")
+            input("Press Enter to continue...")
 
         # Create battle
         wild_team = Team()
@@ -1365,3 +1376,119 @@ class Game:
         self.save_manager.save_game(self.state)
         print("\nProgress saved!")
         input("Press Enter to continue...")
+
+    def _show_breeding_menu(self):
+        """Show the breeding center menu."""
+        while True:
+            # Combine team and storage for parent selection
+            available_creatures = list(self.state.player_team.creatures) + self.state.storage
+
+            action = self.breeding_ui.show_breeding_menu(
+                self.state.breeding_center,
+                self.state.player_team.creatures,
+                self.state.storage
+            )
+
+            if action is None:
+                break
+            elif action == "start_breeding":
+                self._handle_start_breeding(available_creatures)
+            elif action == "collect_egg":
+                self._handle_collect_egg()
+            elif action == "hatch_egg":
+                self._handle_hatch_egg()
+            elif action == "view_pairs":
+                self.breeding_ui.show_breeding_pairs(self.state.breeding_center)
+            elif action == "view_eggs":
+                self.breeding_ui.show_eggs(self.state.breeding_center)
+
+        # Auto-save after breeding activities
+        self.save_manager.save_game(self.state)
+
+    def _handle_start_breeding(self, available_creatures):
+        """Handle starting a new breeding pair."""
+        parents = self.breeding_ui.select_breeding_parents(available_creatures)
+
+        if parents is None:
+            return
+
+        parent1, parent2 = parents
+
+        success, message = self.state.breeding_center.start_breeding(parent1, parent2)
+
+        self.display.clear_screen()
+        self.display.print_header("BREEDING CENTER")
+
+        if success:
+            print(f"\n✓ {message}")
+            print(f"\nCome back later to collect the egg!")
+        else:
+            print(f"\n✗ {message}")
+
+        input("\nPress Enter to continue...")
+
+    def _handle_collect_egg(self):
+        """Handle collecting an egg from a breeding pair."""
+        if not self.state.breeding_center.breeding_pairs:
+            print("\nNo breeding pairs available to collect eggs from!")
+            input("Press Enter to continue...")
+            return
+
+        pair_index = self.breeding_ui.select_breeding_pair(
+            self.state.breeding_center.breeding_pairs
+        )
+
+        if pair_index < 0:
+            return
+
+        egg = self.state.breeding_center.collect_egg(pair_index)
+
+        if egg:
+            self.display.clear_screen()
+            self.display.print_header("EGG COLLECTED!")
+
+            shiny_text = " ✨ (SHINY!)" if egg.is_shiny else ""
+            print(f"\nYou collected a {egg.species.name} Egg{shiny_text}!")
+            print(f"\nInherited {len(egg.inherited_moves)} moves from parents.")
+
+            if egg.inherited_moves:
+                print("\nInherited Moves:")
+                for move in egg.inherited_moves:
+                    print(f"  - {move.name} ({move.type})")
+
+            input("\nPress Enter to continue...")
+
+    def _handle_hatch_egg(self):
+        """Handle hatching an egg."""
+        if not self.state.breeding_center.eggs:
+            print("\nNo eggs available to hatch!")
+            input("Press Enter to continue...")
+            return
+
+        egg_index = self.breeding_ui.select_egg(self.state.breeding_center.eggs)
+
+        if egg_index < 0:
+            return
+
+        hatched_creature = self.state.breeding_center.hatch_egg(egg_index)
+
+        if hatched_creature:
+            self.display.clear_screen()
+            self.display.print_header("EGG HATCHED!")
+
+            shiny_text = " ✨ (SHINY!)" if hatched_creature.is_shiny else ""
+            print(f"\nThe egg hatched into a level 1 {hatched_creature.species.name}{shiny_text}!")
+
+            # Add to Pokedex
+            self.state.pokedex_seen.add(hatched_creature.species.id)
+            self.state.pokedex_caught.add(hatched_creature.species.id)
+
+            # Try to add to team, otherwise add to storage
+            if len(self.state.player_team.creatures) < 6:
+                self.state.player_team.add_creature(hatched_creature)
+                print(f"\n{hatched_creature.species.name} was added to your team!")
+            else:
+                self.state.storage.append(hatched_creature)
+                print(f"\n{hatched_creature.species.name} was sent to storage!")
+
+            input("\nPress Enter to continue...")

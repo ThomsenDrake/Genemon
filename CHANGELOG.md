@@ -2,6 +2,40 @@
 
 All notable changes to the Genemon project.
 
+## [0.25.0] - 2025-11-12
+
+### Added
+- **Shiny Creatures System** - Rare color variants with 1/4096 encounter rate! ⭐ NEW FEATURE
+  - Shiny status with special sparkle indicator (✨)
+  - Alternate color palettes for shiny sprites (gold, purple, silver tints)
+  - Shiny indicators in all displays (team, battles, menus)
+  - Wild encounter shiny checking with special message
+  - Full save/load persistence for shiny status
+- **Breeding System** - Breed creatures to produce eggs! ⭐ NEW FEATURE
+  - Breed level 15+ creatures of the same species
+  - Eggs inherit up to 3 moves from parents
+  - Enhanced shiny odds for breeding (1/512 vs 1/4096)
+  - Hatch eggs into level 1 creatures
+  - Full breeding center UI with egg management
+  - Breeding pairs and egg persistence through saves
+- **Comprehensive Testing** - 19 new tests for shiny and breeding systems
+- **Modules Created:**
+  - `genemon/core/shiny.py` - Shiny creature utilities (88 lines)
+  - `genemon/core/breeding.py` - Complete breeding system (216 lines)
+  - `genemon/ui/breeding_ui.py` - Breeding center UI (225 lines)
+
+### Improved
+- Enhanced sprite generator to support shiny color transformations
+- Added "Breeding Center" menu option to main game loop
+- Updated creature display name to show shiny indicators
+- Python codebase now 11,887 lines across 33 modules
+
+### Impact
+- Adds long-term collection goals with shiny hunting
+- Strategic breeding for custom movesets and shiny odds
+- Enhanced replayability and endgame content
+- 100% backward compatible with existing saves
+
 ## [0.24.0] - 2025-11-12
 
 ### Fixed

@@ -288,6 +288,9 @@ class Creature:
     # Choice item tracking (locks into first move used)
     choice_locked_move: Optional[str] = None  # Name of move locked into by Choice items
 
+    # Shiny status (rare color variant, 1/4096 chance)
+    is_shiny: bool = False
+
     # Current battle stats (can be modified by stat changes)
     attack: int = field(init=False)
     defense: int = field(init=False)
@@ -325,9 +328,20 @@ class Creature:
         if self.current_hp == 0 or self.current_hp > self.max_hp:
             self.current_hp = self.max_hp
 
-    def get_display_name(self) -> str:
-        """Get the display name (nickname or species name)."""
-        return self.nickname if self.nickname else self.species.name
+    def get_display_name(self, include_shiny: bool = True) -> str:
+        """
+        Get the display name (nickname or species name).
+
+        Args:
+            include_shiny: If True, adds sparkle indicator for shiny creatures
+
+        Returns:
+            Display name with optional shiny indicator
+        """
+        name = self.nickname if self.nickname else self.species.name
+        if include_shiny and self.is_shiny:
+            return f"{name} ✨"
+        return name
 
     def is_fainted(self) -> bool:
         """Check if creature has fainted."""
@@ -509,7 +523,8 @@ class Creature:
             'nickname': self.nickname,
             'moves': [m.to_dict() for m in self.moves],
             'status': self.status.value,
-            'status_turns': self.status_turns
+            'status_turns': self.status_turns,
+            'is_shiny': self.is_shiny
         }
         # Add held_item if present
         if self.held_item:
@@ -524,7 +539,8 @@ class Creature:
             level=data['level'],
             current_hp=data['current_hp'],
             exp=data.get('exp', 0),
-            nickname=data.get('nickname')
+            nickname=data.get('nickname'),
+            is_shiny=data.get('is_shiny', False)
         )
         # Override max_hp from saved data if needed
         if 'max_hp' in data and data['max_hp'] != creature.max_hp:
