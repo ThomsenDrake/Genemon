@@ -24,6 +24,35 @@ class Game:
         self.display = Display()
         self.running = False
 
+    def _get_int_input(self, prompt: str = "> ", default: int = 0, min_val: int = 0, max_val: int = 999999) -> int:
+        """
+        Safely get integer input from user with validation.
+
+        Args:
+            prompt: The input prompt to display
+            default: Default value if input is empty or invalid
+            min_val: Minimum allowed value
+            max_val: Maximum allowed value
+
+        Returns:
+            Valid integer within the specified range
+        """
+        while True:
+            try:
+                user_input = input(prompt).strip()
+                if not user_input:
+                    return default
+                value = int(user_input)
+                if min_val <= value <= max_val:
+                    return value
+                else:
+                    print(f"Please enter a number between {min_val} and {max_val}.")
+            except ValueError:
+                print(f"Invalid input. Please enter a number (or press Enter for {default}).")
+            except (KeyboardInterrupt, EOFError):
+                # Handle Ctrl+C or Ctrl+D gracefully
+                return default
+
     def run(self):
         """Main game loop."""
         self.running = True
@@ -499,8 +528,11 @@ class Game:
             # Get all creatures that match the gym leader's specialty type
             matching_species = []
             for species_id, species in self.state.species_dict.items():
-                if (species.type1 == npc.specialty_type or
-                    species.type2 == npc.specialty_type):
+                # Access types using list indexing
+                primary_type = species.types[0] if len(species.types) > 0 else None
+                secondary_type = species.types[1] if len(species.types) > 1 else None
+                if (primary_type == npc.specialty_type or
+                    secondary_type == npc.specialty_type):
                     matching_species.append(species)
 
             # If we have enough matching creatures, use them
@@ -528,170 +560,139 @@ class Game:
 
         return trainer_team
 
+    def _create_typed_elite_team(
+        self,
+        seed_name: str,
+        primary_types: list,
+        support_types: list,
+        base_level_normal: int,
+        base_level_rematch: int,
+        team_size: int = 5,
+        is_rematch: bool = False,
+        sort_by_stat: str = None
+    ) -> Team:
+        """
+        Generic helper to create type-specialized Elite Four teams.
+
+        Args:
+            seed_name: Unique seed name for RNG (e.g., "elite_mystica")
+            primary_types: List of primary type strings to filter for (e.g., ["Mystic"])
+            support_types: List of support type strings for filling team (e.g., ["Mind", "Spirit"])
+            base_level_normal: Starting level for normal mode (e.g., 32)
+            base_level_rematch: Starting level for rematch mode (e.g., 50)
+            team_size: Number of creatures in team (default 5)
+            is_rematch: Whether this is a rematch battle
+            sort_by_stat: Optional stat to sort by ("speed", "attack", etc.)
+
+        Returns:
+            Team with type-specialized creatures
+        """
+        team = Team()
+        rng = random.Random(hash(seed_name + str(self.state.seed)))
+        base_level = base_level_rematch if is_rematch else base_level_normal
+
+        # Find creatures matching primary types
+        primary_creatures = []
+        for species in self.state.species_dict.values():
+            primary_type = species.types[0] if len(species.types) > 0 else None
+            secondary_type = species.types[1] if len(species.types) > 1 else None
+            if primary_type in primary_types or secondary_type in primary_types:
+                primary_creatures.append(species)
+
+        # Select creatures (prioritize 4 primary type creatures)
+        if len(primary_creatures) >= 4:
+            if sort_by_stat:
+                # Sort by specified stat
+                sorted_creatures = sorted(
+                    primary_creatures,
+                    key=lambda s: getattr(s.base_stats, sort_by_stat),
+                    reverse=True
+                )
+                selected = sorted_creatures[:4]
+            else:
+                selected = rng.sample(primary_creatures, 4)
+        else:
+            selected = primary_creatures[:]
+
+        # Add support types to fill team
+        while len(selected) < team_size:
+            support_creatures = [
+                s for s in self.state.species_dict.values()
+                if s.types[0] in support_types and s not in selected
+            ]
+            if support_creatures:
+                selected.append(rng.choice(support_creatures))
+            else:
+                # Add any random creature if support types exhausted
+                candidate = rng.choice(list(self.state.species_dict.values()))
+                if candidate not in selected:
+                    selected.append(candidate)
+
+        # Create team with progressive levels
+        for i, species in enumerate(selected):
+            level = base_level + i
+            creature = Creature(species=species, level=level)
+            team.add_creature(creature)
+
+        return team
+
     def _create_elite_mystica_team(self, is_rematch: bool = False) -> Team:
         """
         Create hand-crafted team for Elite Mystica (Mystic-type specialist).
         Level 32-36 normal, 50-54 rematch with strong Mystic and supporting types.
         """
-        team = Team()
-        rng = random.Random(hash("elite_mystica" + str(self.state.seed)))
-
-        # Rematch increases levels significantly
-        base_level = 50 if is_rematch else 32
-
-        # Find creatures with Mystic type and high stats
-        mystic_creatures = []
-        for species in self.state.species_dict.values():
-            if species.types[0] == "Mystic" or (len(species.types) > 1 and species.types[1] == "Mystic"):
-                mystic_creatures.append(species)
-
-        # Select 5 creatures: 3-4 Mystic types + 1-2 supporting types
-        if len(mystic_creatures) >= 4:
-            selected = rng.sample(mystic_creatures, 4)
-        else:
-            selected = mystic_creatures[:]
-            # Add some Mind or Spirit types as support
-            support_types = [s for s in self.state.species_dict.values()
-                           if s.types[0] in ["Mind", "Spirit"] and s not in selected]
-            if support_types:
-                selected.extend(rng.sample(support_types, min(4 - len(selected), len(support_types))))
-
-        # Add one more random strong creature if needed
-        while len(selected) < 5:
-            candidate = rng.choice(list(self.state.species_dict.values()))
-            if candidate not in selected:
-                selected.append(candidate)
-
-        # Create team with progressive levels
-        for i, species in enumerate(selected):
-            level = base_level + i  # 32-36 normal, 50-54 rematch
-            creature = Creature(species=species, level=level)
-            team.add_creature(creature)
-
-        return team
+        return self._create_typed_elite_team(
+            seed_name="elite_mystica",
+            primary_types=["Mystic"],
+            support_types=["Mind", "Spirit"],
+            base_level_normal=32,
+            base_level_rematch=50,
+            is_rematch=is_rematch
+        )
 
     def _create_elite_tempest_team(self, is_rematch: bool = False) -> Team:
         """
         Create hand-crafted team for Elite Tempest (Gale-type specialist).
         Level 33-37 normal, 51-55 rematch with fast, powerful Gale types.
         """
-        team = Team()
-        rng = random.Random(hash("elite_tempest" + str(self.state.seed)))
-        base_level = 51 if is_rematch else 33
-
-        # Find Gale-type creatures
-        gale_creatures = []
-        for species in self.state.species_dict.values():
-            if species.types[0] == "Gale" or (len(species.types) > 1 and species.types[1] == "Gale"):
-                gale_creatures.append(species)
-
-        # Select creatures prioritizing high speed
-        if len(gale_creatures) >= 4:
-            # Sort by speed and pick top candidates
-            sorted_gale = sorted(gale_creatures, key=lambda s: s.base_stats.speed, reverse=True)
-            selected = sorted_gale[:4]
-        else:
-            selected = gale_creatures[:]
-
-        # Add supporting Volt or Frost types (good offensive combos)
-        while len(selected) < 5:
-            support_types = [s for s in self.state.species_dict.values()
-                           if s.types[0] in ["Volt", "Frost"] and s not in selected]
-            if support_types:
-                selected.append(rng.choice(support_types))
-            else:
-                # Add any creature
-                candidate = rng.choice(list(self.state.species_dict.values()))
-                if candidate not in selected:
-                    selected.append(candidate)
-
-        # Create team with progressive levels
-        for i, species in enumerate(selected):
-            level = base_level + i
-            creature = Creature(species=species, level=level)
-            team.add_creature(creature)
-
-        return team
+        return self._create_typed_elite_team(
+            seed_name="elite_tempest",
+            primary_types=["Gale"],
+            support_types=["Volt", "Frost"],
+            base_level_normal=33,
+            base_level_rematch=51,
+            is_rematch=is_rematch,
+            sort_by_stat="speed"  # Prioritize fast creatures
+        )
 
     def _create_elite_steel_team(self, is_rematch: bool = False) -> Team:
         """
         Create hand-crafted team for Elite Steel (Metal-type specialist).
         Level 34-38 normal, 52-56 rematch with defensive Metal types and hard-hitting attacks.
         """
-        team = Team()
-        rng = random.Random(hash("elite_steel" + str(self.state.seed)))
-        base_level = 52 if is_rematch else 34
-
-        # Find Metal-type creatures
-        metal_creatures = []
-        for species in self.state.species_dict.values():
-            if species.types[0] == "Metal" or (len(species.types) > 1 and species.types[1] == "Metal"):
-                metal_creatures.append(species)
-
-        # Select creatures prioritizing defense
-        if len(metal_creatures) >= 4:
-            sorted_metal = sorted(metal_creatures, key=lambda s: s.base_stats.defense, reverse=True)
-            selected = sorted_metal[:4]
-        else:
-            selected = metal_creatures[:]
-
-        # Add Terra or Brawl types for coverage
-        while len(selected) < 5:
-            support_types = [s for s in self.state.species_dict.values()
-                           if s.types[0] in ["Terra", "Brawl"] and s not in selected]
-            if support_types:
-                selected.append(rng.choice(support_types))
-            else:
-                candidate = rng.choice(list(self.state.species_dict.values()))
-                if candidate not in selected:
-                    selected.append(candidate)
-
-        # Create team with progressive levels
-        for i, species in enumerate(selected):
-            level = base_level + i
-            creature = Creature(species=species, level=level)
-            team.add_creature(creature)
-
-        return team
+        return self._create_typed_elite_team(
+            seed_name="elite_steel",
+            primary_types=["Metal"],
+            support_types=["Terra", "Brawl"],
+            base_level_normal=34,
+            base_level_rematch=52,
+            is_rematch=is_rematch,
+            sort_by_stat="defense"  # Prioritize defensive creatures
+        )
 
     def _create_elite_phantom_team(self, is_rematch: bool = False) -> Team:
         """
         Create hand-crafted team for Elite Phantom (Spirit-type specialist).
         Level 35-39 normal, 53-57 rematch with evasive Spirit and Shadow types.
         """
-        team = Team()
-        rng = random.Random(hash("elite_phantom" + str(self.state.seed)))
-        base_level = 53 if is_rematch else 35
-
-        # Find Spirit and Shadow-type creatures
-        spirit_shadow_creatures = []
-        for species in self.state.species_dict.values():
-            if species.types[0] in ["Spirit", "Shadow"] or (len(species.types) > 1 and species.types[1] in ["Spirit", "Shadow"]):
-                spirit_shadow_creatures.append(species)
-
-        # Select creatures
-        if len(spirit_shadow_creatures) >= 5:
-            selected = rng.sample(spirit_shadow_creatures, 5)
-        else:
-            selected = spirit_shadow_creatures[:]
-            # Add Toxin or Mind types
-            while len(selected) < 5:
-                support_types = [s for s in self.state.species_dict.values()
-                               if s.types[0] in ["Toxin", "Mind"] and s not in selected]
-                if support_types:
-                    selected.append(rng.choice(support_types))
-                else:
-                    candidate = rng.choice(list(self.state.species_dict.values()))
-                    if candidate not in selected:
-                        selected.append(candidate)
-
-        # Create team with progressive levels
-        for i, species in enumerate(selected):
-            level = base_level + i
-            creature = Creature(species=species, level=level)
-            team.add_creature(creature)
-
-        return team
+        return self._create_typed_elite_team(
+            seed_name="elite_phantom",
+            primary_types=["Spirit", "Shadow"],
+            support_types=["Toxin", "Mind"],
+            base_level_normal=35,
+            base_level_rematch=53,
+            is_rematch=is_rematch
+        )
 
     def _create_champion_aurora_team(self, is_rematch: bool = False) -> Team:
         """
@@ -882,7 +883,7 @@ class Game:
         # Get item choice
         print("Select item to use (or 0 to cancel):")
         item_list = list(self.state.items.keys())
-        choice = int(input("> ").strip() or "0")
+        choice = self._get_int_input("> ", default=0, min_val=0, max_val=len(item_list))
 
         if choice < 1 or choice > len(item_list):
             return  # Cancel
@@ -912,7 +913,7 @@ class Game:
         print("\nUse on which creature?")
         self.display.show_team_summary(self.state.player_team)
 
-        target_choice = int(input("> ").strip() or "0")
+        target_choice = self._get_int_input("> ", default=0, min_val=0, max_val=len(self.state.player_team.creatures))
 
         if target_choice < 1 or target_choice > len(self.state.player_team.creatures):
             return  # Cancel
@@ -954,7 +955,7 @@ class Game:
             return
 
         print("Select a creature to view (or 0 to go back):")
-        choice = int(input("> ").strip() or "0")
+        choice = self._get_int_input("> ", default=0, min_val=0, max_val=len(self.state.player_team.creatures))
 
         if 1 <= choice <= len(self.state.player_team.creatures):
             creature = self.state.player_team.creatures[choice - 1]
@@ -976,7 +977,7 @@ class Game:
 
         print("Select item to use (or 0 to go back):")
         item_list = list(self.state.items.keys())
-        choice = int(input("> ").strip() or "0")
+        choice = self._get_int_input("> ", default=0, min_val=0, max_val=len(item_list))
 
         if choice < 1 or choice > len(item_list):
             return  # Cancel
@@ -1003,7 +1004,7 @@ class Game:
             input("Press Enter to continue...")
             return
 
-        target_choice = int(input("> ").strip() or "0")
+        target_choice = self._get_int_input("> ", default=0, min_val=0, max_val=len(self.state.player_team.creatures))
 
         if target_choice < 1 or target_choice > len(self.state.player_team.creatures):
             return  # Cancel
@@ -1052,7 +1053,7 @@ class Game:
                     print(f"   {item.description}")
 
             print("\nSelect item to buy (or 0 to exit):")
-            choice = int(input("> ").strip() or "0")
+            choice = self._get_int_input("> ", default=0, min_val=0, max_val=len(npc.shop_inventory))
 
             if choice < 1 or choice > len(npc.shop_inventory):
                 break  # Exit shop
@@ -1068,10 +1069,7 @@ class Game:
             # Ask quantity
             print(f"\nHow many {item.name} would you like to buy?")
             print(f"Price: ${item.price} each")
-            try:
-                quantity = int(input("> ").strip() or "0")
-            except ValueError:
-                quantity = 0
+            quantity = self._get_int_input("> ", default=0, min_val=0, max_val=999)
 
             if quantity < 1:
                 continue
@@ -1128,18 +1126,18 @@ class Game:
         self.display.clear_screen()
         self.display.print_header("MOVE RELEARNER")
 
-        if self.state.player_team.size() == 0:
+        if len(self.state.player_team.creatures) == 0:
             print("\nYou don't have any creatures to teach!")
             return
 
         # Select creature
         print("\nWhich creature should relearn moves?")
-        self.display.show_team(self.state.player_team)
-        print(f"{self.state.player_team.size() + 1}. Cancel")
+        self.display.show_team_summary(self.state.player_team)
+        print(f"{len(self.state.player_team.creatures) + 1}. Cancel")
 
-        choice = self.display.get_menu_choice(self.state.player_team.size() + 1)
+        choice = self.display.get_menu_choice(len(self.state.player_team.creatures) + 1)
 
-        if choice >= self.state.player_team.size():
+        if choice >= len(self.state.player_team.creatures):
             return
 
         creature = self.state.player_team.creatures[choice]
@@ -1194,13 +1192,15 @@ class Game:
                 input("Press Enter to continue...")
                 return
 
-            # Replace the move
+            # Replace the move (deep copy to avoid shared references)
+            import copy
             old_move = creature.moves[replace_choice]
-            creature.moves[replace_choice] = selected_move.copy()
+            creature.moves[replace_choice] = copy.deepcopy(selected_move)
             print(f"\n{creature.get_display_name()} forgot {old_move.name} and learned {selected_move.name}!")
         else:
-            # Add the move
-            creature.moves.append(selected_move.copy())
+            # Add the move (deep copy to avoid shared references)
+            import copy
+            creature.moves.append(copy.deepcopy(selected_move))
             print(f"\n{creature.get_display_name()} learned {selected_move.name}!")
 
         input("Press Enter to continue...")
@@ -1213,7 +1213,7 @@ class Game:
         print(f"Caught: {len(self.state.pokedex_caught)}/151\n")
 
         print("Enter creature number (1-151) or 0 to go back:")
-        choice = int(input("> ").strip() or "0")
+        choice = self._get_int_input("> ", default=0, min_val=0, max_val=151)
 
         if 1 <= choice <= 151:
             self.display.show_pokedex_entry(
