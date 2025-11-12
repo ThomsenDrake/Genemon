@@ -22,6 +22,8 @@ EFFECT_STAT_HEAL = "stat_heal"  # Restores HP each turn
 EFFECT_FOCUS_BAND = "focus_band"  # Chance to survive fatal hit with 1 HP
 EFFECT_CHOICE_BOOST = "choice_boost"  # Massive boost but locks into one move
 EFFECT_LIFE_ORB = "life_orb"  # Boosts power but takes recoil damage
+EFFECT_CONTACT_DAMAGE = "contact_damage"  # Damages attackers on contact moves
+EFFECT_AUTO_STATUS = "auto_status"  # Auto-inflicts status on holder
 
 
 def create_held_items_catalog() -> Dict[str, HeldItem]:
@@ -91,9 +93,9 @@ def create_held_items_catalog() -> Dict[str, HeldItem]:
     items["Rocky Helmet"] = HeldItem(
         name="Rocky Helmet",
         description="Damages attackers when hit by contact moves",
-        effect_type=EFFECT_DEFENSE_BOOST,
-        effect_value=1.1,
-        effect_data={"contact_damage": 0.16}  # 1/6 of attacker's max HP
+        effect_type=EFFECT_CONTACT_DAMAGE,
+        effect_value=0.16,  # 1/6 of attacker's max HP
+        effect_data={"contact_damage": 0.16}
     )
 
     # Speed items
@@ -130,21 +132,21 @@ def create_held_items_catalog() -> Dict[str, HeldItem]:
         effect_data={"crit_stage": 1}
     )
 
-    # Status immunity items
+    # Status orbs (auto-inflict status on holder)
     items["Flame Orb"] = HeldItem(
         name="Flame Orb",
         description="Burns the holder at the end of each turn",
-        effect_type=EFFECT_STATUS_IMMUNE,
+        effect_type=EFFECT_AUTO_STATUS,
         effect_value=1.0,
-        effect_data={"inflict": "burn"}
+        effect_data={"status": "burn"}
     )
 
     items["Toxic Orb"] = HeldItem(
         name="Toxic Orb",
         description="Badly poisons the holder at the end of each turn",
-        effect_type=EFFECT_STATUS_IMMUNE,
+        effect_type=EFFECT_AUTO_STATUS,
         effect_value=1.0,
-        effect_data={"inflict": "poison"}
+        effect_data={"status": "poison"}
     )
 
     # Healing items

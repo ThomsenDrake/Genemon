@@ -70,6 +70,7 @@ class Move:
     stat_changes: Optional[Dict[str, int]] = None  # Stat stage changes: {"attack": 2, "defense": 1}
     stat_change_target: str = "self"  # "self" or "opponent" - who gets the stat changes
     stat_change_chance: int = 100  # Chance (0-100) to apply stat changes
+    is_contact: bool = True  # Whether move makes physical contact (for Rocky Helmet, etc.)
 
     def to_dict(self) -> dict:
         """Convert move to dictionary for serialization."""
@@ -89,7 +90,8 @@ class Move:
             'priority': self.priority,
             'stat_changes': self.stat_changes,
             'stat_change_target': self.stat_change_target,
-            'stat_change_chance': self.stat_change_chance
+            'stat_change_chance': self.stat_change_chance,
+            'is_contact': self.is_contact
         }
 
     @classmethod
@@ -113,6 +115,8 @@ class Move:
             data['stat_change_target'] = "self"
         if 'stat_change_chance' not in data:
             data['stat_change_chance'] = 100
+        if 'is_contact' not in data:
+            data['is_contact'] = True  # Default to contact for backward compatibility
         # Convert list back to tuple for multi_hit
         if isinstance(data.get('multi_hit'), list):
             data['multi_hit'] = tuple(data['multi_hit'])
@@ -277,6 +281,12 @@ class Creature:
 
     # Held item (provides passive bonuses)
     held_item: Optional['HeldItem'] = None
+
+    # Focus Sash tracking (one-time use per battle)
+    focus_sash_used: bool = False
+
+    # Choice item tracking (locks into first move used)
+    choice_locked_move: Optional[str] = None  # Name of move locked into by Choice items
 
     # Current battle stats (can be modified by stat changes)
     attack: int = field(init=False)

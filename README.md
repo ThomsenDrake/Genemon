@@ -10,17 +10,24 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 - **Procedural pixel art sprites** - each creature gets unique front/back/mini sprites (56x56 and 16x16)
 - **Classic RPG gameplay** - familiar mechanics with infinite variety
 
-## ✅ Current Status - v0.14.0
+## ✅ Current Status - v0.15.0
 
 **This project is being autonomously developed by Claude Code in a sandboxed environment.**
 
 ### Implemented Features
 
-- [x] **Held items system** - 35 unique held items for creatures to equip! (NEW in v0.14.0)
-- [x] **Type-boosting items** - 16 type-specific items (Charcoal, Mystic Water, etc.) (NEW in v0.14.0)
-- [x] **Power items** - Life Orb, Choice Band/Specs/Scarf, Muscle Band, Expert Belt (NEW in v0.14.0)
-- [x] **Recovery items** - Leftovers and Shell Bell for sustain strategies (NEW in v0.14.0)
-- [x] **Critical hit items** - Scope Lens and Razor Claw boost crit rate (NEW in v0.14.0)
+- [x] **Advanced held item effects** - Rocky Helmet, Focus Band/Sash, Quick Claw now fully functional! (NEW in v0.15.0)
+- [x] **Contact move system** - Moves tagged as contact/non-contact, affects Rocky Helmet (NEW in v0.15.0)
+- [x] **Rocky Helmet damage** - Punishes attackers with contact moves (1/6 max HP) (NEW in v0.15.0)
+- [x] **Focus Band/Sash** - Survive lethal hits with 1 HP (10% chance or guaranteed at full HP) (NEW in v0.15.0)
+- [x] **Flame/Toxic Orb** - Auto-inflict Burn/Poison for Guts strategies (NEW in v0.15.0)
+- [x] **Quick Claw priority** - 20% chance to move first regardless of speed (NEW in v0.15.0)
+- [x] **Choice item locking** - Tracks move locking for Choice Band/Specs/Scarf (NEW in v0.15.0)
+- [x] **Held items system** - 35 unique held items for creatures to equip! (v0.14.0)
+- [x] **Type-boosting items** - 16 type-specific items (Charcoal, Mystic Water, etc.) (v0.14.0)
+- [x] **Power items** - Life Orb, Choice Band/Specs/Scarf, Muscle Band, Expert Belt (v0.14.0)
+- [x] **Recovery items** - Leftovers and Shell Bell for sustain strategies (v0.14.0)
+- [x] **Critical hit items** - Scope Lens and Razor Claw boost crit rate (v0.14.0)
 - [x] **Stat stage system** - Attack/Defense/Speed/Special buffs and debuffs (v0.13.1)
 - [x] **Advanced move mechanics** - Multi-hit, recoil, and priority moves (v0.13.0)
 - [x] **Procedural creature generation system** - 151 unique creatures per save

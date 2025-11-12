@@ -10,7 +10,8 @@ from ..creatures.types import get_effectiveness
 from ..core.held_items import (
     EFFECT_POWER_BOOST, EFFECT_TYPE_BOOST, EFFECT_DEFENSE_BOOST,
     EFFECT_SPEED_BOOST, EFFECT_CRIT_BOOST, EFFECT_STAT_HEAL,
-    EFFECT_FOCUS_BAND, EFFECT_CHOICE_BOOST, EFFECT_LIFE_ORB
+    EFFECT_FOCUS_BAND, EFFECT_CHOICE_BOOST, EFFECT_LIFE_ORB,
+    EFFECT_CONTACT_DAMAGE, EFFECT_AUTO_STATUS
 )
 
 
@@ -257,6 +258,12 @@ class Battle:
 
         self.log.add(f"{attacker_name} used {move.name}!")
 
+        # Lock into move if using a Choice item
+        if (attacker.held_item and attacker.held_item.effect_type == EFFECT_CHOICE_BOOST and
+            attacker.choice_locked_move is None):
+            attacker.choice_locked_move = move.name
+            # Note: We don't announce the lock - it's just tracked internally
+
         # Check for weather-changing moves and stat-changing moves (power 0 indicates non-damaging move)
         if move.power == 0:
             weather_moves = {
@@ -315,6 +322,9 @@ class Battle:
 
             # Calculate damage (with critical hit flag)
             damage = self._calculate_damage(attacker, defender, move, is_critical)
+
+            # Check for Focus Band/Sash before applying damage
+            damage = self._apply_focus_item(defender, damage)
 
             # Apply damage
             actual_damage = defender.take_damage(damage)
@@ -383,6 +393,18 @@ class Battle:
                 if attacker.current_hp < attacker.max_hp:
                     attacker.heal(heal_amount)
                     self.log.add(f"{attacker_name} restored HP using Shell Bell!")
+
+        # Rocky Helmet contact damage (if defender still alive and move made contact)
+        if (total_damage > 0 and not defender.is_fainted() and not attacker.is_fainted() and
+            move.is_contact and defender.held_item and
+            defender.held_item.effect_type == EFFECT_CONTACT_DAMAGE):
+            # Rocky Helmet deals 1/6 of attacker's max HP
+            helmet_damage = max(1, int(attacker.max_hp * defender.held_item.effect_value))
+            attacker.take_damage(helmet_damage)
+            self.log.add(f"{attacker_name} was hurt by {defender_name}'s Rocky Helmet!")
+
+            if attacker.is_fainted():
+                self.log.add(f"{attacker_name} fainted from Rocky Helmet damage!")
 
         # Try to apply status effect from move (only if defender not fainted)
         if move.status_effect and move.status_chance > 0 and not defender.is_fainted():
@@ -629,6 +651,7 @@ class Battle:
     ) -> bool:
         """
         Determine if player goes first based on move priority, then speed.
+        Also checks for Quick Claw effect.
 
         Args:
             player_move: The move the player is using
@@ -637,6 +660,21 @@ class Battle:
         Returns:
             True if player goes first
         """
+        # Check for Quick Claw (20% chance to move first)
+        player_has_quick_claw = (self.player_active.held_item and
+                                  self.player_active.held_item.name == "Quick Claw")
+        opponent_has_quick_claw = (self.opponent_active.held_item and
+                                    self.opponent_active.held_item.name == "Quick Claw")
+
+        # Quick Claw activation (both can't activate in same turn - first one checked wins)
+        if player_has_quick_claw and random.random() < 0.20:
+            self.log.add(f"{self.player_active.get_display_name()}'s Quick Claw activated!")
+            return True
+
+        if opponent_has_quick_claw and random.random() < 0.20:
+            self.log.add(f"{self.opponent_active.get_display_name()}'s Quick Claw activated!")
+            return False
+
         player_priority = player_move.priority if player_move else 0
         opponent_priority = opponent_move.priority if opponent_move else 0
 
@@ -869,6 +907,43 @@ class Battle:
         if creature.is_fainted():
             self.log.add(f"{creature.get_display_name()} fainted from the hail!")
 
+    def _apply_focus_item(self, creature: Creature, damage: int) -> int:
+        """
+        Check if Focus Band/Sash prevents fainting and adjust damage accordingly.
+        Returns the adjusted damage amount.
+
+        Args:
+            creature: The creature taking damage
+            damage: The damage that would be dealt
+
+        Returns:
+            Adjusted damage (reduced to leave 1 HP if Focus item triggers)
+        """
+        if not creature.held_item or creature.held_item.effect_type != EFFECT_FOCUS_BAND:
+            return damage
+
+        # Only trigger if damage would be fatal
+        if damage < creature.current_hp:
+            return damage
+
+        item = creature.held_item
+        name = creature.get_display_name()
+
+        # Focus Sash - guaranteed survival if at full HP (one-time use)
+        if item.name == "Focus Sash":
+            if creature.current_hp == creature.max_hp and not creature.focus_sash_used:
+                creature.focus_sash_used = True
+                self.log.add(f"{name} held on using its Focus Sash!")
+                return creature.current_hp - 1  # Leave at 1 HP
+
+        # Focus Band - 10% chance to survive
+        elif item.name == "Focus Band":
+            if random.random() < 0.10:  # 10% chance
+                self.log.add(f"{name} held on using its Focus Band!")
+                return creature.current_hp - 1  # Leave at 1 HP
+
+        return damage
+
     def _process_held_item_effects(self, creature: Creature):
         """Process end-of-turn held item effects (Leftovers, Flame Orb, etc.)."""
         if creature.is_fainted() or not creature.held_item:
@@ -884,9 +959,16 @@ class Battle:
                 creature.heal(heal_amount)
                 self.log.add(f"{name} restored some HP using {item.name}!")
 
-        # Flame Orb / Toxic Orb - inflict status at end of turn
-        # (This is a simplified implementation - these would normally inflict on turn 1)
-        # For now, we'll skip auto-inflict as status is already handled elsewhere
+        # Flame Orb / Toxic Orb - auto-inflict status at end of turn
+        if item.effect_type == EFFECT_AUTO_STATUS:
+            if not creature.has_status():  # Only if not already statused
+                status_name = item.effect_data.get("status", "")
+                if status_name == "burn":
+                    creature.apply_status(StatusEffect.BURN)
+                    self.log.add(f"{name} was burned by its {item.name}!")
+                elif status_name == "poison":
+                    creature.apply_status(StatusEffect.POISON)
+                    self.log.add(f"{name} was poisoned by its {item.name}!")
 
     def set_weather(self, weather: Weather, turns: int = 5):
         """

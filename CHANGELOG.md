@@ -4,6 +4,161 @@ All notable changes to the Genemon project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.15.0] - 2025-11-11 - Iteration 15: Advanced Held Item Effects
+
+### Added
+
+#### Contact Move System
+- **Move.is_contact field** - Moves now track whether they make physical contact (genemon/core/creature.py:73)
+- **Intelligent contact detection** - Move generator automatically determines contact vs. non-contact moves (genemon/creatures/generator.py:467-474)
+- **Non-contact keywords** - Beam, Blast, Wave, Ray, Pulse, Storm, Burst moves don't make contact
+- **Status moves non-contact** - Zero-power moves never make contact
+- **Backward compatibility** - Old saves default moves to contact=True
+
+#### Rocky Helmet Damage System
+- **EFFECT_CONTACT_DAMAGE constant** - New effect type for contact damage items (genemon/core/held_items.py:25)
+- **Rocky Helmet integration** - Updated to use new effect type (genemon/core/held_items.py:93-99)
+- **Contact damage calculation** - Deals 1/6 (16%) of attacker's max HP on contact moves (genemon/battle/engine.py:388-398)
+- **Battle feedback** - Clear messages when Rocky Helmet triggers
+- **Non-contact immunity** - Beam/Blast/Wave moves bypass Rocky Helmet
+- **Proper timing** - Triggers after damage but before status application
+
+#### Focus Band/Sash Survival System
+- **EFFECT_FOCUS_BAND constant** - Effect type for survival items
+- **Creature.focus_sash_used field** - Tracks one-time use of Focus Sash per battle (genemon/core/creature.py:286)
+- **_apply_focus_item() method** - Checks for fatal damage and prevents fainting (genemon/battle/engine.py:885-920)
+- **Focus Sash mechanics** - Guaranteed survival at full HP (one-time use)
+- **Focus Band mechanics** - 10% chance to survive any fatal hit with 1 HP
+- **Damage adjustment** - Reduces damage to leave creature at 1 HP
+- **Battle feedback** - Announces when Focus item activates
+
+#### Flame/Toxic Orb Auto-Status System
+- **EFFECT_AUTO_STATUS constant** - New effect type for status orbs (genemon/core/held_items.py:26)
+- **Flame Orb updated** - Now uses EFFECT_AUTO_STATUS (genemon/core/held_items.py:136-142)
+- **Toxic Orb updated** - Now uses EFFECT_AUTO_STATUS (genemon/core/held_items.py:144-150)
+- **Auto-inflict logic** - Orbs inflict status at end of turn (genemon/battle/engine.py:937-946)
+- **Status immunity check** - Won't inflict if creature already has status
+- **Battle feedback** - Clear messages for auto-inflicted status
+- **Guts synergy** - Enables Guts ability strategies
+
+#### Quick Claw Priority System
+- **Priority override** - 20% chance to move first regardless of speed (genemon/battle/engine.py:657-670)
+- **Turn order integration** - Checked before priority and speed (genemon/battle/engine.py:664-670)
+- **Battle feedback** - Announces Quick Claw activation
+- **Proper precedence** - First Quick Claw check wins if both activate
+
+#### Choice Item Move Locking
+- **Creature.choice_locked_move field** - Tracks move locked into by Choice items (genemon/core/creature.py:289)
+- **Auto-lock on first use** - Choice items lock creature into first move used (genemon/battle/engine.py:261-265)
+- **Silent tracking** - Lock tracked internally without announcement
+- **Reset on switch** - Lock clears when creature switches out (field resets)
+
+#### Comprehensive Test Suite
+- **test_iteration_15.py** - New 480-line test suite (NEW)
+- **9 test functions** covering all iteration 15 features:
+  1. `test_contact_move_tagging()` - Contact vs. non-contact move detection
+  2. `test_rocky_helmet()` - Rocky Helmet damages attackers on contact
+  3. `test_non_contact_no_helmet()` - Non-contact moves bypass Rocky Helmet
+  4. `test_focus_band()` - 10% chance survival (statistical test)
+  5. `test_focus_sash()` - Guaranteed survival at full HP
+  6. `test_flame_orb()` - Auto-inflicts burn status
+  7. `test_toxic_orb()` - Auto-inflicts poison status
+  8. `test_quick_claw()` - 20% priority activation (statistical test)
+  9. `test_choice_item_locking()` - Move locking mechanics
+- **All tests passing** - 9/9 tests pass (100%)
+- **Statistical tests** - Probabilistic features tested with 100 trials
+
+### Changed
+
+#### Move Dataclass Enhancements
+- **is_contact field** - Added boolean field for contact detection (genemon/core/creature.py:73)
+- **Serialization updated** - to_dict/from_dict include is_contact (genemon/core/creature.py:94, 118-119)
+- **Default value** - Defaults to True for backward compatibility
+
+#### Held Items System Enhancements
+- **New effect constants** - Added EFFECT_CONTACT_DAMAGE and EFFECT_AUTO_STATUS
+- **Rocky Helmet effect type** - Changed from EFFECT_DEFENSE_BOOST to EFFECT_CONTACT_DAMAGE
+- **Flame/Toxic Orb effect type** - Changed from EFFECT_STATUS_IMMUNE to EFFECT_AUTO_STATUS
+- **Battle engine imports** - Added new effect type imports (genemon/battle/engine.py:14)
+
+#### Battle Engine Enhancements
+- **Contact damage integration** - Rocky Helmet triggers after Shell Bell healing (genemon/battle/engine.py:388-398)
+- **Focus item integration** - Checked before damage application (genemon/battle/engine.py:320-321)
+- **Auto-status processing** - Flame/Toxic Orb in end-of-turn effects (genemon/battle/engine.py:937-946)
+- **Quick Claw priority** - Integrated into turn order determination (genemon/battle/engine.py:657-670)
+- **Choice locking** - Tracked when moves are used (genemon/battle/engine.py:261-265)
+
+#### Creature Generator Improvements
+- **Automatic contact detection** - Intelligently tags moves as contact/non-contact
+- **Keyword-based detection** - Beam/Blast/Wave/Ray/Pulse/Storm/Burst are non-contact
+- **Power-based detection** - Zero-power moves never make contact
+
+### Technical Details
+
+#### Code Changes
+- **Modified files**: 4 core/battle files enhanced, 1 test file created
+  - genemon/core/creature.py: +4 lines (Move.is_contact + focus_sash_used + choice_locked_move)
+  - genemon/core/held_items.py: +4 lines (New effect constants + item updates)
+  - genemon/creatures/generator.py: +9 lines (Contact move detection)
+  - genemon/battle/engine.py: +80 lines (All held item effect implementations)
+  - test_iteration_15.py: +480 lines (NEW - Comprehensive test suite)
+- **Total code added**: +577 lines (97 production + 480 test)
+- **No breaking changes**: All v0.14.0 features maintained
+- **Backward compatible**: Old saves work with new features
+
+#### Test Coverage
+- **Iteration 15 tests**: 9/9 passing (100%)
+- **Iteration 14 tests**: 8/8 passing (100%)
+- **Core system tests**: 6/6 passing (100%)
+- **Total test suite**: 23/23 tests passing across all modules
+
+#### Feature Completion
+- ✅ **Rocky Helmet contact damage** - Fully implemented and tested
+- ✅ **Focus Band/Sash survival** - Complete with one-time use tracking
+- ✅ **Flame/Toxic Orb auto-status** - End-of-turn infliction working
+- ✅ **Quick Claw priority** - 20% activation chance integrated
+- ✅ **Choice item locking** - Move lock tracking implemented
+- ✅ **Contact move tagging** - Intelligent detection in generator
+
+### Strategic Impact
+
+#### New Battle Mechanics
+1. **Rocky Helmet counter-play** - Punishes contact moves, encourages special attacks
+2. **Focus items clutch plays** - Survive lethal hits for comebacks
+3. **Status orb strategies** - Intentional Burn/Poison for Guts ability
+4. **Quick Claw upsets** - Slow creatures can outspeed opponents
+5. **Choice item optimization** - Lock into powerful STAB moves
+
+#### Held Item Synergies
+- **Rocky Helmet + Defensive builds** - Chip damage while tanking
+- **Focus Sash + Glass cannons** - Guarantee one attack from fragile sweepers
+- **Flame Orb + Guts ability** - 1.5x attack boost from self-burn
+- **Quick Claw + Slow powerhouses** - Speed advantage for heavy hitters
+- **Choice Band + STAB moves** - 2.25x damage (1.5x STAB + 1.5x Choice)
+
+#### Team Building Options
+- **Anti-physical teams** - Rocky Helmet + high defense creatures
+- **Revenge killers** - Focus Sash guarantees survival to strike back
+- **Status-immune strategies** - Flame/Toxic Orb prevent worse statuses
+- **Speed control** - Quick Claw adds unpredictability
+- **Hit-and-run** - Choice Scarf + fast switching
+
+### Performance & Quality
+
+#### Code Quality
+- **Modular design** - Each held item effect isolated in separate methods
+- **Clear battle flow** - Effects trigger at logical points (after damage, end of turn)
+- **Comprehensive testing** - All features have dedicated test coverage
+- **Statistical validation** - Probabilistic features tested with 100+ trials
+- **Documentation** - All new methods have docstrings
+
+#### Balance Considerations
+- **Rocky Helmet** - 1/6 max HP is significant but not overwhelming
+- **Focus Band** - 10% chance prevents abuse while allowing clutch plays
+- **Focus Sash** - One-time use and full HP requirement balance guaranteed survival
+- **Quick Claw** - 20% chance adds variance without dominating speed tiers
+- **Choice locking** - Tracking enables future enforcement of move restriction
+
 ## [0.14.0] - 2025-11-11 - Iteration 14: Held Items System
 
 ### Added

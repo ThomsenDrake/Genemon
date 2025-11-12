@@ -464,6 +464,15 @@ class CreatureGenerator:
                     power = max(30, power // 2)  # Reduced damage
                     description = f"A {move_type}-type attack that lowers the foe's {stat.capitalize()}."
 
+        # Determine if move makes contact (for Rocky Helmet, etc.)
+        # Non-contact moves: beams, blasts, waves, rays, special attacks
+        non_contact_keywords = ["Beam", "Blast", "Wave", "Ray", "Pulse", "Storm", "Burst"]
+        is_contact = not any(keyword in name for keyword in non_contact_keywords)
+
+        # Status moves and pure stat moves don't make contact
+        if power == 0:
+            is_contact = False
+
         return Move(
             name=name,
             type=move_type,
@@ -480,7 +489,8 @@ class CreatureGenerator:
             priority=priority,
             stat_changes=stat_changes,
             stat_change_target=stat_change_target,
-            stat_change_chance=stat_change_chance
+            stat_change_chance=stat_change_chance,
+            is_contact=is_contact
         )
 
     def _generate_flavor_text(self, name: str, types: List[str]) -> str:
