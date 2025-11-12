@@ -6,11 +6,13 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, Dict
 from .creature import Creature, Move
+from .constants import REVIVE_HP_PERCENT
 
 
 class ItemType(Enum):
     """Types of items."""
     HEALING = "healing"          # Restores HP
+    REVIVAL = "revival"          # Revives fainted creatures
     PP_RESTORE = "pp_restore"    # Restores PP
     STATUS_HEAL = "status_heal"  # Cures status effects
     CAPTURE = "capture"          # Capture balls
@@ -22,6 +24,8 @@ class ItemEffect(Enum):
     """Specific item effects."""
     HEAL_HP = "heal_hp"
     HEAL_HP_FULL = "heal_hp_full"
+    REVIVE_HP = "revive_hp"           # Revive with partial HP
+    REVIVE_HP_FULL = "revive_hp_full" # Revive with full HP
     RESTORE_PP = "restore_pp"
     RESTORE_PP_FULL = "restore_pp_full"
     CURE_STATUS = "cure_status"
@@ -56,8 +60,14 @@ class Item:
         Returns:
             (can_use, message) tuple
         """
+        # Revival items can only be used on fainted creatures
+        if self.item_type == ItemType.REVIVAL:
+            if not creature.is_fainted():
+                return False, f"{creature.get_display_name()} is not fainted!"
+            return True, ""
+
+        # All other items cannot be used on fainted creatures
         if creature.is_fainted():
-            # Only revival items can be used on fainted creatures (not implemented yet)
             return False, f"{creature.get_display_name()} has fainted!"
 
         if self.item_type == ItemType.HEALING:
@@ -119,6 +129,25 @@ class Item:
             creature.heal()
             healed = creature.current_hp - before_hp
             return f"{name} was fully healed! (+{healed} HP)"
+
+        elif self.effect == ItemEffect.REVIVE_HP:
+            # Revive with partial HP
+            if creature.is_fainted():
+                hp_restored = int(creature.max_hp * REVIVE_HP_PERCENT)
+                creature.current_hp = hp_restored
+                creature.cure_status()  # Reviving also cures status
+                return f"{name} was revived with {hp_restored} HP!"
+            else:
+                return f"{name} is not fainted!"
+
+        elif self.effect == ItemEffect.REVIVE_HP_FULL:
+            # Revive with full HP
+            if creature.is_fainted():
+                creature.current_hp = creature.max_hp
+                creature.cure_status()  # Reviving also cures status
+                return f"{name} was revived with full HP!"
+            else:
+                return f"{name} is not fainted!"
 
         elif self.effect == ItemEffect.RESTORE_PP:
             creature.restore_pp(self.effect_value)
@@ -277,6 +306,26 @@ ITEMS = {
         effect=ItemEffect.CURE_ALL_STATUS,
         effect_value=0,
         price=1500
+    ),
+
+    # Revival items
+    'revive': Item(
+        id='revive',
+        name='Revive',
+        description='Revives a fainted creature with 50% HP',
+        item_type=ItemType.REVIVAL,
+        effect=ItemEffect.REVIVE_HP,
+        effect_value=0,
+        price=800
+    ),
+    'max_revive': Item(
+        id='max_revive',
+        name='Max Revive',
+        description='Revives a fainted creature with full HP',
+        item_type=ItemType.REVIVAL,
+        effect=ItemEffect.REVIVE_HP_FULL,
+        effect_value=0,
+        price=2000
     ),
 
     # Capture items

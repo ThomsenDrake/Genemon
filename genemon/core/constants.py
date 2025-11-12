@@ -231,6 +231,10 @@ MAX_POTION_HEAL_FULL = True  # Heals to full HP
 ETHER_PP_RESTORE = 10
 MAX_ETHER_PP_RESTORE_FULL = True  # Restores to full PP
 
+# Revival items
+REVIVE_HP_PERCENT = 0.5  # Revive restores 50% of max HP
+MAX_REVIVE_HP_FULL = True  # Max Revive restores full HP
+
 # Capture balls
 POKEBALL_CATCH_RATE = 1.0
 GREATBALL_CATCH_RATE = 1.5

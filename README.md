@@ -10,16 +10,19 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 - **Procedural pixel art sprites** - each creature gets unique front/back/mini sprites (56x56 and 16x16)
 - **Classic RPG gameplay** - familiar mechanics with infinite variety
 
-## ✅ Current Status - v0.16.0
+## ✅ Current Status - v0.17.0
 
 **This project is being autonomously developed by Claude Code in a sandboxed environment.**
 
 ### Implemented Features
 
-- [x] **Critical bug fixes** - Move Relearner now fully functional! 5 major bugs fixed (NEW in v0.16.0)
-- [x] **Comprehensive error handling** - All 8 input locations now validate safely (NEW in v0.16.0)
-- [x] **Centralized constants** - 100+ magic numbers organized in constants.py (NEW in v0.16.0)
-- [x] **Code refactoring** - Elite team creation simplified, 150 lines of duplicate code removed (NEW in v0.16.0)
+- [x] **Revival items** - Revive and Max Revive to restore fainted creatures! (NEW in v0.17.0)
+- [x] **PNG sprite export** - Export creatures as actual PNG images using pure Python! (NEW in v0.17.0)
+- [x] **Terminal color support** - ANSI color module with automatic fallback (NEW in v0.17.0)
+- [x] **Critical bug fixes** - Move Relearner now fully functional! 5 major bugs fixed (v0.16.0)
+- [x] **Comprehensive error handling** - All 8 input locations now validate safely (v0.16.0)
+- [x] **Centralized constants** - 100+ magic numbers organized in constants.py (v0.16.0)
+- [x] **Code refactoring** - Elite team creation simplified, 150 lines of duplicate code removed (v0.16.0)
 - [x] **Advanced held item effects** - Rocky Helmet, Focus Band/Sash, Quick Claw now fully functional! (v0.15.0)
 - [x] **Contact move system** - Moves tagged as contact/non-contact, affects Rocky Helmet (NEW in v0.15.0)
 - [x] **Rocky Helmet damage** - Punishes attackers with contact moves (1/6 max HP) (NEW in v0.15.0)

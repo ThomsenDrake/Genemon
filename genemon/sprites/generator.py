@@ -407,3 +407,126 @@ class SpriteGenerator:
             new_sprite.append(row)
 
         return new_sprite
+
+    @staticmethod
+    def hex_to_color(hex_string: str) -> Color:
+        """Convert hex string to Color object."""
+        if hex_string == "transparent":
+            return TRANSPARENT
+        if hex_string.startswith('#'):
+            hex_string = hex_string[1:]
+        r = int(hex_string[0:2], 16)
+        g = int(hex_string[2:4], 16)
+        b = int(hex_string[4:6], 16)
+        return Color(r, g, b)
+
+    @staticmethod
+    def hex_array_to_color_array(hex_sprite: List[List[str]]) -> List[List[Color]]:
+        """Convert 2D hex string array to 2D Color array."""
+        return [[SpriteGenerator.hex_to_color(hex_color) for hex_color in row] for row in hex_sprite]
+
+    @staticmethod
+    def export_sprite_to_png(sprite: List[List[Color]], filename: str, scale: int = 1):
+        """
+        Export a sprite to a PNG file using pure Python (no PIL/Pillow required).
+
+        Args:
+            sprite: 2D array of Color objects
+            filename: Output PNG filename
+            scale: Scale factor for upscaling (default 1 = no scaling)
+
+        Note: This uses pure Python PNG encoding without external dependencies.
+        For production use, consider using Pillow library for better PNG support.
+        """
+        import struct
+        import zlib
+
+        height = len(sprite)
+        width = len(sprite[0]) if height > 0 else 0
+
+        if scale > 1:
+            # Scale up the sprite
+            scaled_sprite = []
+            for y in range(height):
+                for _ in range(scale):
+                    row = []
+                    for x in range(width):
+                        for _ in range(scale):
+                            row.append(sprite[y][x])
+                    scaled_sprite.append(row)
+            sprite = scaled_sprite
+            height = len(sprite)
+            width = len(sprite[0]) if height > 0 else 0
+
+        # PNG file structure
+        def write_chunk(chunk_type: bytes, data: bytes) -> bytes:
+            """Write a PNG chunk with length, type, data, and CRC."""
+            length = struct.pack('>I', len(data))
+            crc = struct.pack('>I', zlib.crc32(chunk_type + data) & 0xffffffff)
+            return length + chunk_type + data + crc
+
+        # Build PNG data
+        png_data = b'\x89PNG\r\n\x1a\n'  # PNG signature
+
+        # IHDR chunk (image header)
+        ihdr = struct.pack('>IIBBBBB', width, height, 8, 2, 0, 0, 0)  # RGB, 8-bit
+        png_data += write_chunk(b'IHDR', ihdr)
+
+        # IDAT chunk (image data)
+        raw_data = bytearray()
+        for row in sprite:
+            raw_data.append(0)  # Filter type (0 = None)
+            for color in row:
+                raw_data.extend([color.r, color.g, color.b])
+
+        compressed = zlib.compress(bytes(raw_data), 9)
+        png_data += write_chunk(b'IDAT', compressed)
+
+        # IEND chunk (end of file)
+        png_data += write_chunk(b'IEND', b'')
+
+        # Write to file
+        with open(filename, 'wb') as f:
+            f.write(png_data)
+
+    @staticmethod
+    def export_creature_sprites_to_png(front_sprite: List[List[Color]],
+                                      back_sprite: List[List[Color]],
+                                      mini_sprite: List[List[Color]],
+                                      creature_name: str,
+                                      output_dir: str = "sprites",
+                                      scale: int = 2):
+        """
+        Export all three sprites for a creature to PNG files.
+
+        Args:
+            front_sprite: Front-facing sprite
+            back_sprite: Back-facing sprite
+            mini_sprite: Mini sprite for overworld
+            creature_name: Name of the creature (for filenames)
+            output_dir: Directory to save sprites (will be created if needed)
+            scale: Scale factor for upscaling (default 2x)
+        """
+        import os
+
+        # Create output directory if it doesn't exist
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Export each sprite
+        SpriteGenerator.export_sprite_to_png(
+            front_sprite,
+            os.path.join(output_dir, f"{creature_name}_front.png"),
+            scale=scale
+        )
+
+        SpriteGenerator.export_sprite_to_png(
+            back_sprite,
+            os.path.join(output_dir, f"{creature_name}_back.png"),
+            scale=scale
+        )
+
+        SpriteGenerator.export_sprite_to_png(
+            mini_sprite,
+            os.path.join(output_dir, f"{creature_name}_mini.png"),
+            scale=scale * 2  # Mini sprites get extra scaling since they're smaller
+        )
