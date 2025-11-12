@@ -1,0 +1,882 @@
+{
+  "npcs": [
+    {
+      "id": "prof_oak",
+      "name": "Prof. Cypress",
+      "location_id": "town_starter",
+      "x": 5,
+      "y": 5,
+      "sprite": "P",
+      "dialogues": [
+        {"text": "Welcome to the world of Genemon!", "condition": null},
+        {"text": "Each creature is unique to your journey!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "rival_starter",
+      "name": "Blake",
+      "location_id": "town_starter",
+      "x": 10,
+      "y": 10,
+      "sprite": "R",
+      "dialogues": [
+        {"text": "Hey! I'm going to be the best trainer!", "condition": null},
+        {"text": "Let's battle!", "condition": "before_battle"}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "shop_oakwood",
+      "name": "Merchant Mae",
+      "location_id": "town_second",
+      "x": 15,
+      "y": 5,
+      "sprite": "S",
+      "dialogues": [
+        {"text": "Welcome to my shop!", "condition": null},
+        {"text": "I sell potions, revival items, and capture balls!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": true,
+      "shop_inventory": [
+        "potion", "super_potion", "hyper_potion", "max_potion",
+        "revive", "max_revive", "ether",
+        "antidote", "awakening", "burn_heal", "paralyze_heal",
+        "capture_ball", "great_ball", "ultra_ball"
+      ],
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "gym_leader_1",
+      "name": "Leader Flint",
+      "location_id": "town_third",
+      "x": 10,
+      "y": 7,
+      "sprite": "G",
+      "dialogues": [
+        {"text": "I'm the Flame-type Gym Leader!", "condition": null},
+        {"text": "Prove your strength in battle!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": true,
+      "specialty_type": "Flame",
+      "badge_id": "badge_flame",
+      "badge_name": "Ember Badge",
+      "badge_description": "Proof of victory over Leader Flint and mastery of Flame-type battles."
+    },
+    {
+      "id": "gym_leader_2",
+      "name": "Leader Marina",
+      "location_id": "town_fourth",
+      "x": 10,
+      "y": 7,
+      "sprite": "G",
+      "dialogues": [
+        {"text": "Welcome to Aquamarine Harbor!", "condition": null},
+        {"text": "Face the power of the ocean!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": true,
+      "specialty_type": "Aqua",
+      "badge_id": "badge_aqua",
+      "badge_name": "Cascade Badge",
+      "badge_description": "Proof of victory over Leader Marina and mastery of Aqua-type battles."
+    },
+    {
+      "id": "gym_leader_3",
+      "name": "Leader Zapper",
+      "location_id": "town_fifth",
+      "x": 10,
+      "y": 7,
+      "sprite": "G",
+      "dialogues": [
+        {"text": "Feel the power of lightning!", "condition": null},
+        {"text": "Your circuits are overloaded by my electric prowess!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": true,
+      "specialty_type": "Volt",
+      "badge_id": "badge_volt",
+      "badge_name": "Thunder Badge",
+      "badge_description": "Proof of victory over Leader Zapper and mastery of Volt-type battles."
+    },
+    {
+      "id": "gym_leader_4",
+      "name": "Leader Glacia",
+      "location_id": "town_sixth",
+      "x": 10,
+      "y": 7,
+      "sprite": "G",
+      "dialogues": [
+        {"text": "Welcome to Frostfield, where ice reigns supreme!", "condition": null},
+        {"text": "Your determination melted my defenses!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": true,
+      "specialty_type": "Frost",
+      "badge_id": "badge_frost",
+      "badge_name": "Glacier Badge",
+      "badge_description": "Proof of victory over Leader Glacia and mastery of Frost-type battles."
+    },
+    {
+      "id": "gym_leader_5",
+      "name": "Leader Umbra",
+      "location_id": "town_seventh",
+      "x": 10,
+      "y": 7,
+      "sprite": "G",
+      "dialogues": [
+        {"text": "The shadows are my allies...", "condition": null},
+        {"text": "You have illuminated the darkness within me!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": true,
+      "specialty_type": "Shadow",
+      "badge_id": "badge_shadow",
+      "badge_name": "Eclipse Badge",
+      "badge_description": "Proof of victory over Leader Umbra and mastery of Shadow-type battles."
+    },
+    {
+      "id": "gym_leader_6",
+      "name": "Leader Boulder",
+      "location_id": "town_eighth",
+      "x": 10,
+      "y": 7,
+      "sprite": "G",
+      "dialogues": [
+        {"text": "My rock-solid defense is unbreakable!", "condition": null},
+        {"text": "Your strength has shattered my resolve!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": true,
+      "specialty_type": "Terra",
+      "badge_id": "badge_terra",
+      "badge_name": "Boulder Badge",
+      "badge_description": "Proof of victory over Leader Boulder and mastery of Terra-type battles."
+    },
+    {
+      "id": "gym_leader_7",
+      "name": "Leader Sage",
+      "location_id": "town_ninth",
+      "x": 10,
+      "y": 7,
+      "sprite": "G",
+      "dialogues": [
+        {"text": "The mind is the ultimate battleground...", "condition": null},
+        {"text": "Your mental fortitude has exceeded my expectations!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": true,
+      "specialty_type": "Mind",
+      "badge_id": "badge_mind",
+      "badge_name": "Wisdom Badge",
+      "badge_description": "Proof of victory over Leader Sage and mastery of Mind-type battles."
+    },
+    {
+      "id": "gym_leader_8",
+      "name": "Leader Champion",
+      "location_id": "town_tenth",
+      "x": 10,
+      "y": 7,
+      "sprite": "G",
+      "dialogues": [
+        {"text": "Show me your fighting spirit!", "condition": null},
+        {"text": "You have the heart of a true champion!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": true,
+      "specialty_type": "Brawl",
+      "badge_id": "badge_brawl",
+      "badge_name": "Victory Badge",
+      "badge_description": "Proof of victory over Leader Champion and mastery of Brawl-type battles."
+    },
+    {
+      "id": "nurse_thunderpeak",
+      "name": "Nurse Joy",
+      "location_id": "town_fifth",
+      "x": 5,
+      "y": 5,
+      "sprite": "N",
+      "dialogues": [
+        {"text": "Welcome to Thunderpeak! Let me heal your team!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": false,
+      "is_healer": true,
+      "is_gym_leader": false
+    },
+    {
+      "id": "nurse_frostfield",
+      "name": "Nurse Joy",
+      "location_id": "town_sixth",
+      "x": 5,
+      "y": 5,
+      "sprite": "N",
+      "dialogues": [
+        {"text": "You look cold! Warm up and let me heal your team!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": false,
+      "is_healer": true,
+      "is_gym_leader": false
+    },
+    {
+      "id": "nurse_shadowmere",
+      "name": "Nurse Joy",
+      "location_id": "town_seventh",
+      "x": 5,
+      "y": 5,
+      "sprite": "N",
+      "dialogues": [
+        {"text": "Even in the shadows, I'll heal your team!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": false,
+      "is_healer": true,
+      "is_gym_leader": false
+    },
+    {
+      "id": "nurse_boulder",
+      "name": "Nurse Joy",
+      "location_id": "town_eighth",
+      "x": 5,
+      "y": 5,
+      "sprite": "N",
+      "dialogues": [
+        {"text": "Welcome to Boulder Ridge! Rest up for the gym challenge!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": false,
+      "is_healer": true,
+      "is_gym_leader": false
+    },
+    {
+      "id": "nurse_mindspire",
+      "name": "Nurse Joy",
+      "location_id": "town_ninth",
+      "x": 5,
+      "y": 5,
+      "sprite": "N",
+      "dialogues": [
+        {"text": "Clear your mind and let me heal your team!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": false,
+      "is_healer": true,
+      "is_gym_leader": false
+    },
+    {
+      "id": "nurse_victory",
+      "name": "Nurse Joy",
+      "location_id": "town_tenth",
+      "x": 5,
+      "y": 5,
+      "sprite": "N",
+      "dialogues": [
+        {"text": "You're close to Victory Road! Prepare well!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": false,
+      "is_healer": true,
+      "is_gym_leader": false
+    },
+    {
+      "id": "nurse_elite",
+      "name": "Nurse Joy",
+      "location_id": "elite_hall",
+      "x": 5,
+      "y": 5,
+      "sprite": "N",
+      "dialogues": [
+        {"text": "Only the strongest trainers make it here. Let me heal you!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": false,
+      "is_healer": true,
+      "is_gym_leader": false
+    },
+    {
+      "id": "healer_newbark",
+      "name": "Nurse Joy",
+      "location_id": "town_starter",
+      "x": 14,
+      "y": 5,
+      "sprite": "H",
+      "dialogues": [
+        {"text": "I can heal your creatures!", "condition": null},
+        {"text": "Come back anytime!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": false,
+      "is_healer": true,
+      "is_gym_leader": false
+    },
+    {
+      "id": "healer_fourth",
+      "name": "Nurse Joy",
+      "location_id": "town_fourth",
+      "x": 5,
+      "y": 5,
+      "sprite": "H",
+      "dialogues": [
+        {"text": "Welcome to Aquamarine Harbor!", "condition": null},
+        {"text": "Let me heal your team!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": false,
+      "is_healer": true,
+      "is_gym_leader": false
+    },
+    {
+      "id": "trainer_route1_1",
+      "name": "Bug Catcher Tim",
+      "location_id": "route_1",
+      "x": 10,
+      "y": 12,
+      "sprite": "T",
+      "dialogues": [
+        {"text": "Let's battle!", "condition": null},
+        {"text": "You're strong!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "trainer_route1_2",
+      "name": "Lass Anna",
+      "location_id": "route_1",
+      "x": 10,
+      "y": 18,
+      "sprite": "T",
+      "dialogues": [
+        {"text": "Hi! Want to battle?", "condition": null},
+        {"text": "Good match!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "trainer_route3_1",
+      "name": "Ace Trainer Jake",
+      "location_id": "route_3",
+      "x": 10,
+      "y": 15,
+      "sprite": "T",
+      "dialogues": [
+        {"text": "I'm an expert trainer!", "condition": null},
+        {"text": "Impressive skills!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "trainer_route3_2",
+      "name": "Hiker Bob",
+      "location_id": "route_3",
+      "x": 10,
+      "y": 25,
+      "sprite": "T",
+      "dialogues": [
+        {"text": "I love the mountains!", "condition": null},
+        {"text": "You got me!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "trainer_route4_1",
+      "name": "Swimmer Maya",
+      "location_id": "route_4",
+      "x": 10,
+      "y": 15,
+      "sprite": "T",
+      "dialogues": [
+        {"text": "The ocean calls to me!", "condition": null},
+        {"text": "You surf right over me!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "trainer_route4_2",
+      "name": "Fisherman Ron",
+      "location_id": "route_4",
+      "x": 10,
+      "y": 25,
+      "sprite": "T",
+      "dialogues": [
+        {"text": "I caught these creatures fishing!", "condition": null},
+        {"text": "You reeled me in!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "trainer_route7_1",
+      "name": "Blackbelt Ken",
+      "location_id": "route_7",
+      "x": 10,
+      "y": 20,
+      "sprite": "T",
+      "dialogues": [
+        {"text": "My martial arts are unmatched!", "condition": null},
+        {"text": "Your fighting spirit wins!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "trainer_route7_2",
+      "name": "Psychic Luna",
+      "location_id": "route_7",
+      "x": 10,
+      "y": 35,
+      "sprite": "T",
+      "dialogues": [
+        {"text": "I foresaw this battle...", "condition": null},
+        {"text": "My vision was clouded!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "trainer_route9_1",
+      "name": "Ace Trainer Sarah",
+      "location_id": "route_9",
+      "x": 10,
+      "y": 20,
+      "sprite": "T",
+      "dialogues": [
+        {"text": "I'm an elite trainer!", "condition": null},
+        {"text": "You're even stronger than me!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "trainer_route9_2",
+      "name": "Dragon Tamer Drake",
+      "location_id": "route_9",
+      "x": 10,
+      "y": 40,
+      "sprite": "T",
+      "dialogues": [
+        {"text": "My creatures have the power of legends!", "condition": null},
+        {"text": "You've tamed the untamable!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "trainer_victory_1",
+      "name": "Veteran Marcus",
+      "location_id": "victory_road",
+      "x": 15,
+      "y": 15,
+      "sprite": "T",
+      "dialogues": [
+        {"text": "Only the best make it through Victory Road!", "condition": null},
+        {"text": "You're ready for the Elite Four!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "trainer_victory_2",
+      "name": "Veteran Diana",
+      "location_id": "victory_road",
+      "x": 15,
+      "y": 25,
+      "sprite": "T",
+      "dialogues": [
+        {"text": "Turn back if you're not ready!", "condition": null},
+        {"text": "You have what it takes!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "elite_1",
+      "name": "Elite Mystica",
+      "location_id": "elite_hall",
+      "x": 8,
+      "y": 10,
+      "sprite": "E",
+      "dialogues": [
+        {"text": "I am the first of the Elite Four. Prove your worth!", "condition": null},
+        {"text": "Impressive... but there are three more ahead!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "elite_2",
+      "name": "Elite Tempest",
+      "location_id": "elite_hall",
+      "x": 12,
+      "y": 10,
+      "sprite": "E",
+      "dialogues": [
+        {"text": "Feel the fury of the storm!", "condition": null},
+        {"text": "Your resolve is stronger than any gale!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "elite_3",
+      "name": "Elite Steel",
+      "location_id": "elite_hall",
+      "x": 8,
+      "y": 14,
+      "sprite": "E",
+      "dialogues": [
+        {"text": "My iron defense cannot be breached!", "condition": null},
+        {"text": "You've forged an incredible team!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "elite_4",
+      "name": "Elite Phantom",
+      "location_id": "elite_hall",
+      "x": 12,
+      "y": 14,
+      "sprite": "E",
+      "dialogues": [
+        {"text": "The spirits will decide your fate!", "condition": null},
+        {"text": "Your spirit burns brighter than mine!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "champion",
+      "name": "Champion Aurora",
+      "location_id": "elite_hall",
+      "x": 10,
+      "y": 3,
+      "sprite": "C",
+      "dialogues": [
+        {"text": "You've made it this far. I am the Champion! Show me everything!", "condition": null},
+        {"text": "Congratulations! You are the new Champion!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "move_relearner",
+      "name": "Move Tutor Ray",
+      "location_id": "town_tenth",
+      "x": 15,
+      "y": 5,
+      "sprite": "M",
+      "dialogues": [
+        {"text": "I can help your creatures remember forgotten moves!", "condition": null},
+        {"text": "Come back anytime you need to relearn moves!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "tm_shop_boulder",
+      "name": "TM Merchant Terra",
+      "location_id": "town_eighth",
+      "x": 15,
+      "y": 10,
+      "sprite": "S",
+      "dialogues": [
+        {"text": "Welcome to the TM Shop!", "condition": null},
+        {"text": "These Technical Machines contain powerful moves!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": true,
+      "shop_inventory": [
+        "tm01", "tm02", "tm03", "tm04", "tm05", "tm06",
+        "tm07", "tm08", "tm09", "tm10", "tm11", "tm12",
+        "tm13", "tm14", "tm15", "tm16", "tm17"
+      ],
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "tm_shop_mindspire",
+      "name": "TM Merchant Mind",
+      "location_id": "town_ninth",
+      "x": 15,
+      "y": 10,
+      "sprite": "S",
+      "dialogues": [
+        {"text": "More TMs for your collection!", "condition": null},
+        {"text": "Master these moves and nothing can stop you!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": true,
+      "shop_inventory": [
+        "tm18", "tm19", "tm20", "tm21", "tm22", "tm23",
+        "tm24", "tm25", "tm26", "tm27", "tm28", "tm29",
+        "tm30", "tm31", "tm32", "tm33", "tm34"
+      ],
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "tm_shop_victory",
+      "name": "TM Merchant Victory",
+      "location_id": "town_tenth",
+      "x": 14,
+      "y": 10,
+      "sprite": "S",
+      "dialogues": [
+        {"text": "The finest TMs for the final challenges!", "condition": null},
+        {"text": "With these moves, you can conquer the Elite Four!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": true,
+      "shop_inventory": [
+        "tm35", "tm36", "tm37", "tm38", "tm39", "tm40",
+        "tm41", "tm42", "tm43", "tm44", "tm45", "tm46",
+        "tm47", "tm48", "tm49", "tm50", "tm51"
+      ],
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "battle_tower_master",
+      "name": "Tower Master Zane",
+      "location_id": "battle_tower",
+      "x": 10,
+      "y": 5,
+      "sprite": "B",
+      "dialogues": [
+        {"text": "Welcome to the Battle Tower! I'll test your skills with random powerful creatures!", "condition": null},
+        {"text": "You're truly a master trainer! Come back anytime for another challenge!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "battle_tower_healer",
+      "name": "Tower Assistant",
+      "location_id": "battle_tower",
+      "x": 5,
+      "y": 10,
+      "sprite": "N",
+      "dialogues": [
+        {"text": "Welcome to the Battle Tower! Let me heal your team!", "condition": null},
+        {"text": "Good luck in your battles!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": false,
+      "is_healer": true,
+      "is_gym_leader": false
+    },
+    {
+      "id": "legendary_guardian_1",
+      "name": "Guardian Kai",
+      "location_id": "legendary_sanctuary",
+      "x": 17,
+      "y": 10,
+      "sprite": "G",
+      "dialogues": [
+        {"text": "Only those who have defeated the Champion may enter this sacred place!", "condition": null},
+        {"text": "You have proven yourself worthy!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "legendary_guardian_2",
+      "name": "Guardian Luna",
+      "location_id": "legendary_sanctuary",
+      "x": 17,
+      "y": 30,
+      "sprite": "G",
+      "dialogues": [
+        {"text": "The legendary creatures ahead are not to be taken lightly!", "condition": null},
+        {"text": "You've earned the right to proceed!", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "legendary_researcher",
+      "name": "Professor Sage",
+      "location_id": "legendary_sanctuary",
+      "x": 17,
+      "y": 20,
+      "sprite": "P",
+      "dialogues": [
+        {"text": "I study the legendary creatures of this region. They are the strongest of all!", "condition": null},
+        {"text": "Six legendary creatures dwell in this sanctuary. Tread carefully!", "condition": null}
+      ],
+      "is_trainer": false,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "legendary_encounter_1",
+      "name": "Legendary Creature",
+      "location_id": "legendary_sanctuary",
+      "x": 5,
+      "y": 10,
+      "sprite": "L",
+      "dialogues": [
+        {"text": "A powerful legendary creature blocks your path!", "condition": null},
+        {"text": "The legendary creature watches you intently...", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "legendary_encounter_2",
+      "name": "Legendary Creature",
+      "location_id": "legendary_sanctuary",
+      "x": 29,
+      "y": 10,
+      "sprite": "L",
+      "dialogues": [
+        {"text": "A majestic legendary creature appears!", "condition": null},
+        {"text": "The legendary aura is overwhelming...", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "legendary_encounter_3",
+      "name": "Legendary Creature",
+      "location_id": "legendary_sanctuary",
+      "x": 5,
+      "y": 30,
+      "sprite": "L",
+      "dialogues": [
+        {"text": "An ancient legendary creature emerges!", "condition": null},
+        {"text": "The legendary creature radiates power...", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "legendary_encounter_4",
+      "name": "Legendary Creature",
+      "location_id": "legendary_sanctuary",
+      "x": 29,
+      "y": 30,
+      "sprite": "L",
+      "dialogues": [
+        {"text": "A rare legendary creature stands before you!", "condition": null},
+        {"text": "The legendary presence is unmistakable...", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "legendary_encounter_5",
+      "name": "Legendary Creature",
+      "location_id": "legendary_sanctuary",
+      "x": 10,
+      "y": 20,
+      "sprite": "L",
+      "dialogues": [
+        {"text": "A mythical legendary creature awaits!", "condition": null},
+        {"text": "The legendary creature's eyes glow with power...", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    },
+    {
+      "id": "legendary_encounter_6",
+      "name": "Legendary Creature",
+      "location_id": "legendary_sanctuary",
+      "x": 24,
+      "y": 20,
+      "sprite": "L",
+      "dialogues": [
+        {"text": "The most powerful legendary creature appears!", "condition": null},
+        {"text": "The ultimate legendary challenge stands before you...", "condition": null}
+      ],
+      "is_trainer": true,
+      "is_shopkeeper": false,
+      "is_healer": false,
+      "is_gym_leader": false
+    }
+  ]
+}

@@ -10,13 +10,19 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 - **Procedural pixel art sprites** - each creature gets unique front/back/mini sprites (56x56 and 16x16)
 - **Classic RPG gameplay** - familiar mechanics with infinite variety
 
-## ✅ Current Status - v0.29.0
+## ✅ Current Status - v0.30.0
 
 **This project is being autonomously developed by Claude Code in a sandboxed environment.**
 
 ### Implemented Features
 
-- [x] **Battle Module Integration** - Fully integrated battle system modules! (NEW in v0.29.0) ✅
+- [x] **NPC Data Externalization** - All NPCs now loaded from JSON! (NEW in v0.30.0) 📦
+  - Externalized all 52 NPCs to genemon/data/npcs.json
+  - Created NPCLoader utility class for data loading and validation
+  - Enabled modding support (players can customize NPCs!)
+  - 22 comprehensive tests (all passing) + 100% backward compatibility
+  - Better maintainability with data/code separation
+- [x] **Battle Module Integration** - Fully integrated battle system modules! (v0.29.0) ✅
   - Integrated DamageCalculator and BattleStatManager into battle/engine.py
   - Reduced engine.py from 1,370 to 906 lines (34% reduction!)
   - Removed 464 lines of duplicate code across 9 methods
@@ -59,8 +65,8 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
   - Cross-save species compatibility
   - Trade file management
   - 19 comprehensive tests (all passing)
-- [x] **Python codebase** - 12,532 lines of Python code across 36 modules (95.3% ratio) (v0.29.0)
-- [x] **Comprehensive test suite** - 120 test cases covering all major systems (132/132 passing) (v0.29.0)
+- [x] **Python codebase** - 12,387 lines of Python code across 37 modules (95.2% ratio) (v0.30.0)
+- [x] **Comprehensive test suite** - 154 test cases covering all major systems (154/154 passing) (v0.30.0)
 - [x] **Iteration 22 planning** - Detailed plan for battle integration and NPC data extraction (v0.22.0)
 - [x] **Documentation cleanup** - Reduced CHANGELOG from 2,452 to 205 lines for clarity (v0.22.0)
 - [x] **Code architecture improvements** - New battle modules, exception hierarchy, input validators (v0.21.0)
@@ -138,9 +144,10 @@ Unlike traditional monster-collecting games with fixed rosters, Genemon creates 
 
 ## 🛠️ Technology Stack
 
-**Python-First** - Pure Python 3.8+ implementation (95.2% of codebase, 11,942 lines)
+**Python-First** - Pure Python 3.8+ implementation (95.2% of codebase, 12,387 lines)
 - **No external dependencies** - Uses only Python standard library
-- **Modular architecture** - 34 specialized modules for creatures, battle, breeding, trading, world, UI, menus, sprites, exceptions, validation
+- **Modular architecture** - 37 specialized modules for creatures, battle, breeding, trading, world, UI, menus, sprites, exceptions, validation, data loading
+- **Modding support** - JSON data files for NPCs, enabling easy customization
 - **Clean code practices** - Custom exception hierarchy, input validation utilities, comprehensive docstrings
 - **JSON save files** - Human-readable save data
 - **Trading system** - Export/import creatures between saves with full compatibility

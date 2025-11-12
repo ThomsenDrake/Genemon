@@ -2,6 +2,62 @@
 
 All notable changes to the Genemon project.
 
+## [0.30.0] - 2025-11-12
+
+### Added
+- **NPC Data Externalization** - All NPC data moved to JSON for modding support! 📦 CODE ARCHITECTURE
+  - Created `genemon/data/npcs.json` with all 52 NPCs
+    - 8 Gym Leaders with badge data
+    - 5 Elite Four members + Champion
+    - 6 Legendary encounters
+    - 10 Healers (Nurse Joy)
+    - 3 TM Shops
+    - 14 Route trainers
+    - Special NPCs (Professor, Rival, Move Relearner, etc.)
+  - Created `genemon/data/npc_loader.py` (260 lines)
+    - NPCLoader class for loading and managing NPC data
+    - Methods: load_all_npcs, get_gym_leaders, get_trainers, etc.
+    - Data validation and filtering capabilities
+  - Updated NPCRegistry to support JSON loading
+    - Added use_json parameter (defaults to True)
+    - Preserved legacy hardcoded mode for backward compatibility
+    - Zero breaking changes
+
+### Improved
+- **Modding Support Enabled** - Players can now customize NPCs! 🎨
+  - Edit NPC names and dialogues
+  - Change NPC positions
+  - Modify shop inventories
+  - Customize gym leader types
+  - Add new NPCs easily
+- **Data Validation** - NPCLoader validates all loaded data
+  - Checks required fields
+  - Validates gym leader completeness
+  - Validates shopkeeper inventories
+
+### Testing
+- **New test suite** - test_iteration_30.py with 22 comprehensive tests
+  - NPCLoader functionality tests (11 tests)
+  - NPCRegistry integration tests (5 tests)
+  - Data integrity tests (6 tests)
+  - JSON vs Legacy consistency validation
+  - All tests passing (22/22) ✅
+
+### Impact
+- Externalized all 52 NPCs to JSON (950 lines of data)
+- Added NPCLoader utility (260 Python lines)
+- Enabled modding and customization support
+- Better maintainability (data/code separation)
+- Zero breaking changes (100% backward compatible)
+- Total Python lines: 12,532 → 12,387 (-145 from optimization)
+- Total modules: 36 → 37 (+1 npc_loader.py)
+- Total tests: 132 → 154 (+22 tests)
+
+### Documentation
+- ITERATION_30_SUMMARY.md created with comprehensive details
+- Updated CHANGELOG.md (this file)
+- Ready for README.md update
+
 ## [0.29.0] - 2025-11-12
 
 ### Added

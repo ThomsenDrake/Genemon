@@ -96,13 +96,30 @@ class NPC:
 class NPCRegistry:
     """Registry of all NPCs in the game."""
 
-    def __init__(self):
-        """Initialize NPC registry."""
+    def __init__(self, use_json: bool = True):
+        """
+        Initialize NPC registry.
+
+        Args:
+            use_json: If True, load NPCs from JSON file. If False, use legacy hardcoded NPCs.
+        """
         self.npcs: Dict[str, NPC] = {}
-        self._create_npcs()
+        self.use_json = use_json
+
+        if use_json:
+            self._load_npcs_from_json()
+        else:
+            self._create_npcs()
+
+    def _load_npcs_from_json(self):
+        """Load all NPCs from JSON data file."""
+        from ..data.npc_loader import NPCLoader
+
+        loader = NPCLoader()
+        self.npcs = loader.load_all_npcs()
 
     def _create_npcs(self):
-        """Create all authored NPCs."""
+        """Create all authored NPCs (legacy hardcoded method)."""
 
         # Professor in starter town
         professor = NPC(
