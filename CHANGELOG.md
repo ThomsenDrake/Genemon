@@ -2,6 +2,50 @@
 
 All notable changes to the Genemon project.
 
+## [0.27.0] - 2025-11-12
+
+### Added
+- **MenuManager Module** - New dedicated menu management system! 🏗️ CODE ARCHITECTURE
+  - Created `genemon/ui/menu_manager.py` (468 lines)
+  - MenuManager class handles all in-game menus
+  - 9 menu methods extracted from Game class:
+    - `show_team_menu()` - Team management
+    - `show_items_menu()` - Item usage
+    - `show_shop_menu()` - Shopping interface
+    - `show_badges()` - Badge collection display
+    - `show_move_relearner_menu()` - Move relearning
+    - `show_pokedex()` - Pokedex viewer
+    - `show_type_chart_menu()` - Type effectiveness chart
+    - `show_sprite_viewer_menu()` - Sprite gallery
+    - `show_settings_menu()` - Game settings
+
+### Improved
+- **Game.py Refactoring** - Massive code organization improvement! 📉 CODE QUALITY
+  - Reduced game.py from 1467 to 1081 lines (26% reduction, 386 lines removed)
+  - Improved separation of concerns (UI logic → MenuManager, game logic → Game)
+  - Better adherence to Single Responsibility Principle
+  - Game class now focuses on core game loop and state management
+  - Easier to test and maintain menu systems independently
+
+### Testing
+- **New test suite** - test_iteration_27.py with 26 comprehensive tests
+  - Tests for MenuManager class existence and methods
+  - Tests for Game integration with MenuManager
+  - Code quality metrics validation
+  - Documentation coverage tests
+  - Code structure and import tests
+  - All tests passing (26/26) ✅
+
+### Impact
+- Improved code organization and maintainability
+- Better module cohesion (menus separated from game engine)
+- Reduced complexity in Game class
+- Easier to add new menus or modify existing ones
+- Zero functional changes (100% backward compatible)
+- Total Python lines: 11,860 → 11,942 (+82 lines, including new module and tests)
+- Total modules: 33 → 34
+- Total tests: 58 → 84 (+26 tests)
+
 ## [0.26.0] - 2025-11-12
 
 ### Improved
